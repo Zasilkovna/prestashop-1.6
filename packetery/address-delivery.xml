@@ -1,0 +1,652 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<export xmlns="http://www.zasilkovna.cz/api/v4/branch" xmlns:ns="http://www.zasilkovna.cz/api/v4/branch" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.zasilkovna.cz/api/v4/branch http://www.zasilkovna.cz/api/v4/branch.xsd">
+	<contacts>
+<contact>
+	<country>cs</country>
+	<phone>+420 216 216 516</phone>
+	<email>praha@zasilkovna.cz</email>
+	<businessHours>Po-Pá 08:00 – 18:00 hod.</businessHours>
+</contact>
+<contact>
+	<country>sk</country>
+	<phone>+421 221 201 135</phone>
+	<email>bratislava@zasielkovna.sk</email>
+	<businessHours>Po-Pi 9:00 – 18:00 hod.</businessHours>
+</contact>
+	</contacts>
+	
+	<carriers>
+<carrier>
+	<id>13</id>
+	<name>Česká pošta</name>
+	<pickupPoints>false</pickupPoints>
+	<apiAllowed>true</apiAllowed>
+	<country>cz</country>
+	<currency>CZK</currency>
+	<maxWeight>10</maxWeight>
+	<labelRouting>A-***-013</labelRouting>
+	<labelName>Česká pošta</labelName>
+</carrier>
+<carrier>
+	<id>16</id>
+	<name>Slovenská pošta</name>
+	<pickupPoints>false</pickupPoints>
+	<apiAllowed>true</apiAllowed>
+	<country>sk</country>
+	<currency>EUR</currency>
+	<maxWeight>5</maxWeight>
+	<labelRouting>X-**P-016</labelRouting>
+	<labelName>Slovenská pošta</labelName>
+</carrier>
+<carrier>
+	<id>80</id>
+	<name>Rakouská pošta</name>
+	<pickupPoints>false</pickupPoints>
+	<apiAllowed>true</apiAllowed>
+	<country>at</country>
+	<currency>EUR</currency>
+	<maxWeight>5</maxWeight>
+	<labelRouting>C-***-080</labelRouting>
+	<labelName>Rakouská pošta</labelName>
+</carrier>
+<carrier>
+	<id>106</id>
+	<name>CZ - Nejlevnější doručení na adresu</name>
+	<pickupPoints>false</pickupPoints>
+	<apiAllowed>true</apiAllowed>
+	<country>cz</country>
+	<currency>CZK</currency>
+	<maxWeight>5</maxWeight>
+	<labelRouting>B-***-106</labelRouting>
+	<labelName>CZ - Nejlevnější doručení na adresu</labelName>
+</carrier>
+<carrier>
+	<id>111</id>
+	<name>Německá pošta</name>
+	<pickupPoints>false</pickupPoints>
+	<apiAllowed>true</apiAllowed>
+	<country>de</country>
+	<currency>EUR</currency>
+	<maxWeight>10</maxWeight>
+	<labelRouting>A-S**-111</labelRouting>
+	<labelName>Německá pošta</labelName>
+</carrier>
+<carrier>
+	<id>131</id>
+	<name>SK - Best delivery solution</name>
+	<pickupPoints>false</pickupPoints>
+	<apiAllowed>true</apiAllowed>
+	<country>sk</country>
+	<currency>EUR</currency>
+	<maxWeight>5</maxWeight>
+	<labelRouting>X-**K-131</labelRouting>
+	<labelName>SK - Best delivery solution</labelName>
+</carrier>
+<carrier>
+	<id>132</id>
+	<name>Expresné doručenie Bratislava</name>
+	<pickupPoints>false</pickupPoints>
+	<apiAllowed>false</apiAllowed>
+	<country>sk</country>
+	<currency>EUR</currency>
+	<maxWeight>5</maxWeight>
+	<labelRouting>X-EXP-132</labelRouting>
+	<labelName>Expresné doručenie Bratislava</labelName>
+</carrier>
+<carrier>
+	<id>134</id>
+	<name>Expresní doručení Ostrava</name>
+	<pickupPoints>false</pickupPoints>
+	<apiAllowed>false</apiAllowed>
+	<country>cz</country>
+	<currency>CZK</currency>
+	<maxWeight>5</maxWeight>
+	<labelRouting>S-EXP-134</labelRouting>
+	<labelName>Expresní doručení Ostrava</labelName>
+</carrier>
+<carrier>
+	<id>136</id>
+	<name>Expresní doručení Brno</name>
+	<pickupPoints>false</pickupPoints>
+	<apiAllowed>false</apiAllowed>
+	<country>cz</country>
+	<currency>CZK</currency>
+	<maxWeight>5</maxWeight>
+	<labelRouting>B-EXP-136</labelRouting>
+	<labelName>Expresní doručení Brno</labelName>
+</carrier>
+<carrier>
+	<id>149</id>
+	<name>Slovensko GLS</name>
+	<pickupPoints>false</pickupPoints>
+	<apiAllowed>true</apiAllowed>
+	<country>sk</country>
+	<currency>EUR</currency>
+	<maxWeight>5</maxWeight>
+	<labelRouting>X-**K-149</labelRouting>
+	<labelName>Slovensko GLS</labelName>
+</carrier>
+<carrier>
+	<id>151</id>
+	<name>Maďarsko Express One (Transoflex)</name>
+	<pickupPoints>false</pickupPoints>
+	<apiAllowed>true</apiAllowed>
+	<country>hu</country>
+	<currency>HUF</currency>
+	<maxWeight>30</maxWeight>
+	<labelRouting>H-***-151</labelRouting>
+	<labelName>Maďarsko Express One (Transoflex)</labelName>
+</carrier>
+<carrier>
+	<id>153</id>
+	<name>Česká republika InTime</name>
+	<pickupPoints>false</pickupPoints>
+	<apiAllowed>true</apiAllowed>
+	<country>cz</country>
+	<currency>CZK</currency>
+	<maxWeight>5</maxWeight>
+	<labelRouting>@-***-153</labelRouting>
+	<labelName>Česká republika InTime</labelName>
+</carrier>
+<carrier>
+	<id>257</id>
+	<name>Expresní doručení Praha</name>
+	<pickupPoints>false</pickupPoints>
+	<apiAllowed>false</apiAllowed>
+	<country>cz</country>
+	<currency>CZK</currency>
+	<maxWeight>5</maxWeight>
+	<labelRouting>A-EXP-257</labelRouting>
+	<labelName>Expresní doručení Praha</labelName>
+</carrier>
+<carrier>
+	<id>272</id>
+	<name>Polská pošta</name>
+	<pickupPoints>false</pickupPoints>
+	<apiAllowed>true</apiAllowed>
+	<country>pl</country>
+	<currency>PLN</currency>
+	<maxWeight>5</maxWeight>
+	<labelRouting>T-F**-272</labelRouting>
+	<labelName>Polská pošta</labelName>
+</carrier>
+<carrier>
+	<id>590</id>
+	<name>Rumunsko Cargus</name>
+	<pickupPoints>false</pickupPoints>
+	<apiAllowed>true</apiAllowed>
+	<country>ro</country>
+	<currency>RON</currency>
+	<maxWeight>5</maxWeight>
+	<labelRouting>H-**R-590</labelRouting>
+	<labelName>Rumunsko Cargus</labelName>
+</carrier>
+<carrier>
+	<id>633</id>
+	<name>Česká republika DPD</name>
+	<pickupPoints>false</pickupPoints>
+	<apiAllowed>true</apiAllowed>
+	<country>cz</country>
+	<currency>CZK</currency>
+	<maxWeight>5</maxWeight>
+	<labelRouting>A-***-633</labelRouting>
+	<labelName>Česká republika DPD</labelName>
+</carrier>
+<carrier>
+	<id>762</id>
+	<name>Rumunsko FAN</name>
+	<pickupPoints>false</pickupPoints>
+	<apiAllowed>true</apiAllowed>
+	<country>ro</country>
+	<currency>RON</currency>
+	<maxWeight>5</maxWeight>
+	<labelRouting>H-**R-762</labelRouting>
+	<labelName>Rumunsko FAN</labelName>
+</carrier>
+<carrier>
+	<id>763</id>
+	<name>Maďarská pošta</name>
+	<pickupPoints>false</pickupPoints>
+	<apiAllowed>true</apiAllowed>
+	<country>hu</country>
+	<currency>HUF</currency>
+	<maxWeight>30</maxWeight>
+	<labelRouting>H-***-763</labelRouting>
+	<labelName>Maďarská pošta</labelName>
+</carrier>
+<carrier>
+	<id>805</id>
+	<name>Maďarsko DPD</name>
+	<pickupPoints>false</pickupPoints>
+	<apiAllowed>true</apiAllowed>
+	<country>hu</country>
+	<currency>HUF</currency>
+	<maxWeight>30</maxWeight>
+	<labelRouting>H-***-805</labelRouting>
+	<labelName>Maďarsko DPD</labelName>
+</carrier>
+<carrier>
+	<id>836</id>
+	<name>Rumunsko DPD</name>
+	<pickupPoints>false</pickupPoints>
+	<apiAllowed>false</apiAllowed>
+	<country>ro</country>
+	<currency>RON</currency>
+	<maxWeight>5</maxWeight>
+	<labelRouting>H-**R-836</labelRouting>
+	<labelName>Rumunsko DPD</labelName>
+</carrier>
+<carrier>
+	<id>1120</id>
+	<name>Spojené království Royal Mail</name>
+	<pickupPoints>false</pickupPoints>
+	<apiAllowed>false</apiAllowed>
+	<country>gb</country>
+	<currency>GBP</currency>
+	<maxWeight>5</maxWeight>
+	<labelRouting>A-S**-1120</labelRouting>
+	<labelName>Spojené království Royal Mail</labelName>
+</carrier>
+<carrier>
+	<id>1160</id>
+	<name>Ukrajina Rosan</name>
+	<pickupPoints>false</pickupPoints>
+	<apiAllowed>false</apiAllowed>
+	<country>ua</country>
+	<currency>UAH</currency>
+	<maxWeight>5</maxWeight>
+	<labelRouting>B-J**-1160</labelRouting>
+	<labelName>Ukrajina Rosan</labelName>
+</carrier>
+<carrier>
+	<id>1406</id>
+	<name>Polsko DPD</name>
+	<pickupPoints>false</pickupPoints>
+	<apiAllowed>true</apiAllowed>
+	<country>pl</country>
+	<currency>PLN</currency>
+	<maxWeight>5</maxWeight>
+	<labelRouting>T-F**-1406</labelRouting>
+	<labelName>Polsko DPD</labelName>
+</carrier>
+<carrier>
+	<id>1438</id>
+	<name>Polská pošta 24h</name>
+	<pickupPoints>false</pickupPoints>
+	<apiAllowed>true</apiAllowed>
+	<country>pl</country>
+	<currency>PLN</currency>
+	<maxWeight>5</maxWeight>
+	<labelRouting>T-F**-1438</labelRouting>
+	<labelName>Polská pošta 24h</labelName>
+</carrier>
+<carrier>
+	<id>2726</id>
+	<name>Itálie GLS</name>
+	<pickupPoints>false</pickupPoints>
+	<apiAllowed>true</apiAllowed>
+	<country>it</country>
+	<currency>EUR</currency>
+	<maxWeight>5</maxWeight>
+	<labelRouting>B-J**-2726</labelRouting>
+	<labelName>It GLS</labelName>
+</carrier>
+
+<carrier>
+	<id>3294</id>
+	<name>Švýcarsko-Lichtejnštejnská Pošta</name>
+	<pickupPoints>false</pickupPoints>
+	<apiAllowed>true</apiAllowed>
+	<country>ch</country>
+	<currency>CHF</currency>
+	<maxWeight>5</maxWeight>
+	<labelRouting>A-S**-3294</labelRouting>
+	<labelName>Ch Post</labelName>
+</carrier>
+<carrier>
+	<id>3603</id>
+	<name>Polsko InPost</name>
+	<pickupPoints>false</pickupPoints>
+	<apiAllowed>true</apiAllowed>
+	<country>pl</country>
+	<currency>PLN</currency>
+	<maxWeight>5</maxWeight>
+	<labelRouting>T-F**-3603</labelRouting>
+	<labelName>Polsko InPost</labelName>
+</carrier>
+
+<carrier>
+	<id>3870</id>
+	<name>Švýcarsko-Lichtenštejnská Pošta - prioritní</name>
+	<pickupPoints>false</pickupPoints>
+	<apiAllowed>true</apiAllowed>
+	<country>ch</country>
+	<currency>CHF</currency>
+	<maxWeight>5</maxWeight>
+	<labelRouting>A-S**-3870</labelRouting>
+	<labelName>Švýcarsko-Lichtejnštejnská Pošta - prioritní</labelName>
+</carrier>
+<carrier>
+	<id>3885</id>
+	<name>Spojené království Hermes</name>
+	<pickupPoints>false</pickupPoints>
+	<apiAllowed>true</apiAllowed>
+	<country>gb</country>
+	<currency>GBP</currency>
+	<maxWeight>5</maxWeight>
+	<labelRouting>A-S**-3885</labelRouting>
+	<labelName>spojene-kralovstvi-hermes</labelName>
+</carrier>
+<carrier>
+	<id>3946</id>
+	<name>Německo Hermes</name>
+	<pickupPoints>false</pickupPoints>
+	<apiAllowed>true</apiAllowed>
+	<country>de</country>
+	<currency>EUR</currency>
+	<maxWeight>5</maxWeight>
+	<labelRouting>P-***-3946</labelRouting>
+	<labelName>Německo Hermes</labelName>
+</carrier>
+<carrier>
+	<id>4015</id>
+	<name>Bulharsko Speedy Home</name>
+	<pickupPoints>false</pickupPoints>
+	<apiAllowed>true</apiAllowed>
+	<country>bg</country>
+	<currency>BGN</currency>
+	<maxWeight>5</maxWeight>
+	<labelRouting>H-*BG-4015</labelRouting>
+	<labelName>Bulharsko Speedy Home</labelName>
+</carrier>
+
+<carrier>
+	<id>4159</id>
+	<name>HU - best delivery solution</name>
+	<pickupPoints>false</pickupPoints>
+	<apiAllowed>false</apiAllowed>
+	<country>hu</country>
+	<currency>HUF</currency>
+	<maxWeight>5</maxWeight>
+	<labelRouting>H-***-4159</labelRouting>
+	<labelName>HU - best delivery solution</labelName>
+</carrier>
+<carrier>
+	<id>4161</id>
+	<name>RO - best delivery solution</name>
+	<pickupPoints>false</pickupPoints>
+	<apiAllowed>false</apiAllowed>
+	<country>ro</country>
+	<currency>RON</currency>
+	<maxWeight>5</maxWeight>
+	<labelRouting>H-**R-4161</labelRouting>
+	<labelName>RO - best delivery solution</labelName>
+</carrier>
+<carrier>
+	<id>4162</id>
+	<name>PL - best delivery solution</name>
+	<pickupPoints>false</pickupPoints>
+	<apiAllowed>true</apiAllowed>
+	<country>pl</country>
+	<currency>PLN</currency>
+	<maxWeight>5</maxWeight>
+	<labelRouting>T-***-4162</labelRouting>
+	<labelName>PL - best delivery solution</labelName>
+</carrier>
+
+<carrier>
+	<id>4309</id>
+	<name>Francie Colissimo Home</name>
+	<pickupPoints>false</pickupPoints>
+	<apiAllowed>true</apiAllowed>
+	<country>fr</country>
+	<currency>EUR</currency>
+	<maxWeight>5</maxWeight>
+	<labelRouting>A-S**-4309</labelRouting>
+	<labelName>Francie Colissimo Home</labelName>
+</carrier>
+<carrier>
+	<id>4329</id>
+	<name>NL Post</name>
+	<pickupPoints>false</pickupPoints>
+	<apiAllowed>true</apiAllowed>
+	<country>nl</country>
+	<currency>EUR</currency>
+	<maxWeight>5</maxWeight>
+	<labelRouting>A-S**-4329</labelRouting>
+	<labelName>NL Post</labelName>
+</carrier>
+
+<carrier>
+	<id>4524</id>
+	<name>Irsko Hermes</name>
+	<pickupPoints>false</pickupPoints>
+	<apiAllowed>true</apiAllowed>
+	<country>ie</country>
+	<currency>EUR</currency>
+	<maxWeight>5</maxWeight>
+	<labelRouting>A-S**-4524</labelRouting>
+	<labelName>Irsko Hermes</labelName>
+</carrier>
+<carrier>
+	<id>4559</id>
+	<name>Ruská pošta</name>
+	<pickupPoints>false</pickupPoints>
+	<apiAllowed>true</apiAllowed>
+	<country>ru</country>
+	<currency>RUB</currency>
+	<maxWeight>5</maxWeight>
+	<labelRouting>A-***-4559</labelRouting>
+	<labelName>Ruská pošta</labelName>
+</carrier>
+<carrier>
+	<id>4634</id>
+	<name>Chorvatská Pošta - doručení na adresu</name>
+	<pickupPoints>false</pickupPoints>
+	<apiAllowed>true</apiAllowed>
+	<country>hr</country>
+	<currency>HRK</currency>
+	<maxWeight>5</maxWeight>
+	<labelRouting>B-J**-4634</labelRouting>
+	<labelName>Chorvatská Pošta - doručení na adresu</labelName>
+</carrier>
+
+<carrier>
+	<id>4638</id>
+	<name>Španělsko Correos</name>
+	<pickupPoints>false</pickupPoints>
+	<apiAllowed>true</apiAllowed>
+	<country>es</country>
+	<currency>EUR</currency>
+	<maxWeight>5</maxWeight>
+	<labelRouting>A-S**-4638</labelRouting>
+	<labelName>Španělsko Correos</labelName>
+</carrier>
+<carrier>
+	<id>4653</id>
+	<name>ES MRW Home</name>
+	<pickupPoints>false</pickupPoints>
+	<apiAllowed>true</apiAllowed>
+	<country>es</country>
+	<currency>EUR</currency>
+	<maxWeight>5</maxWeight>
+	<labelRouting>A-S**-4653</labelRouting>
+	<labelName>ES MRW Home</labelName>
+</carrier>
+
+<carrier>
+	<id>4655</id>
+	<name>PT MRW Home</name>
+	<pickupPoints>false</pickupPoints>
+	<apiAllowed>true</apiAllowed>
+	<country>pt</country>
+	<currency>EUR</currency>
+	<maxWeight>5</maxWeight>
+	<labelRouting>A-S**-4655</labelRouting>
+	<labelName>PT MRW Home</labelName>
+</carrier>
+
+<carrier>
+	<id>4738</id>
+	<name>Recko Speedy Home</name>
+	<pickupPoints>false</pickupPoints>
+	<apiAllowed>true</apiAllowed>
+	<country>gr</country>
+	<currency>EUR</currency>
+	<maxWeight>5</maxWeight>
+	<labelRouting>H-*BG-4738</labelRouting>
+	<labelName>Recko Speedy Home</labelName>
+</carrier>
+
+<carrier>
+	<id>4827</id>
+	<name>SE Post Nord Home</name>
+	<pickupPoints>false</pickupPoints>
+	<apiAllowed>true</apiAllowed>
+	<country>se</country>
+	<currency>SEK</currency>
+	<maxWeight>5</maxWeight>
+	<labelRouting>A-S**-4827</labelRouting>
+	<labelName>SE Post Nord Home</labelName>
+</carrier>
+
+<carrier>
+	<id>4830</id>
+	<name>FI Post Nord Home</name>
+	<pickupPoints>false</pickupPoints>
+	<apiAllowed>true</apiAllowed>
+	<country>fi</country>
+	<currency>EUR</currency>
+	<maxWeight>5</maxWeight>
+	<labelRouting>A-S**-4830</labelRouting>
+	<labelName>FI Post Nord Home</labelName>
+</carrier>
+<carrier>
+	<id>4832</id>
+	<name>BE Post</name>
+	<pickupPoints>false</pickupPoints>
+	<apiAllowed>true</apiAllowed>
+	<country>be</country>
+	<currency>EUR</currency>
+	<maxWeight>5</maxWeight>
+	<labelRouting>A-S**-4832</labelRouting>
+	<labelName>BE Post</labelName>
+</carrier>
+<carrier>
+	<id>4834</id>
+	<name>LU DPD</name>
+	<pickupPoints>false</pickupPoints>
+	<apiAllowed>true</apiAllowed>
+	<country>lu</country>
+	<currency>EUR</currency>
+	<maxWeight>5</maxWeight>
+	<labelRouting>A-S**-4834</labelRouting>
+	<labelName>LU DPD</labelName>
+</carrier>
+<carrier>
+	<id>4856</id>
+	<name>Spojené království Royal Mail 24</name>
+	<pickupPoints>false</pickupPoints>
+	<apiAllowed>true</apiAllowed>
+	<country>gb</country>
+	<currency>GBP</currency>
+	<maxWeight>5</maxWeight>
+	<labelRouting>A-***-4856</labelRouting>
+	<labelName>Spojené království Royal Mail 24</labelName>
+</carrier>
+<carrier>
+	<id>4857</id>
+	<name>Spojené království Royal Mail 48</name>
+	<pickupPoints>false</pickupPoints>
+	<apiAllowed>true</apiAllowed>
+	<country>gb</country>
+	<currency>GBP</currency>
+	<maxWeight>5</maxWeight>
+	<labelRouting>A-***-4857</labelRouting>
+	<labelName>Spojené království Royal Mail 48</labelName>
+</carrier>
+<carrier>
+	<id>4949</id>
+	<name>SI DPD Home</name>
+	<pickupPoints>false</pickupPoints>
+	<apiAllowed>true</apiAllowed>
+	<country>si</country>
+	<currency>EUR</currency>
+	<maxWeight>5</maxWeight>
+	<labelRouting>B-J**-4949</labelRouting>
+	<labelName>SI DPD Home</labelName>
+</carrier>
+
+<carrier>
+	<id>4993</id>
+	<name>DK Post Nord Home</name>
+	<pickupPoints>false</pickupPoints>
+	<apiAllowed>true</apiAllowed>
+	<country>dk</country>
+	<currency>DKK</currency>
+	<maxWeight>5</maxWeight>
+	<labelRouting>A-S**-4993</labelRouting>
+	<labelName>DK Post Nord Home</labelName>
+</carrier>
+
+<carrier>
+	<id>5060</id>
+	<name>EE Omniva Home</name>
+	<pickupPoints>false</pickupPoints>
+	<apiAllowed>true</apiAllowed>
+	<country>ee</country>
+	<currency>EUR</currency>
+	<maxWeight>5</maxWeight>
+	<labelRouting>A-S**-5060</labelRouting>
+	<labelName>EE Omniva Home</labelName>
+</carrier>
+
+
+<carrier>
+	<id>5063</id>
+	<name>LV Omniva Home</name>
+	<pickupPoints>false</pickupPoints>
+	<apiAllowed>true</apiAllowed>
+	<country>lv</country>
+	<currency>EUR</currency>
+	<maxWeight>5</maxWeight>
+	<labelRouting>A-S**-5063</labelRouting>
+	<labelName>LV Omniva Home</labelName>
+</carrier>
+
+<carrier>
+	<id>5065</id>
+	<name>LT Omniva Home</name>
+	<pickupPoints>false</pickupPoints>
+	<apiAllowed>true</apiAllowed>
+	<country>lt</country>
+	<currency>EUR</currency>
+	<maxWeight>5</maxWeight>
+	<labelRouting>A-S**-5065</labelRouting>
+	<labelName>LT Omniva Home</labelName>
+</carrier>
+
+<carrier>
+	<id>5101</id>
+	<name>RU Post EMS</name>
+	<pickupPoints>false</pickupPoints>
+	<apiAllowed>true</apiAllowed>
+	<country>ru</country>
+	<currency>RUB</currency>
+	<maxWeight>5</maxWeight>
+	<labelRouting>A-S**-5101</labelRouting>
+	<labelName>RU Post EMS</labelName>
+</carrier>
+<carrier>
+	<id>5102</id>
+	<name>RU Post Registered Packet</name>
+	<pickupPoints>false</pickupPoints>
+	<apiAllowed>true</apiAllowed>
+	<country>ru</country>
+	<currency>RUB</currency>
+	<maxWeight>5</maxWeight>
+	<labelRouting>A-S**-5102</labelRouting>
+	<labelName>RU Post Registered Parcel</labelName>
+</carrier>
+	</carriers>
+</export>
