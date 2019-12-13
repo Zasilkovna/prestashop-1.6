@@ -1,5 +1,8 @@
 # Instalace Modulu
 
+### Stažení modulu
+[Aktuální verze (Stáhnout »)](https://github.com/Zasilkovna/prestashop-1.6/blob/master/releases/prestahop-1.6-packetery-2.0.2.zip)
+
 ## Systémové požadavky
 Pro instalaci Prestashop 1.6.x jsou vyžadovány následující komponenty:
 - System: Unix, Linux (doporučené); nebo Windows
