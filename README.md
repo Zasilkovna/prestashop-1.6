@@ -1,4 +1,4 @@
-# Instalace Modulu
+# Modul pro PrestaShop 1.6
 
 ### Stažení modulu
 [Aktuální verze (Stáhnout »)](https://github.com/Zasilkovna/prestashop-1.6/blob/master/releases/prestahop-1.6-packetery-2.0.2.zip)
