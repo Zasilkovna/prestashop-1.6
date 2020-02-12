@@ -1,7 +1,7 @@
 # Modul pro PrestaShop 1.6
 
 ### Stažení modulu
-[Aktuální verze (Stáhnout »)](https://github.com/Zasilkovna/prestashop-1.6/blob/master/releases/prestahop-1.6-packetery-2.0.2.zip)
+[Aktuální verze 2.0.2 (Stáhnout »)](https://github.com/Zasilkovna/prestashop-1.6/raw/master/releases/prestahop-1.6-packetery-2.0.2.zip)
 
 ## Systémové požadavky
 Pro instalaci Prestashop 1.6.x jsou vyžadovány následující komponenty:
@@ -41,21 +41,64 @@ ujistěte se, že stránky order a order-opc mají rozlišné přátelské URL. 
 
 ## Instalace plug-inu pro Zásilkovnu
  Pro instalaci plug-inu je potřeba provést následující kroky:
-- Ujistit se, že má webserver práva na zápis do složky /modules 
-- Přihlásit se do administrace Prestashopu na adrese host/adminXXXXXX (vygenerováno automaticky, adresu administrace zjistíte dle jména složky)
-- V sekci "Moduly a Služby" kliknout na tlačítko "Přidat nový modul" v pravém horním rohu
-- Vybrat .zip archiv modulu
+- Ujistěte se, že má webserver práva na zápis do složky /modules 
+- Přihlašte se do administrace Prestashopu na adrese host/adminXXXXXX (vygenerováno automaticky, adresu administrace zjistíte dle jména složky)
+- V sekci "Moduly a Služby" klikněte na tlačítko "Přidat nový modul" v pravém horním rohu
+- Vyberte .zip archiv modulu a klikněte na tlačítko "Nahrát tento modul"
 
-Po těchto krocích je plug-in nainstalovaný. Dále je potřeba provést základní konfiguraci, v nastavení modulu vyplňte následující:
-- API klíč (získáte po přihlášení na http://client.packeta.com/)
-- Vytvořte dopravce v sekci "Přidání způsobu dopravy".
-
-Každý z bloků konfigurace se ukládá vlastním tlačítkem "Přidat", nebo "Uložit".
+Po těchto krocích je plug-in nainstalovaný. Dále je potřeba provést základní konfiguraci modulu.
 
 ## Konfigurace plug-inu
-### Základní konfigurace
- - Nejprve se zaregistrujte na http://client.packeta.com/ a zkopírujte API klíč do pole na kartě modulu.
- - Každý z bloků konfigurace se ukládá vlastním tlačítkem "Přidat", nebo "Uložit".
+Každý z bloků konfigurace se ukládá vlastním tlačítkem "Přidat", nebo "Uložit". 
+
+### Nastavení modulu
+ - **Klíč API:**  - váš klíč API naleznete v [klientské sekci Zásilkovny](https://client.packeta.com/cs/support/) v části **Klientská podpora**
+ - **Označení odesílatele** - označení odesílatele které máte nastaveno v [klientské sekci](https://client.packeta.com/cs/senders/) v seznamu odesílatelů
+ - **Vynutit zemi** - vyberte země, které se budou nabízet v košíku eshopu při výběru výdejního místa Zásilkovny. Výběr provedete tak, že stisknete 
+ klávesu *Ctrl* + levým tlačítkem myši vyberete požadovanou zemi.  Můžete vybrat více zemí zároveň.  Stejným způsobem zemi odeberete. Jestliže 
+ nevyberete žádnou zemi, budou se nabízet automaticky všechny podporované země.
+ - **Vynutit jazyk** - Jazyk widgetu pro výběr výdejních míst se nastavuje podle aktuálně zvolené jazykové mutace eshopu.  Pokud nastavíte vynucený jazyk,  
+ nastaví se tento jazyk ve widgetu vždy, bez ohledu na nastavenou jazykovou mutaci eshopu. 
+ 
+ - Do pole  Nejprve se zaregistrujte na http://client.packeta.com/ a zkopírujte API klíč do pole na kartě modulu.
  - Pro přidání vyplňte formulář v sekci "Přidání způsobu dopravy"
  - Je možné vynutit použití specifické země a jazyka ve widgetu nastavením hodnot "Vynucená země" a "Vynucený jazyk". Pokud jsou hodnoty prázdné, vybere se země podle adresy zákazníka.. 
  - K export dat do CSV souboru zvolte objednávky, které chcete vyexportovat na záložce "Objednávky" a klikněte na tlačítko "CSV Export"
+
+### Způsoby dopravy
+ - Pro přidání nového dopravce vyplňte *Název dopravce*, *Doba přepravy* , *Země* (zemi označíte stiknutím klávesy *Ctrl* a kliknutím levým tlačítkem myši,
+  můžete vybrat i více zemí). Dále zvolíte zda se jedná o přepravu na dobírku.  Vše uložíte kliknutím na tlačítko  
+ *Přidat*.
+ - Pro smazání klikněte na tlačítko *Odstranit* u existujícího způsobu dopravy. 
+
+### Seznam dopravců doručení na adresu
+Modul podporuje doručení na adresu přes Zásilkovnu prostřednictvím externích dopravců. 
+Ke každému dopravci můžete přiřadit externího dopravce Zásilkovny. 
+ 
+## Seznam objednávek Zásilkovna
+ - Seznam objednávek naleznete v menu *Objednávky* - *Zásilkovna*.
+ - Zaškrtněte seznam objednávek, které chcete exportovat.  U objednávky můžete nastavit zda se jedná o dobírku.
+ - K export dat do CSV klikněte na tlačítko "Uložit seznam dobírek a exportovat vybrané".
+ 
+ ## Informace o modulu
+ 
+ **Podporované jazyky:**
+ - čeština
+ - angličtina
+ 
+ #### Podporovaná verze
+ - PrestaShop verze 1.6.x
+ - Při problému s použitím modulu nás kontaktujte na adrese technicka.podpora@zasilkovna.cz
+ 
+ #### Poskytované funkce
+ - Integrace widgetu pro výběr výdejních míst v košíku eshopu
+ - Export zásilek do csv souboru, který lze importovat v [klientské sekci](https://client.packeta.com/).
+ 
+ ### Omezení
+ - modul v současné době nepodporuje multistore
+ - modul je určen pouze pro výchozí košíky PrestaShopu.  Pokud používáte nějaký one page checkout modul košíku třetí strany,  modul nemusí správně
+ fungovat.
+ 
+ 
+ 
+ 
