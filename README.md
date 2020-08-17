@@ -3,7 +3,7 @@
 # Module for PrestaShop 1.6
 
 ### Download link
-[Download version 2.0.2](https://github.com/Zasilkovna/prestashop-1.6/raw/master/releases/prestahop-1.6-packetery-2.0.2.zip)
+[Download version 2.0.3](https://github.com/Zasilkovna/prestashop-1.6/archive/2.0.3.zip)
 
 ## Systém requirements
 For installation of Prestashop 1.6.x there is required to install following components:
@@ -106,7 +106,7 @@ for a third-party cart, the module may not work properly
 # Modul pro PrestaShop 1.6
 
 ### Stažení modulu
-[Aktuální verze 2.0.2 (Stáhnout »)](https://github.com/Zasilkovna/prestashop-1.6/raw/master/releases/prestahop-1.6-packetery-2.0.2.zip)
+[Aktuální verze 2.0.3 (Stáhnout »)](https://github.com/Zasilkovna/prestashop-1.6/archive/2.0.3.zip)
 
 ## Systémové požadavky
 Pro instalaci Prestashop 1.6.x jsou vyžadovány následující komponenty:
