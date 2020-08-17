@@ -32,7 +32,7 @@ class Packetery extends Module
     {
         $this->name = 'packetery';
         $this->tab = 'shipping_logistics';
-        $this->version = '2.0.2';
+        $this->version = '2.0.3';
         $this->limited_countries = array('cz', 'sk', 'pl', 'hu', 'ro');
         parent::__construct();
 
@@ -132,7 +132,7 @@ class Packetery extends Module
         }
 
         $key = Configuration::get('PACKETERY_API_KEY');
-        $test = "http://www.zasilkovna.cz/api/$key/test";
+        $test = "https://www.zasilkovna.cz/api/$key/test";
         if (!$key) {
             $error[] = $this->l('Packetery API key is not set.');
             $have_error = true;
@@ -142,7 +142,7 @@ class Packetery extends Module
                 $have_error = true;
             } else {
                 $data = Tools::jsonDecode(
-                    $this->fetch("http://www.zasilkovna.cz/api/$key/version-check-prestashop?my=" . $this->version)
+                    $this->fetch("https://www.zasilkovna.cz/api/$key/version-check-prestashop?my=" . $this->version)
                 );
                 if (self::compareVersions($data->version, $this->version) > 0) {
                     $cookie = Context::getContext()->cookie;
@@ -1183,7 +1183,7 @@ END;
         $key = Configuration::get('PACKETERY_API_KEY');
         $files = array(
             _PS_MODULE_DIR_ . "packetery/address-delivery.xml" =>
-                "http://www.zasilkovna.cz/api/v4/$key/branch.xml"
+                "https://www.zasilkovna.cz/api/v4/$key/branch.xml"
         );
 
         foreach ($files as $local => $remote) {
