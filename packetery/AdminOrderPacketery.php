@@ -112,20 +112,8 @@ class AdminOrderPacketery extends AdminTab
                     $phone = trim($order[$field]);
             }
 
-            /* If address2 is not set, split address1 into street / house no. */
-            if (!empty($order['address2'])) {
-                $streetName = $order['address1'];
-                $streetNumber = $order['address2'];
-            } else {
-                $address = $order['address1'];
-                // Find a match and store it in $result.
-                if (preg_match('/([^\d]+)\s?(.+)/i', $address, $result)) {
-                    // $result[1] will have the steet name
-                    $streetName = $result[1];
-                    // and $result[2] is the number part.
-                    $streetNumber = $result[2];
-                }
-            }
+			$streetName = $order['address1'];
+			$streetNumber = (!empty($order['address2'] ? $order['address2'] : null));
 
             $currency = new Currency($order['id_currency']);
             $precision = $currency->decimals ? 2 : 0;
