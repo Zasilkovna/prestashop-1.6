@@ -4,38 +4,17 @@ window.initializePacketaWidget = function () {
     $("input.delivery_option_radio:checked").each(function (i, e) {
         v = $(e).val().replace(/^\,+|\,+$/g, '');
 
-        // if packetery carrier
-        if (carrier_data.hasOwnProperty(v)) {
-
-            var countries = country.split(',');
-            var validCarrier = false;
-
-            /* Check if carrier is available for countries */
-            $.each(countries, function (k, val)
-            {
-                if (carrier_data[v]['country'].indexOf(val) != -1)
-                {
-                    validCarrier = true;
-                }
-            });
-
-            if (!validCarrier)
-            {
-                c = $(e).closest('tr').find('td:nth-child(3)');
-                c.find('.invalid_country_msg').remove();
-                c.append('<p class="invalid_country_msg" style="color: red">' + invalid_country_text + '</p>');
-            }
-            else {
-                /* Display button and inputs */
-                c = $(e).closest('tr').find('td:nth-child(3)');
-                c.append('<div class="zas-box"><h3><button class="btn btn-success btn-md" id="open-packeta-widget">' + select_text + '</h3>' +
-                    '<div id="selected-pickup-point">' +
-                    '<input type="hidden" name="packeta-branch-id" id="packeta-branch-id">' +
-                    '<input type="hidden" name="packeta-branch-name" id="packeta-branch-name">' +
-                    '<b>' + selected_text + '</b>: <span id="picked-delivery-place"></span>' +
-                    '</div>' +
-                    '</div>');
-            }
+        // if is packetery pickup method
+        if (carrier_data.hasOwnProperty(v) && carrier_data[v]['id_branch'] === pickup_branch_id) {
+            /* Display button and inputs */
+            c = $(e).closest('tr').find('td:nth-child(3)');
+            c.append('<div class="zas-box"><h3><button class="btn btn-success btn-md" id="open-packeta-widget">' + select_text + '</h3>' +
+                '<div id="selected-pickup-point">' +
+                '<input type="hidden" name="packeta-branch-id" id="packeta-branch-id">' +
+                '<input type="hidden" name="packeta-branch-name" id="packeta-branch-name">' +
+                '<b>' + selected_text + '</b>: <span id="picked-delivery-place"></span>' +
+                '</div>' +
+                '</div>');
 
             if (processCarrier.length > 0) {
                 $('button[name=processCarrier]').attr('disabled', true);

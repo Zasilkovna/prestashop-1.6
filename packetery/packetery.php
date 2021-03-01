@@ -25,6 +25,8 @@ class Packetery extends Module
     private $currency_conversion;
     protected $_postErrors = array();
     const CC_PRESTASHOP = 1, CC_CNB = 2, CC_FIXED = 3;
+    // 0, abychom nemuseli v db měnit int na varchar
+    const PICKUP_BRANCH_ID = 0;
 
     public static $is_before_carrier = false;
 
@@ -32,7 +34,7 @@ class Packetery extends Module
     {
         $this->name = 'packetery';
         $this->tab = 'shipping_logistics';
-        $this->version = '2.0.4';
+        $this->version = '2.0.5';
         $this->limited_countries = array('cz', 'sk', 'pl', 'hu', 'ro');
         parent::__construct();
 
@@ -292,12 +294,11 @@ class Packetery extends Module
 
         // mark carriers deleted
         $db->execute(
-            'update `' . _DB_PREFIX_ . 'carrier` set deleted=1 where external_module_name="packetery"
-            or id_carrier in (select id_carrier from `' . _DB_PREFIX_ . 'packetery_carrier`)'
+            'UPDATE `' . _DB_PREFIX_ . 'carrier` SET `deleted` = 1 WHERE `external_module_name` = "packetery"
+            OR `id_carrier` IN (SELECT `id_carrier` FROM `' . _DB_PREFIX_ . 'packetery_address_delivery`)'
         );
 
         // remove our carrier and payment table, keep order table for reinstall
-        $db->execute('drop table if exists `' . _DB_PREFIX_ . 'packetery_carrier`');
         $db->execute('drop table if exists `' . _DB_PREFIX_ . 'packetery_payment`');
         $db->execute('drop table if exists `' . _DB_PREFIX_ . 'packetery_address_delivery`');
 
@@ -365,117 +366,6 @@ class Packetery extends Module
     }
 
     /**
-     * Processes data on "add carrier" form save
-     */
-    public function cAddCarrierPost()
-    {
-        $db = Db::getInstance();
-        /* Check if the button was submitted, all *Post functions are being called everytime */
-        if (!Tools::getIsset('packetery_add_carrier') || !Tools::getValue('packetery_add_carrier')) {
-            return;
-        }
-
-        $carrier = new Carrier();
-
-        $carrier->name = Tools::getValue('packetery_carrier_name');
-        $carrier->active = true;
-        $carrier->shipping_method = defined('Carrier::SHIPPING_METHOD_WEIGHT') ? Carrier::SHIPPING_METHOD_WEIGHT : 1;
-        $carrier->deleted = 0;
-
-        $carrier->range_behavior = true; // true disables this carrier if outside weight range
-        $carrier->is_module = true;
-        $carrier->external_module_name = "packetery";
-        $carrier->need_range = true;
-
-        foreach (Language::getLanguages(true) as $language) {
-            if (Tools::getIsset('delay_' . $language['id_lang']) && Tools::getValue('delay_' . $language['id_lang'])) {
-                $carrier->delay[$language['id_lang']] = Tools::getValue('delay_' . $language['id_lang']);
-            }
-        }
-
-        if (!$carrier->add()) {
-            return false;
-        }
-
-        $country = "";
-        $countries = Tools::getValue('packetery_carrier_country');
-        foreach ($countries as $key => $countryCode) {
-            $country .= $countryCode;
-            if ($key != count($countries) - 1) {
-                $country .= ',';
-            }
-        }
-
-        // Saves carrier countries, if not set, use cz and sk
-        $db->execute(
-            'insert into `' . _DB_PREFIX_ . 'packetery_carrier` set id_carrier=' . ((int)$carrier->id) .
-            ', country="' . pSQL($country ? $country : 'cz,sk') . '", is_cod=' .
-            (Tools::getIsset('packetery_carrier_is_cod') ? (int)Tools::getValue('packetery_carrier_is_cod') : 0)
-        );
-
-        // Add carrier to all customer groups
-        foreach (Group::getGroups(true) as $group) {
-            $db->autoExecute(
-                _DB_PREFIX_ . 'carrier_group',
-                array(
-                    'id_carrier' => (int)$carrier->id,
-                    'id_group' => (int)$group['id_group']
-                ),
-                'INSERT'
-            );
-        }
-
-        // Set default weight range
-        $rangeWeight = new RangeWeight();
-        $rangeWeight->id_carrier = $carrier->id;
-        $rangeWeight->delimiter1 = '0';
-        $rangeWeight->delimiter2 = '5';
-        $rangeWeight->add();
-
-        // Set default price range
-        $rangePrice = new RangePrice();
-        $rangePrice->id_carrier = $carrier->id;
-        $rangePrice->delimiter1 = '0';
-        $rangePrice->delimiter2 = '1000000';
-        $rangePrice->add();
-
-        // SAve additionally carrier relationships
-        $zones = Zone::getZones(true);
-        foreach ($zones as $zone) {
-            $db->autoExecute(
-                _DB_PREFIX_ . 'carrier_zone',
-                array(
-                    'id_carrier' => (int)$carrier->id,
-                    'id_zone' => (int)$zone['id_zone']
-                ),
-                'INSERT'
-            );
-            $db->autoExecuteWithNullValues(
-                _DB_PREFIX_ . 'delivery',
-                array(
-                    'id_carrier' => (int)$carrier->id,
-                    'id_range_price' => (int)$rangePrice->id,
-                    'id_range_weight' => null,
-                    'id_zone' => (int)$zone['id_zone'],
-                    'price' => '0'
-                ),
-                'INSERT'
-            );
-            $db->autoExecuteWithNullValues(
-                _DB_PREFIX_ . 'delivery',
-                array(
-                    'id_carrier' => (int)$carrier->id,
-                    'id_range_price' => null,
-                    'id_range_weight' => (int)$rangeWeight->id,
-                    'id_zone' => (int)$zone['id_zone'],
-                    'price' => '0'
-                ),
-                'INSERT'
-            );
-        }
-    }
-
-    /**
      * Outputs html for configuration form
      * @return string
      */
@@ -537,140 +427,6 @@ class Packetery extends Module
         $html .= "</form>";
         $html .= "</fieldset>";
 
-        return $html;
-    }
-
-    /**
-     * Outputs html for "add carrier" form
-     * @return string
-     */
-    private function cAddCarrier()
-    {
-        $html = "";
-        $html .= "<fieldset><legend>" . $this->l('Add Carrier') . "</legend>";
-
-        $html .= "<form method='post'>";
-        $html .= "<input type='hidden' name='packetery_add_carrier' value='1' />";
-
-        $html .= "<label>" . $this->l('Carrier Name') . ": </label>";
-        $html .= "<div class='margin-form'><input type='text' name='packetery_carrier_name' size='41' value='" .
-            htmlspecialchars($this->l('Personal pick-up – Packetery'), ENT_QUOTES) . "' /></div>";
-        $html .= "<div class='clear'></div>";
-
-        $html .= "<label>" . $this->l('Delay') . ": </label>";
-        $html .= '<div class="margin-form">';
-
-        $cookie = Context::getContext()->cookie;
-        $def_lang = (int)($cookie->id_lang ? $cookie->id_lang : Configuration::get('PS_LANG_DEFAULT'));
-
-        /**
-        * Je záměrně natvrdo, jedná se pouze o defaultní texty, pro které je potřeba mít všechny 3 verze připravené,
-        * aby bylo možné mezi nimi přepínat
-        */
-        $delay = array(
-            'en' => '1-3 days when in stock',
-            'cs' => "Do 1-3 dní je-li skladem",
-            'sk' => "Do 1-3 dní ak je skladom"
-        );
-
-        foreach (Language::getLanguages(false) as $language) {
-            if ($def_lang == $language['id_lang']) {
-                $def_lang_code = $language['iso_code'];
-            }
-            $html .= '<div id="delay_' . $language['id_lang'] . '" style="display: ' .
-                ($language['id_lang'] == 1 ? 'block' : 'none') .
-                '; float: left;"><input type="text" size="41" maxlength="128" name="delay_' .
-                $language['id_lang'] . '" value="' .
-                htmlspecialchars(
-                    $delay[$language['iso_code']] ? $delay[$language['iso_code']] : $delay['en'],
-                    ENT_QUOTES
-                ) . '" /></div>';
-        }
-
-        $html .= $this->displayFlags(Language::getLanguages(false), $def_lang, 'delay', 'delay', true);
-        $html .= '<p class="clear"></p></div>';
-        $html .= "<div class='clear'></div>";
-        $html .= "
-            <script type='text/javascript'> 
-                changeLanguage('delay', 'delay', $def_lang, '$def_lang_code'); 
-            </script>";
-
-        $html .= "<label>" . $this->l('Countries') . ": </label>";
-        $html .= "<div class='margin-form'>
-            <select name='packetery_carrier_country[]' multiple style='width: 180px; ' size='3'>";
-
-        foreach ($this->supported_countries_trans as $code => $country) {
-            $html .= "<option value='$code'>$country</option>\n";
-        }
-        $html .= "</select>";
-        $html .= "<p class='clear'>" . $this->l('You can select one or more countries by using the Ctrl key. Only branches in selected countries will be shown in this shipping method – you can e.g. set different price based on country.')
-            . "</p>";
-        $html .= "</div>";
-        $html .= "<div class='clear'></div>";
-
-        $html .= "<label for='packetery_carrier_is_cod'>" . $this->l('Is COD') . ": </label>";
-        $html .= "<div class='margin-form'>
-            <input type='checkbox' id='packetery_carrier_is_cod' name='packetery_carrier_is_cod' value='1'><p>" .
-            $this->l('When exporting order with this carrier, the order total will be put as COD.') . "</div>";
-        $html .= "<div class='clear'></div>";
-
-        $html .= "<div class='margin-form'><input class='button' type='submit' value='" .
-            htmlspecialchars($this->l('Add'), ENT_QUOTES) . "' /></div>";
-
-        $html .= "</form>";
-
-        $html .= "</fieldset>";
-
-        return $html;
-    }
-
-    /**
-     * Save changed cod for carriers in list
-     */
-    private function cListCarriersPost()
-    {
-        if (Tools::getIsset('packetery_remove_carrier') && Tools::getValue('packetery_remove_carrier')) {
-            $db = Db::getInstance();
-            $db->execute(
-                'update `' . _DB_PREFIX_ .
-                'carrier` set deleted=1 where external_module_name="packetery"
-                and id_carrier=' . ((int)Tools::getValue('packetery_remove_carrier'))
-            );
-        }
-    }
-
-    /**
-     * Outputs html for carriers list
-     * @return string
-     */
-    private function cListCarriers()
-    {
-        $db = Db::getInstance();
-        $html = "";
-        $html .= "<fieldset><legend>" . $this->l('Carrier List') . "</legend>";
-        if ($list = $db->executeS(
-            'select c.id_carrier, c.name, pc.country, pc.is_cod
-            from `' . _DB_PREFIX_ . 'carrier` c join `' . _DB_PREFIX_ . 'packetery_carrier` pc
-            on(pc.id_carrier=c.id_carrier) where c.deleted=0'
-        )
-        ) {
-            $html .= "<table class='table' cellspacing='0'>";
-            $html .= "<tr><th>" . $this->l('Carrier Name') . "</th><th>" . $this->l('Countries') . "</th><th>" . $this->l('Is COD') . "</th><th>" . $this->l('Action') .
-                "</th></tr>";
-
-            foreach ($list as $carrier) {
-                $html .= "<tr><td>$carrier[name]</td><td>$carrier[country]</td><td>" .
-                    ($carrier['is_cod'] == 1 ? $this->l('Yes') : $this->l('No')) . "</td><td><form method='post'>
-                    <input type='hidden' name='packetery_remove_carrier' value='$carrier[id_carrier]'>
-                    <input type='submit' class='button' value='" . htmlspecialchars($this->l('Remove'), ENT_QUOTES) .
-                    "'></form></td></tr>";
-            }
-            $html .= "</table>";
-            $html .= "<p>" . $this->l('If you want to set price, use standard PrestaShop functions (see Shipping in top menu).') . "</p>";
-        } else {
-            $html .= "<p>" . $this->l('There are no carriers created yet. Please create some below.') . "</p>";
-        }
-        $html .= "</fieldset>";
         return $html;
     }
 
@@ -748,7 +504,7 @@ class Packetery extends Module
     /**
      * Processes adress delivery form
      */
-    private function cListAddressDeliveryCarriersPost()
+    private function cListAllCarriersPost()
     {
         if (!Tools::getIsset('address_delivery_carriers') || !Tools::getValue('address_delivery_carriers')) {
             return;
@@ -758,16 +514,14 @@ class Packetery extends Module
         $db = Db::getInstance();
         $address_deliveries = self::addressDeliveries();
         foreach ($data as $id_carrier => $attr) {
-            if ($attr['id_branch']) {
+            if ($attr['id_branch'] === (string)self::PICKUP_BRANCH_ID) {
+                $name = $this->l('Packeta pickup point');
+                // TODO: odstranit currency_branch - ukládá se pak k objednávce, kde se ale pro export nepoužije, použije se tam id_currency přímo z prestashopu
+                $currency = 'CZK';
+                self::insertPacketeryAddressDelivery($db, $id_carrier, $attr['id_branch'], $name, $currency, $attr['is_cod']);
+            } else if ($attr['id_branch']) {
                 $a = $address_deliveries[$attr['id_branch']];
-                $db->execute(
-                    'insert into `' . _DB_PREFIX_ . 'packetery_address_delivery`(id_carrier, id_branch, name_branch,
-                     currency_branch, is_cod) values(' . ((int)$id_carrier) . ', ' . ((int)$attr['id_branch']) .
-                    ', "' . pSQL($a->name) . '", "' . pSQL($a->currency) . '", ' . ((int)$attr['is_cod']) . ')
-                    on duplicate key update id_branch=' . ((int)$attr['id_branch']) . ',
-                    is_cod=' . ((int)$attr['is_cod']) . ', name_branch="' . pSQL($a->name) . '",
-                    currency_branch="' . pSQL($a->currency) . '"'
-                );
+                self::insertPacketeryAddressDelivery($db, $id_carrier, $attr['id_branch'], $a->name, $a->currency, $attr['is_cod']);
             } else {
                 $db->execute(
                     'delete from `' . _DB_PREFIX_ . 'packetery_address_delivery` where id_carrier=' . ((int)$id_carrier)
@@ -777,45 +531,39 @@ class Packetery extends Module
     }
 
     /**
-     * Öutputs html for address delivery form
+     * Outputs html for delivery form
      * @return string
      */
-    private function cListAddressDeliveryCarriers()
+    private function cListAllCarriers()
     {
         $db = Db::getInstance();
         $html = "";
-        $html .= "<fieldset><legend>" . $this->l('Address Delivery Carriers List') . "</legend>";
+        $html .= "<fieldset><legend>" . $this->l('Carriers List') . "</legend>";
         $html .= "<form method='post'>";
         $html .= "<input type='hidden' name='address_delivery_carriers' value='1'>";
         $html .= "<table class='table' cellspacing='0'>";
-        $html .= "<tr><th>" . $this->l('Carrier') . "</th><th>" . $this->l('Is Address Delivery via Packetery') .
+        $html .= "<tr><th>" . $this->l('Carrier') . "</th><th>" . $this->l('Is delivery via Packetery') .
             "</th><th>" . $this->l('Is COD') . "</th></tr>";
 
         $carriers = $db->executeS(
-            'select pad.*, c.name, c.id_carrier
-            from `' . _DB_PREFIX_ . 'carrier` c
-            LEFT JOIN `' . _DB_PREFIX_ . 'packetery_address_delivery` pad using(id_carrier)
-            WHERE 
-              c.external_module_name<>"packetery"
-              and c.id_carrier not in (select id_carrier from `' . _DB_PREFIX_ . 'packetery_carrier`)
-              and c.deleted=0
-              and c.active=1
+            'SELECT `pad`.`id_branch`, `pad`.`is_cod`, `c`.`name`, `c`.`id_carrier`
+            FROM `' . _DB_PREFIX_ . 'carrier` `c`
+            LEFT JOIN `' . _DB_PREFIX_ . 'packetery_address_delivery` `pad` USING(`id_carrier`)
+            WHERE `c`.`deleted` = 0
         '
         );
 
         foreach ($carriers as $carrier) {
             $html .= "<tr><td>" . ($carrier['name'] != "0" ? $carrier['name'] : Configuration::get('PS_SHOP_NAME')) .
-                "</td><td><select name='data[$carrier[id_carrier]][id_branch]'>";
-            foreach ((
-                array(
-                    '' => (object)array(
-                        'name' => '–– ' . Tools::strtolower($this->l('No')) . ' ––')
-                ) + self::addressDeliveries()
-            ) as $k => $v) {
-                $html .= "<option value='$k'" .
-                    ($carrier['id_branch'] == $k ? " selected" : "") . ">$v->name</option>\n";
+                "</td><td><select name='data[" . $carrier['id_carrier'] . "][id_branch]'>";
+            $html .= "<option value=''>–– " . Tools::strtolower($this->l('No')) . " ––</option>";
+            $html .= "<option value='" . self::PICKUP_BRANCH_ID . "'" .
+                ($carrier['id_branch'] === (string)self::PICKUP_BRANCH_ID ? " selected" : "") . ">" . $this->l('Packeta pickup point') . "</option>";
+            foreach (self::addressDeliveries() as $branch_id => $branch) {
+                $html .= "<option value='$branch_id'" .
+                    ($carrier['id_branch'] == $branch_id ? " selected" : "") . ">$branch->name</option>\n";
             }
-            $html .= "</select></td><td><select name='data[$carrier[id_carrier]][is_cod]'>";
+            $html .= "</select></td><td><select name='data[" . $carrier['id_carrier'] . "][is_cod]'>";
             foreach (array(
                          $this->l('No'),
                          $this->l('Yes')
@@ -845,10 +593,8 @@ class Packetery extends Module
 
         /* Process all forms */
         $this->cConfigurationPost();
-        $this->cAddCarrierPost();
-        $this->cListCarriersPost();
         $this->cListPaymentsPost();
-        $this->cListAddressDeliveryCarriersPost();
+        $this->cListAllCarriersPost();
 
         $html = '';
         $html .= '<h2>' . $this->l('Packetery Shipping Module Settings') . '</h2>';
@@ -868,11 +614,7 @@ class Packetery extends Module
         $html .= "<br>";
         $html .= $this->cConfiguration();
         $html .= "<br>";
-        $html .= $this->cListCarriers();
-        $html .= "<br>";
-        $html .= $this->cAddCarrier();
-        $html .= "<br>";
-        $html .= $this->cListAddressDeliveryCarriers();
+        $html .= $this->cListAllCarriers();
         $html .= "<br>";
         $html .= $this->cListPayments();
 
@@ -912,18 +654,12 @@ class Packetery extends Module
         $address = new AddressCore($params['cart']->id_address_delivery);
         $country_iso = CountryCore::getIsoById($address->id_country)    ;
 
-        $carrier_data = array();
-        $carrier_ids = array();
+        $carrier_data = [];
         foreach ($db->executeS(
-            'select pc.id_carrier, pc.country from `' .
-            _DB_PREFIX_ . 'packetery_carrier` pc join `' .
-            _DB_PREFIX_ . 'carrier` c using(id_carrier) where c.deleted=0'
+            'SELECT `pad`.`id_carrier`,`pad`.`id_branch` FROM `' . _DB_PREFIX_ . 'packetery_address_delivery` `pad`
+            JOIN `' . _DB_PREFIX_ . 'carrier` `c` USING(`id_carrier`) WHERE `c`.`deleted` = 0'
         ) as $carrier) {
-
-            $carrier_ids[] = $carrier['id_carrier']; //9 10
-            $carrier_data[$carrier['id_carrier']] = array(
-                'country' => $carrier['country']
-            );
+            $carrier_data[$carrier['id_carrier']] = ['id_branch' => $carrier['id_branch']];
         }
 
         $forcedCountry = Configuration::get('PACKETERY_FORCED_COUNTRY');
@@ -956,15 +692,16 @@ class Packetery extends Module
         $must_select_point_text = $this->l('You must select a pick-up point before continuing');
         $select_point_text = $this->l('Please select a pick-up point');
         $selected_point_text = $this->l('Selected pick-up point');
-        $invalid_country_text = $this->l('Selected carrier is not available for your country.');
         $module_version = $this->version;
 
         $lang = strtolower($lang);
+        $pickup_branch_id = self::PICKUP_BRANCH_ID;
 
         /* Define some JS variables and inicialize widget */
         return <<< END
         <script type="text/javascript">
-            var carrier_data = $json;           
+            var carrier_data = $json;
+            var pickup_branch_id = "$pickup_branch_id";
             var api_key = "$api_key";           
             var country = "$country";
             var lang = "$lang";            
@@ -972,7 +709,6 @@ class Packetery extends Module
             var selected_text = "$selected_point_text"; 
             var select_text = "$select_point_text";
             var must_select_text = "$must_select_point_text";
-            var invalid_country_text = "$invalid_country_text";
             var module_version = "$module_version";
             
             $(function(){
@@ -993,8 +729,9 @@ END;
     {
         $db = DB::getInstance();
         if ($packetery_carrier = $db->getRow(
-            'select is_cod from `' . _DB_PREFIX_ . 'packetery_carrier`
-            where id_carrier=' . ((int)$params['order']->id_carrier))) {
+            'SELECT `is_cod` FROM `' . _DB_PREFIX_ . 'packetery_address_delivery`
+            WHERE `id_carrier` = ' . ((int)$params['order']->id_carrier) . '
+            AND `id_branch` = ' . self::PICKUP_BRANCH_ID)) {
             // branch
         }
         elseif ($packetery_carrier = $db->getRow(
@@ -1086,9 +823,9 @@ END;
     {
         if ($params['id_carrier'] != $params['carrier']->id) {
             Db::getInstance()->execute(
-                'update `' . _DB_PREFIX_ . 'packetery_carrier`
-                set id_carrier=' . ((int)$params['carrier']->id) . '
-                where id_carrier=' . ((int)$params['id_carrier'])
+                'UPDATE `' . _DB_PREFIX_ . 'packetery_address_delivery`
+                SET `id_carrier` = ' . ((int)$params['carrier']->id) . '
+                WHERE `id_carrier` = ' . ((int)$params['id_carrier'])
             );
         }
     }
@@ -1258,6 +995,38 @@ END;
     }
 
     /**
+     * Can't be used in Carrier.php - class is not loaded
+     * @param Db $db
+     * @param int $id_carrier
+     * @return bool
+     */
+    public static function isPacketeryCarrier(Db $db, $id_carrier)
+    {
+        return  ($db->getValue('SELECT 1 FROM `' . _DB_PREFIX_ . 'packetery_address_delivery` WHERE `id_carrier` = ' . ((int)$id_carrier)) == 1);
+    }
+
+    /**
+     * @param Db $db
+     * @param int $id_carrier
+     * @param int $id_branch
+     * @param string $name_branch
+     * @param string $currency_branch
+     * @param int $is_cod
+     * @return bool
+     */
+    private static function insertPacketeryAddressDelivery(Db $db, $id_carrier, $id_branch, $name_branch, $currency_branch, $is_cod)
+    {
+        return $db->execute(
+            'INSERT INTO `' . _DB_PREFIX_ . 'packetery_address_delivery` (`id_carrier`, `id_branch`, `name_branch`,
+            `currency_branch`, `is_cod`) VALUES(' . ((int)$id_carrier) . ', ' . ((int)$id_branch) .
+            ', "' . pSQL($name_branch) . '", "' . pSQL($currency_branch) . '", ' . ((int)$is_cod) . ')
+            ON DUPLICATE KEY UPDATE `id_branch` = ' . ((int)$id_branch) . ',
+            `is_cod` = ' . ((int)$is_cod) . ', `name_branch` = "' . pSQL($name_branch) . '",
+            `currency_branch` = "' . pSQL($currency_branch) . '"'
+        );
+    }
+
+    /**
      * @return array
      */
     public static function addressDeliveries()
@@ -1296,10 +1065,7 @@ END;
     public function hookPaymentTop($params)
     {
         $db = Db::getInstance();
-        $is_packetery_carrier = ($db->getValue(
-                'select 1 from `' . _DB_PREFIX_ . 'packetery_carrier`
-            where id_carrier=' . ((int)$params['cart']->id_carrier)
-            ) == 1);
+        $is_packetery_carrier = self::isPacketeryCarrier($db, $params['cart']->id_carrier);
         $has_selected_branch = ($db->getValue(
                 'select id_branch from `' . _DB_PREFIX_ . 'packetery_order` where id_cart=' . ((int)$params['cart']->id)
             ) > 0);
