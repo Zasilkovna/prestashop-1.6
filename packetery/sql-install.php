@@ -35,7 +35,7 @@ $sql = array(
             `id_carrier` int not null primary key,
             `id_branch` int not null,
             `name_branch` varchar(255) not null,
-            `currency_branch` char(3) not null,
+            `currency_branch` char(3) null,
             `is_cod` tinyint(1) not null default 0
         ) engine=' . _MYSQL_ENGINE_ . ' default charset=utf8;'
 );

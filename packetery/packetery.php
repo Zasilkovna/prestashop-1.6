@@ -25,7 +25,7 @@ class Packetery extends Module
     private $currency_conversion;
     protected $_postErrors = array();
     const CC_PRESTASHOP = 1, CC_CNB = 2, CC_FIXED = 3;
-    // 0, abychom nemuseli v db měnit int na varchar
+    // 0, so that we don't have to change int to varchar in db
     const PICKUP_BRANCH_ID = 0;
 
     public static $is_before_carrier = false;
@@ -515,10 +515,7 @@ class Packetery extends Module
         $address_deliveries = self::addressDeliveries();
         foreach ($data as $id_carrier => $attr) {
             if ($attr['id_branch'] === (string)self::PICKUP_BRANCH_ID) {
-                $name = $this->l('Packeta pickup point');
-                // TODO: odstranit currency_branch - ukládá se pak k objednávce, kde se ale pro export nepoužije, použije se tam id_currency přímo z prestashopu
-                $currency = 'CZK';
-                self::insertPacketeryAddressDelivery($db, $id_carrier, $attr['id_branch'], $name, $currency, $attr['is_cod']);
+                self::insertPacketeryAddressDelivery($db, $id_carrier, $attr['id_branch'], $this->l('Packeta pickup point'), null, $attr['is_cod']);
             } else if ($attr['id_branch']) {
                 $a = $address_deliveries[$attr['id_branch']];
                 self::insertPacketeryAddressDelivery($db, $id_carrier, $attr['id_branch'], $a->name, $a->currency, $attr['is_cod']);
@@ -550,6 +547,7 @@ class Packetery extends Module
             FROM `' . _DB_PREFIX_ . 'carrier` `c`
             LEFT JOIN `' . _DB_PREFIX_ . 'packetery_address_delivery` `pad` USING(`id_carrier`)
             WHERE `c`.`deleted` = 0
+            AND `c`.`active` = 1
         '
         );
 
@@ -1016,13 +1014,17 @@ END;
      */
     private static function insertPacketeryAddressDelivery(Db $db, $id_carrier, $id_branch, $name_branch, $currency_branch, $is_cod)
     {
+        $carrier_attributes_sql = '
+            `is_cod` = ' . ((int)$is_cod) . ', 
+            `id_branch` = ' . ((int)$id_branch) . ',
+            `name_branch` = "' . pSQL($name_branch) . '",
+            `currency_branch` = ' . ($currency_branch === null ? 'NULL' : '"' . pSQL($currency_branch) . '"');
         return $db->execute(
-            'INSERT INTO `' . _DB_PREFIX_ . 'packetery_address_delivery` (`id_carrier`, `id_branch`, `name_branch`,
-            `currency_branch`, `is_cod`) VALUES(' . ((int)$id_carrier) . ', ' . ((int)$id_branch) .
-            ', "' . pSQL($name_branch) . '", "' . pSQL($currency_branch) . '", ' . ((int)$is_cod) . ')
-            ON DUPLICATE KEY UPDATE `id_branch` = ' . ((int)$id_branch) . ',
-            `is_cod` = ' . ((int)$is_cod) . ', `name_branch` = "' . pSQL($name_branch) . '",
-            `currency_branch` = "' . pSQL($currency_branch) . '"'
+            'INSERT INTO `' . _DB_PREFIX_ . 'packetery_address_delivery` SET 
+            `id_carrier` = ' . ((int)$id_carrier) . ',
+            ' . $carrier_attributes_sql . '
+            ON DUPLICATE KEY UPDATE
+            ' . $carrier_attributes_sql
         );
     }
 

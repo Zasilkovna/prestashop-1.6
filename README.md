@@ -68,21 +68,40 @@ Each of the configuration blocks is saved with its own "Add" or "Save" button.
   eshop language version. If you set a forced language, this language is always set in the widget, regardless
   of the language version of the eshop.
 
-## Carrier methods
-- To add a new carrier, enter the Carrier Name, Shipping Time, Country (select the country by pressing
-  the Ctrl key and left-clicking to select more countries). Next you choose whether it is cash on delivery.
-  Click Add to save everything.
-- To delete, click the Delete button on the existing shipping method.
+### Carrier settings
+- To add a carrier enter the menu *Shipping* - *Carriers*.
+- In the module settings, you select whether it is a *Packeta pickup point* or delivery to the address.
+- If you select YES for the carrier in the "Is COD" column, the orders of this carrier
+  will be always cash on delivery.
+- If you want cash on delivery to be controlled by the payment method and not the carrier, fill NO
+  in the "Is cash on delivery" column for the carrier, and set YES in the "Is COD" column for
+  the payment method.
+- For carriers whose shipments will not be transported by Packetery, select "- no -".
 
-## List of carrier delivery to address
-The module supports delivery to an address by external carriers. You can assign an external Packeta shipment carrier to each carrier.
+#### Set country restrictions
+- In the carrier settings you specify for which zones the selected carrier is allowed and for what price.
+- You can create these zones in the *Localization* - *Zones* menu and assign individual countries to them in the *Localization* - *Countries* menu.
+- It is also necessary to enable selected payment modules in the menu *Modules and Services* - *Payment* at the bottom of the page
+  in the *Country Restrictions* menu.
 
-## List of orders Packeta
-- The list of orders can be found in the menu *Orders* - *Packeta*.
+## List of Packetery orders
+- The list of orders can be found in the menu *Orders* - *Packetery*.
 - Check the list of orders you want to export. You can set whether the order is cash on delivery.
 - To export the data to CSV, click on the "Save COD List and Export Selected" button.
 
-## Informations about the module
+## Module update
+- To update the module, download the new version and upload it in the menu *Modules and Services* - *Modules and Services*.
+
+## Uninstalling the module
+- To uninstall, find the module in the menu *Modules and Services* - *Modules and Services* and choose *Uninstall*.
+- If you want to remove the module completely, choose *Remove*.
+
+### Reinstallation
+- If you decide to reinstall the module, you may encounter an error during the installation
+  "Unable to install override: The method __construct in the class Carrier is already overridden."
+- In this case, you need to delete the contents of the `/cache` folder and the`/override/classes/Carrier.php` file before installation.
+
+## Information about the module
 
 #### Supported languages:
 - czech
@@ -94,7 +113,7 @@ The module supports delivery to an address by external carriers. You can assign 
 
 #### Provided functions:
 - Widget integration for selection pickup points in the eshop cart
-- Delivery on address by a Packeta external shipment carrier
+- Delivery on address by a Packetery external shipment carrier
 - Export shipments to a csv file that can be imported in the [client section](https://client.packeta.com/).
 
 ### Limitations
