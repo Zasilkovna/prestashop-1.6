@@ -2,10 +2,10 @@ window.initializePacketaWidget = function () {
     $('.zas-box').remove();
     var processCarrier = $('button[name=processCarrier]');
     $("input.delivery_option_radio:checked").each(function (i, e) {
-        v = $(e).val().replace(/^\,+|\,+$/g, '');
+        // trim commas
+        var carrierId = $(e).val().replace(/(^\,+)|(\,+$)/g, '');
 
-        // if is packetery pickup method
-        if (carrier_data.hasOwnProperty(v) && carrier_data[v]['id_branch'] === pickup_branch_id) {
+        if (carrier_data.hasOwnProperty(carrierId) && carrier_data[carrierId] === 'show_widget') {
             /* Display button and inputs */
             c = $(e).closest('tr').find('td:nth-child(3)');
             c.append('<div class="zas-box"><h3><button class="btn btn-success btn-md" id="open-packeta-widget">' + select_text + '</h3>' +

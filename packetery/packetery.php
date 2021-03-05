@@ -25,8 +25,8 @@ class Packetery extends Module
     private $currency_conversion;
     protected $_postErrors = array();
     const CC_PRESTASHOP = 1, CC_CNB = 2, CC_FIXED = 3;
-    // 0, so that we don't have to change int to varchar in db
-    const PICKUP_BRANCH_ID = 0;
+    // only for mixing with branch ids
+    const PICKUP_BRANCH_ID = 'pickup';
 
     public static $is_before_carrier = false;
 
@@ -35,7 +35,7 @@ class Packetery extends Module
         $this->name = 'packetery';
         $this->tab = 'shipping_logistics';
         $this->version = '2.0.5';
-        $this->limited_countries = array('cz', 'sk', 'pl', 'hu', 'ro');
+        $this->limited_countries = [];
         parent::__construct();
 
         $this->author = $this->l('Packetery, Ltd.');
@@ -293,10 +293,8 @@ class Packetery extends Module
         }
 
         // mark carriers deleted
-        $db->execute(
-            'UPDATE `' . _DB_PREFIX_ . 'carrier` SET `deleted` = 1 WHERE `external_module_name` = "packetery"
-            OR `id_carrier` IN (SELECT `id_carrier` FROM `' . _DB_PREFIX_ . 'packetery_address_delivery`)'
-        );
+        $db->update('carrier', ['deleted' => 1], '`external_module_name` = "packetery"
+            OR `id_carrier` IN (SELECT `id_carrier` FROM `' . _DB_PREFIX_ . 'packetery_address_delivery`)');
 
         // remove our carrier and payment table, keep order table for reinstall
         $db->execute('drop table if exists `' . _DB_PREFIX_ . 'packetery_payment`');
@@ -510,19 +508,30 @@ class Packetery extends Module
             return;
         }
 
-        $data = (Tools::getIsset("data") && is_array(Tools::getValue("data")) ? Tools::getValue("data") : array());
-        $db = Db::getInstance();
-        $address_deliveries = self::addressDeliveries();
-        foreach ($data as $id_carrier => $attr) {
-            if ($attr['id_branch'] === (string)self::PICKUP_BRANCH_ID) {
-                self::insertPacketeryAddressDelivery($db, $id_carrier, $attr['id_branch'], $this->l('Packeta pickup point'), null, $attr['is_cod']);
-            } else if ($attr['id_branch']) {
-                $a = $address_deliveries[$attr['id_branch']];
-                self::insertPacketeryAddressDelivery($db, $id_carrier, $attr['id_branch'], $a->name, $a->currency, $attr['is_cod']);
-            } else {
-                $db->execute(
-                    'delete from `' . _DB_PREFIX_ . 'packetery_address_delivery` where id_carrier=' . ((int)$id_carrier)
-                );
+        $carriers = (Tools::getIsset("data") && is_array(Tools::getValue("data")) ? Tools::getValue("data") : []);
+        if ($carriers) {
+            $addressDeliveries = self::addressDeliveries();
+            foreach ($carriers as $carrierId => $carrier) {
+                if ($carrier['id_branch']) {
+                    if ($carrier['id_branch'] === self::PICKUP_BRANCH_ID) {
+                        $carrierName = $this->l('Packeta pickup point');
+                        $carrierCurrency = null;
+                        $branchId = null;
+                    } else if ($carrier['id_branch']) {
+                        $a = $addressDeliveries[$carrier['id_branch']];
+                        $carrierName = $a->name;
+                        $carrierCurrency = $a->currency;
+                        $branchId = (int)$carrier['id_branch'];
+                    }
+                    self::insertPacketeryAddressDelivery((int)$carrierId, $branchId, $carrierName, $carrierCurrency, (int)$carrier['is_cod']);
+                    if ($carrier['id_branch'] === self::PICKUP_BRANCH_ID) {
+                        Db::getInstance()->update('carrier', ['external_module_name' => 'packetery'], '`id_carrier` = ' . ((int)$carrierId));
+                    }
+                } else {
+                    Db::getInstance()->execute(
+                        'DELETE FROM `' . _DB_PREFIX_ . 'packetery_address_delivery` WHERE `id_carrier` = ' . ((int)$carrierId)
+                    );
+                }
             }
         }
     }
@@ -543,7 +552,7 @@ class Packetery extends Module
             "</th><th>" . $this->l('Is COD') . "</th></tr>";
 
         $carriers = $db->executeS(
-            'SELECT `pad`.`id_branch`, `pad`.`is_cod`, `c`.`name`, `c`.`id_carrier`
+            'SELECT `pad`.`id_branch`, `pad`.`is_cod`,`pad`.`is_pickup_point`, `c`.`name`, `c`.`id_carrier`
             FROM `' . _DB_PREFIX_ . 'carrier` `c`
             LEFT JOIN `' . _DB_PREFIX_ . 'packetery_address_delivery` `pad` USING(`id_carrier`)
             WHERE `c`.`deleted` = 0
@@ -551,22 +560,24 @@ class Packetery extends Module
         '
         );
 
+        $addressDeliveries = self::addressDeliveries();
+        $codOptions = [
+            $this->l('No'),
+            $this->l('Yes'),
+        ];
         foreach ($carriers as $carrier) {
             $html .= "<tr><td>" . ($carrier['name'] != "0" ? $carrier['name'] : Configuration::get('PS_SHOP_NAME')) .
                 "</td><td><select name='data[" . $carrier['id_carrier'] . "][id_branch]'>";
             $html .= "<option value=''>–– " . Tools::strtolower($this->l('No')) . " ––</option>";
             $html .= "<option value='" . self::PICKUP_BRANCH_ID . "'" .
-                ($carrier['id_branch'] === (string)self::PICKUP_BRANCH_ID ? " selected" : "") . ">" . $this->l('Packeta pickup point') . "</option>";
-            foreach (self::addressDeliveries() as $branch_id => $branch) {
-                $html .= "<option value='$branch_id'" .
-                    ($carrier['id_branch'] == $branch_id ? " selected" : "") . ">$branch->name</option>\n";
+                ($carrier['is_pickup_point'] ? ' selected' : '') . ">" . $this->l('Packeta pickup point') . "</option>";
+            foreach ($addressDeliveries as $branchId => $branch) {
+                $html .= "<option value='$branchId'" .
+                    ($carrier['id_branch'] == $branchId ? " selected" : "") . ">$branch->name</option>\n";
             }
             $html .= "</select></td><td><select name='data[" . $carrier['id_carrier'] . "][is_cod]'>";
-            foreach (array(
-                         $this->l('No'),
-                         $this->l('Yes')
-                     ) as $k => $v) {
-                $html .= "<option value='$k'" . ($carrier['is_cod'] == $k ? " selected" : "") . ">$v</option>\n";
+            foreach ($codOptions as $codOptionId => $codOptionName) {
+                $html .= "<option value='$codOptionId'" . ($carrier['is_cod'] == $codOptionId ? " selected" : "") . ">$codOptionName</option>\n";
             }
             $html .= "</select></td></tr>";
         }
@@ -652,19 +663,20 @@ class Packetery extends Module
         $address = new AddressCore($params['cart']->id_address_delivery);
         $country_iso = CountryCore::getIsoById($address->id_country)    ;
 
-        $carrier_data = [];
+        $carrierData = [];
         foreach ($db->executeS(
-            'SELECT `pad`.`id_carrier`,`pad`.`id_branch` FROM `' . _DB_PREFIX_ . 'packetery_address_delivery` `pad`
+            'SELECT `pad`.`id_carrier`, `pad`.`is_pickup_point` FROM `' . _DB_PREFIX_ . 'packetery_address_delivery` `pad`
             JOIN `' . _DB_PREFIX_ . 'carrier` `c` USING(`id_carrier`) WHERE `c`.`deleted` = 0'
         ) as $carrier) {
-            $carrier_data[$carrier['id_carrier']] = ['id_branch' => $carrier['id_branch']];
+            if ($carrier['is_pickup_point']) {
+                $carrierData[$carrier['id_carrier']] = 'show_widget';
+            }
         }
+        $carrierDataJSON = Tools::jsonEncode($carrierData);
 
         $forcedCountry = Configuration::get('PACKETERY_FORCED_COUNTRY');
         $forcedLang = Configuration::get('PACKETERY_FORCED_LANG');
         $api_key = Configuration::get('PACKETERY_API_KEY');
-
-        $json = Tools::jsonEncode($carrier_data);
 
         /* Get language from cart, global $language updates weirdly */
         $language = new LanguageCore($this->context->cart->id_lang);
@@ -693,13 +705,11 @@ class Packetery extends Module
         $module_version = $this->version;
 
         $lang = strtolower($lang);
-        $pickup_branch_id = self::PICKUP_BRANCH_ID;
 
         /* Define some JS variables and inicialize widget */
         return <<< END
         <script type="text/javascript">
-            var carrier_data = $json;
-            var pickup_branch_id = "$pickup_branch_id";
+            var carrier_data = $carrierDataJSON;
             var api_key = "$api_key";           
             var country = "$country";
             var lang = "$lang";            
@@ -725,48 +735,35 @@ END;
      */
     public function hookNewOrder($params)
     {
-        $db = DB::getInstance();
-        if ($packetery_carrier = $db->getRow(
-            'SELECT `is_cod` FROM `' . _DB_PREFIX_ . 'packetery_address_delivery`
-            WHERE `id_carrier` = ' . ((int)$params['order']->id_carrier) . '
-            AND `id_branch` = ' . self::PICKUP_BRANCH_ID)) {
-            // branch
-        }
-        elseif ($packetery_carrier = $db->getRow(
-            'select is_cod, id_branch, name_branch, currency_branch
-            from `' . _DB_PREFIX_ . 'packetery_address_delivery`
-            where id_carrier=' . ((int)$params['order']->id_carrier))) {
-            // address
-            $db->execute(
-                'insert ignore into `' . _DB_PREFIX_ . 'packetery_order` set id_cart=' . ((int)$params['cart']->id)
-            );
-            $db->execute(
-                'update `' . _DB_PREFIX_ . 'packetery_order` set id_branch=' . ((int)$packetery_carrier['id_branch']) .
-                ', name_branch="' . pSQL($packetery_carrier['name_branch']) . '", currency_branch="' .
-                pSQL($packetery_carrier['currency_branch']) . '" where id_cart=' . ((int)$params['cart']->id)
-            );
-        }
-        else {
+        $db = Db::getInstance();
+        $carrier = self::getPacketeryCarrier((int)$params['order']->id_carrier);
+        if (!$carrier) {
             return;
         }
+        if (!$carrier['is_pickup_point']) {
+            // address delivery
+            $db->execute(
+                'INSERT IGNORE INTO `' . _DB_PREFIX_ . 'packetery_order` SET `id_cart` = ' . ((int)$params['cart']->id)
+            );
+            $db->update('packetery_order', [
+                'id_branch' => ((int)$carrier['id_branch']),
+                'name_branch' => pSQL($carrier['name_branch']),
+                'currency_branch' => pSQL($carrier['currency_branch'])
+            ], '`id_cart` = ' . ((int)$params['cart']->id));
+        }
 
-        /* Save id order. update cart to packetery_order */
-        $db->execute(
-            'update `' . _DB_PREFIX_ . 'packetery_order` set id_order=' . ((int)$params['order']->id) .
-            ' where id_cart=' . ((int)$params['cart']->id)
-        );
+        // Update cart order id in packetery_order
+        $db->update('packetery_order', ['id_order' => ((int)$params['order']->id)], '`id_cart` = ' . ((int)$params['cart']->id));
 
-        $carrier_is_cod = ($packetery_carrier['is_cod'] == 1);
-        $payment_is_cod = ($db->getValue(
-                'select is_cod from `' . _DB_PREFIX_ . 'packetery_payment` where module_name="' .
-                pSQL($params['order']->module) . '"'
+        $carrierIsCod = ($carrier['is_cod'] == 1);
+        $paymentIsCod = ($db->getValue(
+                'SELECT `is_cod` FROM `' . _DB_PREFIX_ . 'packetery_payment`
+                WHERE `module_name` = "' . pSQL($params['order']->module) . '"'
             ) == 1);
 
-        /* If payment or carrier is set as cod - set order as cod */
-        if ($carrier_is_cod || $payment_is_cod) {
-            $db->execute(
-                'update `' . _DB_PREFIX_ . 'packetery_order` set is_cod=1 where id_order=' . ((int)$params['order']->id)
-            );
+        // If payment or carrier is set as cod - set order as cod
+        if ($carrierIsCod || $paymentIsCod) {
+            $db->update('packetery_order', ['is_cod' => 1], '`id_order` = ' . ((int)$params['order']->id));
         }
     }
 
@@ -820,10 +817,9 @@ END;
     public function hookUpdateCarrier($params)
     {
         if ($params['id_carrier'] != $params['carrier']->id) {
-            Db::getInstance()->execute(
-                'UPDATE `' . _DB_PREFIX_ . 'packetery_address_delivery`
-                SET `id_carrier` = ' . ((int)$params['carrier']->id) . '
-                WHERE `id_carrier` = ' . ((int)$params['id_carrier'])
+            Db::getInstance()->update('packetery_address_delivery',
+                ['id_carrier' => ((int)$params['carrier']->id)],
+                '`id_carrier` = ' . ((int)$params['id_carrier'])
             );
         }
     }
@@ -982,49 +978,48 @@ END;
     }
 
     /**
-     * @param $id_carrier
+     * @param $carrierId
      * @return array|bool|null|object
      */
-    public function getPacketeryCarrier($id_carrier)
+    public function getPacketeryCarrier($carrierId)
     {
-        $db = Db::getInstance();
-        return $db->getRow("SELECT * FROM " . _DB_PREFIX_ . "packetery_carrier WHERE id_carrier='".pSQL($id_carrier)."'");
-
+        return Db::getInstance()->getRow('
+            SELECT * FROM `' . _DB_PREFIX_ . 'packetery_address_delivery`
+            WHERE `id_carrier` = ' . $carrierId);
     }
 
     /**
      * Can't be used in Carrier.php - class is not loaded
-     * @param Db $db
-     * @param int $id_carrier
+     * @param int $carrierId
      * @return bool
      */
-    public static function isPacketeryCarrier(Db $db, $id_carrier)
+    private static function isPacketeryCarrier($carrierId)
     {
-        return  ($db->getValue('SELECT 1 FROM `' . _DB_PREFIX_ . 'packetery_address_delivery` WHERE `id_carrier` = ' . ((int)$id_carrier)) == 1);
+        return (Db::getInstance()->getValue('SELECT 1 FROM `' . _DB_PREFIX_ . 'packetery_address_delivery` WHERE `id_carrier` = ' . $carrierId) == 1);
     }
 
     /**
-     * @param Db $db
-     * @param int $id_carrier
-     * @param int $id_branch
-     * @param string $name_branch
-     * @param string $currency_branch
-     * @param int $is_cod
+     * @param int $carrierId
+     * @param int|null $branchId
+     * @param string $branchName
+     * @param string|null $branchCurrency
+     * @param int $isCod
      * @return bool
      */
-    private static function insertPacketeryAddressDelivery(Db $db, $id_carrier, $id_branch, $name_branch, $currency_branch, $is_cod)
+    private static function insertPacketeryAddressDelivery($carrierId, $branchId, $branchName, $branchCurrency, $isCod)
     {
-        $carrier_attributes_sql = '
-            `is_cod` = ' . ((int)$is_cod) . ', 
-            `id_branch` = ' . ((int)$id_branch) . ',
-            `name_branch` = "' . pSQL($name_branch) . '",
-            `currency_branch` = ' . ($currency_branch === null ? 'NULL' : '"' . pSQL($currency_branch) . '"');
-        return $db->execute(
+        $carrierSettingsSQL = '
+            `is_cod` = ' . $isCod . ', 
+            `id_branch` = ' . ($branchId === null ? 'NULL' : $branchId) . ',
+            `name_branch` = "' . pSQL($branchName) . '",
+            `currency_branch` = ' . ($branchCurrency === null ? 'NULL' : '"' . pSQL($branchCurrency) . '"') . ',
+            `is_pickup_point` = ' . ($branchId === null ? 1 : 0);
+        return Db::getInstance()->execute(
             'INSERT INTO `' . _DB_PREFIX_ . 'packetery_address_delivery` SET 
-            `id_carrier` = ' . ((int)$id_carrier) . ',
-            ' . $carrier_attributes_sql . '
+            `id_carrier` = ' . $carrierId . ',
+            ' . $carrierSettingsSQL . '
             ON DUPLICATE KEY UPDATE
-            ' . $carrier_attributes_sql
+            ' . $carrierSettingsSQL
         );
     }
 
@@ -1067,12 +1062,12 @@ END;
     public function hookPaymentTop($params)
     {
         $db = Db::getInstance();
-        $is_packetery_carrier = self::isPacketeryCarrier($db, $params['cart']->id_carrier);
-        $has_selected_branch = ($db->getValue(
+        $isPacketeryCarrier = self::isPacketeryCarrier((int)$params['cart']->id_carrier);
+        $hasSelectedBranch = ($db->getValue(
                 'select id_branch from `' . _DB_PREFIX_ . 'packetery_order` where id_cart=' . ((int)$params['cart']->id)
             ) > 0);
 
-        if ($is_packetery_carrier && !$has_selected_branch) {
+        if ($isPacketeryCarrier && !$hasSelectedBranch) {
             $params['cart']->id_carrier = 0;
         }
     }

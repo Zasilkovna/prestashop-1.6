@@ -33,9 +33,10 @@ $sql = array(
 
     'create table if not exists `' . _DB_PREFIX_ . 'packetery_address_delivery` (
             `id_carrier` int not null primary key,
-            `id_branch` int not null,
+            `id_branch` int null,
             `name_branch` varchar(255) not null,
             `currency_branch` char(3) null,
-            `is_cod` tinyint(1) not null default 0
+            `is_cod` tinyint(1) not null default 0,
+            `is_pickup_point` tinyint(1) not null default 0
         ) engine=' . _MYSQL_ENGINE_ . ' default charset=utf8;'
 );
