@@ -517,20 +517,20 @@ class Packetery extends Module
                         $carrierName = $this->l('Packeta pickup point');
                         $carrierCurrency = null;
                         $branchId = null;
+                        Db::getInstance()->update('carrier', ['external_module_name' => 'packetery'], '`id_carrier` = ' . ((int)$carrierId));
                     } else if ($carrier['id_branch']) {
                         $a = $addressDeliveries[$carrier['id_branch']];
                         $carrierName = $a->name;
                         $carrierCurrency = $a->currency;
                         $branchId = (int)$carrier['id_branch'];
+                        Db::getInstance()->update('carrier', ['external_module_name' => ''], '`id_carrier` = ' . ((int)$carrierId));
                     }
                     self::insertPacketeryAddressDelivery((int)$carrierId, $branchId, $carrierName, $carrierCurrency, (int)$carrier['is_cod']);
-                    if ($carrier['id_branch'] === self::PICKUP_BRANCH_ID) {
-                        Db::getInstance()->update('carrier', ['external_module_name' => 'packetery'], '`id_carrier` = ' . ((int)$carrierId));
-                    }
                 } else {
                     Db::getInstance()->execute(
                         'DELETE FROM `' . _DB_PREFIX_ . 'packetery_address_delivery` WHERE `id_carrier` = ' . ((int)$carrierId)
                     );
+                    Db::getInstance()->update('carrier', ['external_module_name' => ''], '`id_carrier` = ' . ((int)$carrierId));
                 }
             }
         }
