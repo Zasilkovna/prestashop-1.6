@@ -79,7 +79,7 @@ Each of the configuration blocks is saved with its own "Add" or "Save" button.
 - For carriers whose shipments will not be transported by Packetery, select "- no -".
 
 #### Set country restrictions
-- In the carrier settings you specify for which zones the selected carrier is allowed and for what price.
+- In the carrier settings you specify for which zones is the selected carrier allowed and for what price.
 - You can create these zones in the *Localization* - *Zones* menu and assign individual countries to them in the *Localization* - *Countries* menu.
 - It is also necessary to enable selected payment modules in the menu *Modules and Services* - *Payment* at the bottom of the page
   in the *Country Restrictions* menu.

@@ -5,7 +5,7 @@ window.initializePacketaWidget = function () {
         // trim commas
         var carrierId = $(e).val().replace(/(^\,+)|(\,+$)/g, '');
 
-        if (carrier_data.hasOwnProperty(carrierId) && carrier_data[carrierId] === 'show_widget') {
+        if (zpoint_carriers.includes(carrierId)) {
             /* Display button and inputs */
             c = $(e).closest('tr').find('td:nth-child(3)');
             c.append('<div class="zas-box"><h3><button class="btn btn-success btn-md" id="open-packeta-widget">' + select_text + '</h3>' +
