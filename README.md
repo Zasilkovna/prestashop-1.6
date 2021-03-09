@@ -99,7 +99,7 @@ Each of the configuration blocks is saved with its own "Add" or "Save" button.
 ### Reinstallation
 - If you decide to reinstall the module, you may encounter an error during the installation
   "Unable to install override: The method __construct in the class Carrier is already overridden."
-- In this case, you need to delete the contents of the `/cache` folder and the`/override/classes/Carrier.php` file before installation.
+- In this case, you need to delete two files: `/cache/class_index.php` and `/override/classes/Carrier.php` before installation.
 
 ## Information about the module
 
@@ -215,7 +215,7 @@ Každý z bloků konfigurace se ukládá vlastním tlačítkem "Přidat", nebo "
 ### Opětovná instalace
 - Pokud se rozhodnete modul znovu instalovat, můžete se při instalaci setkat s chybou
   "Nelze nainstalovat přepsání: Metoda __construct ve třídě Carrier je již přepsána."
-- V tomto případě je potřeba před instalací smazat obsah složky `/cache` a soubor `/override/classes/Carrier.php`.
+- V tomto případě je potřeba před instalací smazat dva soubory: `/cache/class_index.php` a `/override/classes/Carrier.php`.
 
 ## Informace o modulu
 
