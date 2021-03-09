@@ -525,13 +525,13 @@ class Packetery extends Module
                 $addressDelivery = $addressDeliveries[$carrier['id_branch']];
                 $carrierName = pSQL($addressDelivery->name);
                 $carrierCurrency = pSQL($addressDelivery->currency);
-                $branchId = (int)$carrier['id_branch'];
+                $branchId = $carrier['id_branch'];
             }
 
             Db::getInstance()->insert('packetery_address_delivery', [
                 'id_carrier' => (int)$carrierId,
                 'is_cod' => (int)$carrier['is_cod'],
-                'id_branch' => $branchId,
+                'id_branch' => (int)$branchId,
                 'name_branch' => $carrierName,
                 'currency_branch' => $carrierCurrency,
                 'is_pickup_point' => ($branchId === null ? 1 : 0),
