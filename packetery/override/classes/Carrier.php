@@ -22,7 +22,7 @@ class Carrier extends CarrierCore
             $id_carrier = null;
             $id_cart = null;
         }
-        $is_packetery_carrier = ($db->getValue('select 1 from `' . _DB_PREFIX_ . 'packetery_carrier` where id_carrier=' . ((int)$id_carrier)) == 1);
+        $is_packetery_carrier = ($db->getValue('SELECT 1 FROM `' . _DB_PREFIX_ . 'packetery_address_delivery` WHERE `id_carrier` = ' . ((int)$id_carrier)) == 1);
         if ($is_packetery_carrier) {
             $selected_branch = $db->getValue('select name_branch from `' . _DB_PREFIX_ . 'packetery_order` where id_cart=' . ((int)$id_cart));
             if ($selected_branch) {

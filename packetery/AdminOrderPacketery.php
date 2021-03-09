@@ -88,7 +88,7 @@ class AdminOrderPacketery extends AdminTab
         $data = $db->executeS(
             'select
                 o.id_order, a.firstname, a.lastname, a.phone, a.phone_mobile, c.email,
-                o.total_paid total, po.id_branch, po.is_cod, o.id_currency, po.currency_branch,
+                o.total_paid total, po.id_branch, po.is_cod, o.id_currency,
                 a.company, a.address1, a.address2, a.postcode, a.city
             from
                 `' . _DB_PREFIX_ . 'orders` o
