@@ -19,12 +19,6 @@ if (!defined('_PS_VERSION_')) {
 
 class Packetery extends Module
 {
-    private $supported_countries_trans = array(); /* Used wherever countries with texts are needed */
-    private $supported_languages = array('cs', 'sk', 'pl', 'hu', 'ro', 'en');
-    private $supported_languages_trans = array(); /* Used wherever languages with texts are needed */
-    private $currency_conversion;
-    protected $_postErrors = array();
-    const CC_PRESTASHOP = 1, CC_CNB = 2, CC_FIXED = 3;
     // only for mixing with branch ids
     const ZPOINT = 'zpoint';
 
@@ -46,28 +40,6 @@ class Packetery extends Module
         );
 
         $this->module_key = 'aa9b6f2b47192e6caae86b500177a861';
-        $this->currency_conversion = array(
-            self::CC_PRESTASHOP => $this->l('Use PrestaShop\'s currency conversion'),
-            self::CC_CNB => $this->l('Use CNB rates with optional margin'),
-            self::CC_FIXED => $this->l('Use fixed conversion rate'),
-        );
-
-        $this->supported_countries_trans = array(
-            'cz' => $this->l('Czech Republic'),
-            'sk' => $this->l('Slovakia'),
-            'hu' => $this->l('Hungary'),
-            'pl' => $this->l('Poland'),
-            'ro' => $this->l('Romania')
-        );
-
-        $this->supported_languages_trans = array(
-            'cs' => $this->l('Czech'),
-            'sk' => $this->l('Slovak'),
-            'hu' => $this->l('Hungarian'),
-            'pl' => $this->l('Polish'),
-            'ro' => $this->l('Romanian'),
-            'en' => $this->l('English'),
-        );
 
         // This is only used in admin of modules, and we're accessing Packetery API here, so don't do that elsewhere.
         if (self::_isInstalled($this->name) && strpos($_SERVER['REQUEST_URI'], 'tab=AdminModules') !== false) {
@@ -324,9 +296,7 @@ class Packetery extends Module
         // leave the function if nothing is set
         if (
             !Tools::getIsset('packetery_api_key') &&
-            !Tools::getIsset('packetery_eshop_domain') &&
-            !Tools::getIsset('packetery_forced_country') &&
-            !Tools::getIsset('packetery_forced_lang')
+            !Tools::getIsset('packetery_eshop_domain')
         ) {
             return;
         }
@@ -342,20 +312,6 @@ class Packetery extends Module
         // save e-shop domain
         if (Tools::getIsset('packetery_eshop_domain') && Tools::getValue('packetery_eshop_domain')) {
             Configuration::updateValue('PACKETERY_ESHOP_DOMAIN', trim(Tools::getValue('packetery_eshop_domain')));
-        }
-
-        // save forced country
-        if (Tools::getIsset('packetery_forced_country')) {
-            Configuration::updateValue('PACKETERY_FORCED_COUNTRY', implode(',', Tools::getValue('packetery_forced_country')));
-        } else {
-            Configuration::updateValue('PACKETERY_FORCED_COUNTRY', '');
-        }
-
-        // save forced language
-        if (Tools::getIsset('packetery_forced_lang')) {
-            Configuration::updateValue('PACKETERY_FORCED_LANG', trim(Tools::getValue('packetery_forced_lang')));
-        } else {
-            Configuration::updateValue('PACKETERY_FORCED_LANG', '');
         }
     }
 
@@ -380,40 +336,6 @@ class Packetery extends Module
             $this->l('If you\'re using one Packetery account for multiple e-shops, enter the domain of current one here, so that your customers are properly informed about what package they are receiving.')
             . "</p></div>";
         $html .= "<div class='clear'></div>";
-
-        $defCountry = Configuration::get('PACKETERY_FORCED_COUNTRY');
-        $html .= "<label>" . $this->l('Force Country') . ": </label>";
-        $html .= "<div class='margin-form'>
-            <select name='packetery_forced_country[]' multiple style='width: 180px; ' size='3'>";
-
-        foreach ($this->supported_countries_trans as $code => $country) {
-            if (strpos($defCountry, $code) !== false) {
-                $html .= "<option value='$code' selected>$country</option>\n";
-            } else {
-                $html .= "<option value='$code'>$country</option>\n";
-            }
-        }
-        $html .= "</select></div>";
-        $html .= '<div class="clear"></div>';
-
-        $defLang = Configuration::get('PACKETERY_FORCED_LANG');
-        $html .= "<label>" . $this->l('Force Language') . ": </label>";
-        $html .= "<div class='margin-form'>
-            <select name='packetery_forced_lang' style='width: 180px; ' size='3'>";
-
-        foreach (array(
-                     '' => $this->l('Use e-shop language'),
-                 ) + $this->supported_languages_trans as $code => $lang) {
-            if (empty($defLang) && $code == '') {
-                $html .= "<option value='$code' selected>$lang</option>\n";
-            } else if (strpos($defLang, $code) !== false) {
-                $html .= "<option value='$code' selected>$lang</option>\n";
-            } else {
-                $html .= "<option value='$code'>$lang</option>\n";
-            }
-        }
-        $html .= "</select></div>";
-        $html .= '<div class="clear"></div>';
 
         $html .= "<div class='margin-form'><input class='button' type='submit' value='" .
             htmlspecialchars($this->l('Save'), ENT_QUOTES) . "'  /></div>";
@@ -664,7 +586,8 @@ class Packetery extends Module
         }
 
         $address = new AddressCore($params['cart']->id_address_delivery);
-        $country_iso = CountryCore::getIsoById($address->id_country)    ;
+        $country_iso = CountryCore::getIsoById($address->id_country);
+        $country = strtolower($country_iso);
 
         $zPointCarriers = $db->executeS(
             'SELECT `pad`.`id_carrier` FROM `' . _DB_PREFIX_ . 'packetery_address_delivery` `pad`
@@ -672,28 +595,13 @@ class Packetery extends Module
         );
         $zPointCarriersIdsJSON = Tools::jsonEncode(array_column($zPointCarriers, 'id_carrier'));
 
-        $forcedCountry = Configuration::get('PACKETERY_FORCED_COUNTRY');
-        $forcedLang = Configuration::get('PACKETERY_FORCED_LANG');
         $api_key = Configuration::get('PACKETERY_API_KEY');
 
         /* Get language from cart, global $language updates weirdly */
         $language = new LanguageCore($this->context->cart->id_lang);
 
-        /* Check if forced country is set, if not, use user country */
-        if ($forcedCountry) {
-            $country = $forcedCountry;
-        } else {
-            $country = strtolower($country_iso);
-        }
-        $country = strtolower($country);
-
         /* Use user's language if supported, english otherwise */
-        $lang = in_array($language->iso_code, $this->supported_languages) ? $language->iso_code : 'en';
-
-        /* Use forced lang if set */
-        if ($forcedLang) {
-            $lang = $forcedLang;
-        }
+        $lang = ($language->iso_code ?: 'en');
 
         /* Prepare langs to be used by JS */
         $mod_dir = _MODULE_DIR_;

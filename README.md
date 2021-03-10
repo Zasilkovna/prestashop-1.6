@@ -60,13 +60,6 @@ Each of the configuration blocks is saved with its own "Add" or "Save" button.
 - **API key** - your API key can be found in the [Packeta client section](https://client.packeta.com/en/support/)
   in section of Client support
 - **Sender name** - the sender name you have set in the client section of the sender list
-- **Force country** - select the countries that will be offered in the e-shop basket when selecting the Dispatch
-  Point of Delivery. To select, press Ctrl + left mouse button to select the desired country. You can select more than one
-  country at a time. In the same way, you will remove the country. If no country is selected, all supported countries will
-  be offered automatically.
-- **Force language** – The language of widget for pickup points selection is set according to the currently selected
-  eshop language version. If you set a forced language, this language is always set in the widget, regardless
-  of the language version of the eshop.
 
 ### Carrier settings
 - To add a carrier enter the menu *Shipping* - *Carriers*.

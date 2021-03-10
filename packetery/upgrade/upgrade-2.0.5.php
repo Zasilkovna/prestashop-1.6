@@ -14,5 +14,8 @@ function upgrade_module_2_0_5($object)
         CHANGE `name_branch` `name_branch` varchar(255) NULL,
         CHANGE `currency_branch` `currency_branch` char(3) NULL,
         ADD `is_pickup_point` tinyint(1) NOT NULL;
+        
+        DELETE FROM `' . _DB_PREFIX_ . 'configuration` WHERE `name` = "PACKETERY_FORCED_COUNTRY";
+        DELETE FROM `' . _DB_PREFIX_ . 'configuration` WHERE `name` = "PACKETERY_FORCED_LANG";
     ');
 }
