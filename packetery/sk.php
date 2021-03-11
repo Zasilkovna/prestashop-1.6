@@ -18,17 +18,6 @@ $_MODULE['<{packetery}prestashop>adminorderpacketery_008e7128fecada3769b949e6bd2
 $_MODULE['<{packetery}prestashop>adminorderpacketery_04e710221979de3023907bd772432102'] = 'Exportovaný súbor môžete nahrať v klientskej oblasti webu Zásielkovňa, pod Podať zásielku, v časti Hromadné podanie – CSV.';
 $_MODULE['<{packetery}prestashop>packetery_6af8bc349b863f2c3fdeeea2496e6c72'] = 'Zásilkovna, s.r.o.';
 $_MODULE['<{packetery}prestashop>packetery_c4b0cd796c76b526201e7e4909fabde8'] = 'Zásielkovňa';
-$_MODULE['<{packetery}prestashop>packetery_51802d8bb965d0e5be697f07d16922e8'] = 'Česká republika';
-$_MODULE['<{packetery}prestashop>packetery_88a392b5a8d8f73986d83a2deefb0472'] = 'Slovensko';
-$_MODULE['<{packetery}prestashop>packetery_fa79c3005daec47ecff84a116a0927a1'] = 'Maďarsko';
-$_MODULE['<{packetery}prestashop>packetery_94880bda83bda77c5692876700711f15'] = 'Poľsko';
-$_MODULE['<{packetery}prestashop>packetery_0c7d5ae44b2a0be9ebd7d6b9f7d60f20'] = 'Rumunsko';
-$_MODULE['<{packetery}prestashop>packetery_83ff4480cdf2900ae83bf30d95774d76'] = 'Čeština';
-$_MODULE['<{packetery}prestashop>packetery_9accc467b159e7ce158e53209c0cde2a'] = 'Slovenština';
-$_MODULE['<{packetery}prestashop>packetery_7b86112ec6401fd8f06ab5251d1a68fe'] = 'Maďarština';
-$_MODULE['<{packetery}prestashop>packetery_c730389bc8d99e59c867766babdd48b5'] = 'Polština';
-$_MODULE['<{packetery}prestashop>packetery_efa7394ecaa7fc7076a9da13a77236b8'] = 'Rumunština';
-$_MODULE['<{packetery}prestashop>packetery_78463a384a5aa4fad5fa73e2f506ecfc'] = 'Angličtina';
 $_MODULE['<{packetery}prestashop>packetery_56c6fd6360fe25ca80a51aa365d8c478'] = 'Nie je zadaný kľúč API Zásielkovňa.';
 $_MODULE['<{packetery}prestashop>packetery_dde7cfaa7dee7c7f122f25dd62229b7f'] = 'Nemožno pristúpiť k API Zásielkovňa so zadaným kľúčom. Možno je kľúč zadaný nesprávne.';
 $_MODULE['<{packetery}prestashop>packetery_8ec3c61443d0b58f8509f357873d199b'] = 'Je k dispozici nová verze modulu Zásilkovna pro PrestaShop.';
