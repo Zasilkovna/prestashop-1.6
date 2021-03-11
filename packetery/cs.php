@@ -25,7 +25,6 @@ $_MODULE['<{packetery}prestashop>packetery_0cc39f9a63392ad0ed1f9a14931938b6'] = 
 $_MODULE['<{packetery}prestashop>packetery_656a6828d7ef1bb791e42087c4b5ee6e'] = 'Klíč API';
 $_MODULE['<{packetery}prestashop>packetery_6ca3fca3e34e2f4aa426d7dc974f1b31'] = 'Označení odesílatele';
 $_MODULE['<{packetery}prestashop>packetery_5429125b5b5b2ea3251e799902a37a6a'] = 'Pokud používáte jeden účet Zásilkovny pro více e-shopů, vyplňte zde identifikátor současně používaného, aby Vaši zákazníci byli dostatečně informováni, jaká zásilka je jim doručována.';
-$_MODULE['<{packetery}prestashop>packetery_95dc65904556d8bc11c3c30aa00a9df9'] = 'Použít jazyk e-shopu';
 $_MODULE['<{packetery}prestashop>packetery_c9cc8cce247e49bae79f15173ce97354'] = 'Uložit';
 $_MODULE['<{packetery}prestashop>packetery_6681ed675f503961bf1f59c1b4369393'] = 'Název';
 $_MODULE['<{packetery}prestashop>packetery_790d59ef178acbc75d233bf4211763c6'] = 'Země';
