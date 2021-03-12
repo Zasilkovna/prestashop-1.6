@@ -18,13 +18,14 @@ function upgrade_module_2_0_5($object)
     }
 
     $carriersToPair = [];
-    $oldPacketeryCarriers = Db::getInstance()->executeS('SELECT * FROM `' . _DB_PREFIX_ . 'packetery_carrier`');
+    $oldPacketeryCarriers = Db::getInstance()->executeS('
+        SELECT `id_carrier`, `is_cod` FROM `' . _DB_PREFIX_ . 'packetery_carrier`');
     if ($oldPacketeryCarriers) {
         $psCarriers = Carrier::getCarriers(Configuration::get('PS_LANG_DEFAULT'), false, false, false, null,
             Carrier::PS_CARRIERS_AND_CARRIER_MODULES_NEED_RANGE);
-        $psCarriers = array_column($psCarriers, 'id_carrier');
+        $psCarriersIds = array_column($psCarriers, 'id_carrier');
         foreach ($oldPacketeryCarriers as $oldPacketeryCarrier) {
-            if (in_array($oldPacketeryCarrier['id_carrier'], $psCarriers)) {
+            if (in_array($oldPacketeryCarrier['id_carrier'], $psCarriersIds)) {
                 $carriersToPair[] = [
                     'id_carrier' => $oldPacketeryCarrier['id_carrier'],
                     'is_cod' => $oldPacketeryCarrier['is_cod'],
@@ -37,7 +38,7 @@ function upgrade_module_2_0_5($object)
         Db::getInstance()->insert('packetery_address_delivery', $carriersToPair);
     }
 
-    $result = ('DROP TABLE IF EXISTS `' . _DB_PREFIX_ . 'packetery_carrier`');
+    $result = Db::getInstance()->execute('DROP TABLE IF EXISTS `' . _DB_PREFIX_ . 'packetery_carrier`');
 
     if ($result) {
         Configuration::deleteByName('PACKETERY_FORCED_COUNTRY');
