@@ -17,14 +17,19 @@ function upgrade_module_2_0_5($object)
         return $result;
     }
 
+    $carriersToPair = [];
     $oldPacketeryCarriers = Db::getInstance()->executeS('SELECT * FROM `' . _DB_PREFIX_ . 'packetery_carrier`');
     if ($oldPacketeryCarriers) {
-        $psCarriers = Db::getInstance()->executeS('SELECT `id_carrier` FROM `' . _DB_PREFIX_ . 'carrier` WHERE `deleted` = 0');
+        $psCarriers = Carrier::getCarriers(Configuration::get('PS_LANG_DEFAULT'), false, false, false, null,
+            Carrier::PS_CARRIERS_AND_CARRIER_MODULES_NEED_RANGE);
         $psCarriers = array_column($psCarriers, 'id_carrier');
-        $carriersToPair = [];
         foreach ($oldPacketeryCarriers as $oldPacketeryCarrier) {
             if (in_array($oldPacketeryCarrier['id_carrier'], $psCarriers)) {
-                $carriersToPair[] = ['id_carrier' => $oldPacketeryCarrier['id_carrier'], 'is_cod' => $oldPacketeryCarrier['is_cod'], 'is_pickup_point' => 1];
+                $carriersToPair[] = [
+                    'id_carrier' => $oldPacketeryCarrier['id_carrier'],
+                    'is_cod' => $oldPacketeryCarrier['is_cod'],
+                    'is_pickup_point' => 1,
+                ];
             }
         }
     }
