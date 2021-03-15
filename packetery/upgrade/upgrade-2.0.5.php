@@ -38,7 +38,13 @@ function upgrade_module_2_0_5($object)
         Db::getInstance()->insert('packetery_address_delivery', $carriersToPair);
     }
 
-    $result = Db::getInstance()->execute('DROP TABLE IF EXISTS `' . _DB_PREFIX_ . 'packetery_carrier`');
+    $result = Db::getInstance()->execute('
+        DROP TABLE IF EXISTS `' . _DB_PREFIX_ . 'packetery_carrier`;
+        
+        ALTER TABLE `' . _DB_PREFIX_ . 'packetery_order`
+        ADD `is_carrier` tinyint(1) NOT NULL DEFAULT 0,
+        ADD `carrier_pickup_point` varchar(40) NULL;        
+    ');
 
     if ($result) {
         Configuration::deleteByName('PACKETERY_FORCED_COUNTRY');

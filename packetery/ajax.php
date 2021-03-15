@@ -25,18 +25,23 @@ if (!$cart || !$cart->id) {
 }
 
 $db = Db::getInstance();
+
+$packeteryOrderFields = [
+    'id_branch' => (int)Tools::getValue('id_branch'),
+    'name_branch' => pSQL(Tools::getValue('name_branch')),
+    'currency_branch' => pSQL(Tools::getValue('currency_branch')),
+];
+if (Tools::getValue('pickup_point_type') == 'external') {
+    $packeteryOrderFields['is_carrier'] = 1;
+    $packeteryOrderFields['id_branch'] = (int)Tools::getValue('carrier_id');
+    $packeteryOrderFields['carrier_pickup_point'] = pSQL(Tools::getValue('carrier_pickup_point_id'));
+}
+
 if ($db->getValue('select 1 from `' . _DB_PREFIX_ . 'packetery_order` where id_cart=' . ((int)$cart->id))) {
-    $db->execute(
-        'update `' . _DB_PREFIX_ . 'packetery_order` set id_branch=' . ((int)Tools::getValue('id_branch')) .
-        ', name_branch="' . pSQL(Tools::getValue('name_branch')) . '", currency_branch="' .
-        pSQL(Tools::getValue('currency_branch')) . '" where id_cart=' . ((int)$cart->id)
-    );
+    $db->update('packetery_order', $packeteryOrderFields, '`id_cart` = ' . ((int)$cart->id));
 } else {
-    $db->execute(
-        'insert into `' . _DB_PREFIX_ . 'packetery_order` set id_branch=' . ((int)Tools::getValue('id_branch')) .
-        ', name_branch="' . pSQL(Tools::getValue('name_branch')) . '", currency_branch="' .
-        pSQL(Tools::getValue('currency_branch')) . '", id_cart=' . ((int)$cart->id)
-    );
+    $packeteryOrderFields['id_cart'] = ((int)$cart->id);
+    $db->insert('packetery_order', $packeteryOrderFields);
 }
 
 header("Content-Type: application/json");

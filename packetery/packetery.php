@@ -748,7 +748,7 @@ END;
     public function hookHeader($params)
     {
         return '
-        <script type="text/javascript" src="https://widget.packeta.com/www/js/library.js"></script>
+        <script type="text/javascript" src="https://widget.packeta.com/v6/www/js/library.js"></script>
         <script type="text/javascript" src="' . _MODULE_DIR_ . 'packetery/views/js/front.js?v=' . $this->version . '"></script>       
         <link rel="stylesheet" href="' . _MODULE_DIR_ . 'packetery/views/css/packetery.css?v=' . $this->version . '" />
         ';

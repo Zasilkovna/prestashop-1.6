@@ -64,7 +64,10 @@ window.initializePacketaWidget = function () {
                         data: {
                             id_branch: pickupPoint.id,
                             name_branch: pickupPoint.name,
-                            currency_branch: pickupPoint.currency
+                            currency_branch: pickupPoint.currency,
+                            pickup_point_type: pickupPoint.pickupPointType,
+                            carrier_id: pickupPoint.carrierId,
+                            carrier_pickup_point_id: pickupPoint.carrierPickupPointId,
                         },
                         type: "POST",
                         complete: function () {
