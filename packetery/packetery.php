@@ -38,6 +38,7 @@ class Packetery extends Module
             'Offers your customers the option to choose pick-up point in Packetery network,
             and export orders to Packetery system.'
         );
+        $this->confirmUninstall = $this->l('Are you sure you want to uninstall the module? All module data will be deleted.');
 
         $this->module_key = 'aa9b6f2b47192e6caae86b500177a861';
 
@@ -158,14 +159,6 @@ class Packetery extends Module
         $sql = array();
         $db = Db::getInstance();
 
-        // backup possible old order table
-        if (count($db->executeS('show tables like "' . _DB_PREFIX_ . 'packetery_order"')) > 0) {
-            $db->execute('rename table `' . _DB_PREFIX_ . 'packetery_order` to `' . _DB_PREFIX_ . 'packetery_order_old`');
-            $have_old_table = true;
-        } else {
-            $have_old_table = false;
-        }
-
         // create tables
         if (!defined('_MYSQL_ENGINE_')) {
             define('_MYSQL_ENGINE_', 'MyISAM');
@@ -175,19 +168,6 @@ class Packetery extends Module
             if (!$db->execute($s)) {
                 return false;
             }
-        }
-
-        // copy data from old order table
-        if ($have_old_table) {
-            $fields = array();
-            foreach ($db->executeS('show columns from `' . _DB_PREFIX_ . 'packetery_order_old`') as $field) {
-                $fields[] = $field['Field'];
-            }
-            $db->execute(
-                'insert into `' . _DB_PREFIX_ . 'packetery_order`(`' . implode('`, `', $fields) . '`)
-                select * from `' . _DB_PREFIX_ . 'packetery_order_old`'
-            );
-            $db->execute('drop table `' . _DB_PREFIX_ . 'packetery_order_old`');
         }
 
         // module itself and hooks
@@ -264,9 +244,10 @@ class Packetery extends Module
             $db->execute('delete from `' . _DB_PREFIX_ . 'access` WHERE id_tab=' . $tab_id);
         }
 
-        // remove our carrier and payment table, keep order table for reinstall
+        // remove all module tables
         $db->execute('drop table if exists `' . _DB_PREFIX_ . 'packetery_payment`');
         $db->execute('drop table if exists `' . _DB_PREFIX_ . 'packetery_address_delivery`');
+        $db->execute('drop table if exists `' . _DB_PREFIX_ . 'packetery_order`');
 
         // module itself and hooks
         if (!parent::uninstall()

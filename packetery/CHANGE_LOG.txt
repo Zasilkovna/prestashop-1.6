@@ -1,0 +1,5 @@
+2.0.5 - Transport administration update: Removal of adding carriers on the module side, solved similarly to
+        address delivery by pairing existing carriers with the module.
+      - Country and language forcing removed.
+      - Widget v6 support added.
+      - In case of uninstallation, all database tables created by the module will be deleted.

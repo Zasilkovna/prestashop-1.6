@@ -87,6 +87,7 @@ Each of the configuration blocks is saved with its own "Add" or "Save" button.
 
 ## Uninstalling the module
 - To uninstall, find the module in the menu *Modules and Services* - *Modules and Services* and choose *Uninstall*.
+- Attention, in case of uninstallation, all database tables created by the module will be deleted.
 - If you want to remove the module completely, choose *Remove*.
 
 ### Reinstallation
@@ -198,6 +199,7 @@ Každý z bloků konfigurace se ukládá vlastním tlačítkem "Přidat", nebo "
 
 ## Odinstalace modulu
 - Odinstalování provedete po vyhledání modulu v menu *Moduly a služby* - *Moduly a služby* kliknutím na *Odinstalovat*.
+- Pozor, v případě odinstalace dojde k odstranění všech databázových tabulek vytvořených modulem.
 - Pokud chcete modul úplně odstranit, kliknete na *Odstranit*.
 
 ### Opětovná instalace

@@ -18,6 +18,7 @@ $_MODULE['<{packetery}prestashop>adminorderpacketery_008e7128fecada3769b949e6bd2
 $_MODULE['<{packetery}prestashop>adminorderpacketery_04e710221979de3023907bd772432102'] = 'Exportovaný súbor môžete nahrať v klientskej oblasti webu Zásielkovňa, pod Podať zásielku, v časti Hromadné podanie – CSV.';
 $_MODULE['<{packetery}prestashop>packetery_6af8bc349b863f2c3fdeeea2496e6c72'] = 'Zásilkovna, s.r.o.';
 $_MODULE['<{packetery}prestashop>packetery_c4b0cd796c76b526201e7e4909fabde8'] = 'Zásielkovňa';
+$_MODULE['<{packetery}prestashop>packetery_a198deb5663dd03a7a184b5c6aa57a1f'] = 'Opravdu chcete odinstalovat modul? Budou odstraněna všechna data modulu.';
 $_MODULE['<{packetery}prestashop>packetery_56c6fd6360fe25ca80a51aa365d8c478'] = 'Nie je zadaný kľúč API Zásielkovňa.';
 $_MODULE['<{packetery}prestashop>packetery_dde7cfaa7dee7c7f122f25dd62229b7f'] = 'Nemožno pristúpiť k API Zásielkovňa so zadaným kľúčom. Možno je kľúč zadaný nesprávne.';
 $_MODULE['<{packetery}prestashop>packetery_8ec3c61443d0b58f8509f357873d199b'] = 'Je k dispozici nová verze modulu Zásilkovna pro PrestaShop.';

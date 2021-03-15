@@ -10,4 +10,5 @@
 	<is_configurable>1</is_configurable>
 	<need_instance>1</need_instance>
 	<limited_countries></limited_countries>
+	<confirmUninstall>Are you sure you want to uninstall the module? All module data will be deleted.</confirmUninstall>
 </module>
