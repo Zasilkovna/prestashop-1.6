@@ -235,19 +235,19 @@ class Packetery extends Module
 
         // remove admin tab
         $db = Db::getInstance();
-        if ($tab_id = $db->getValue(
-            'select id_tab from `' . _DB_PREFIX_ . 'tab` where class_name="AdminOrderPacketery"'
-        )
-        ) {
-            $db->execute('delete from `' . _DB_PREFIX_ . 'tab` WHERE id_tab=' . $tab_id);
-            $db->execute('delete from `' . _DB_PREFIX_ . 'tab_lang` WHERE id_tab=' . $tab_id);
-            $db->execute('delete from `' . _DB_PREFIX_ . 'access` WHERE id_tab=' . $tab_id);
+        $tabId = $db->getValue(
+            'SELECT `id_tab` FROM `' . _DB_PREFIX_ . 'tab` WHERE `class_name` = "AdminOrderPacketery"'
+        );
+        if ($tabId) {
+            $db->execute('DELETE FROM `' . _DB_PREFIX_ . 'tab` WHERE `id_tab` = ' . $tabId);
+            $db->execute('DELETE FROM `' . _DB_PREFIX_ . 'tab_lang` WHERE `id_tab` = ' . $tabId);
+            $db->execute('DELETE FROM `' . _DB_PREFIX_ . 'access` WHERE `id_tab` = ' . $tabId);
         }
 
         // remove all module tables
-        $db->execute('drop table if exists `' . _DB_PREFIX_ . 'packetery_payment`');
-        $db->execute('drop table if exists `' . _DB_PREFIX_ . 'packetery_address_delivery`');
-        $db->execute('drop table if exists `' . _DB_PREFIX_ . 'packetery_order`');
+        $db->execute('DROP TABLE IF EXISTS `' . _DB_PREFIX_ . 'packetery_payment`');
+        $db->execute('DROP TABLE IF EXISTS `' . _DB_PREFIX_ . 'packetery_address_delivery`');
+        $db->execute('DROP TABLE IF EXISTS `' . _DB_PREFIX_ . 'packetery_order`');
 
         // module itself and hooks
         if (!parent::uninstall()

@@ -10,5 +10,5 @@
 	<is_configurable>1</is_configurable>
 	<need_instance>1</need_instance>
 	<limited_countries></limited_countries>
-	<confirmUninstall>Opravdu chcete odinstalovat modul? Budou odstraněna všechna data modulu.</confirmUninstall>
+	<confirmUninstall><![CDATA[Opravdu chcete odinstalovat modul? Budou odstraněna všechna data modulu.]]></confirmUninstall>
 </module>
