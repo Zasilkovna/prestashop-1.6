@@ -19,22 +19,23 @@ require_once('packetery.php');
 
 $context = Context::getContext();
 $cart = $context->cart;
-/** @var stdClass $pickupPoint */
-$pickupPoint = Tools::jsonDecode(Tools::getValue('pickup_point'));
+if (Tools::getIsset('pickup_point')) {
+    $pickupPoint = Tools::getValue('pickup_point');
+}
 
 if (!$cart || !$cart->id || !$pickupPoint) {
     return;
 }
 
 $packeteryOrderFields = [
-    'id_branch' => (int)$pickupPoint->id,
-    'name_branch' => pSQL($pickupPoint->name),
-    'currency_branch' => pSQL($pickupPoint->currency),
+    'id_branch' => (int)$pickupPoint['id'],
+    'name_branch' => pSQL($pickupPoint['name']),
+    'currency_branch' => pSQL($pickupPoint['currency']),
 ];
-if ($pickupPoint->pickupPointType == 'external') {
+if ($pickupPoint['pickupPointType'] == 'external') {
     $packeteryOrderFields['is_carrier'] = 1;
-    $packeteryOrderFields['id_branch'] = (int)$pickupPoint->carrierId;
-    $packeteryOrderFields['carrier_pickup_point'] = pSQL($pickupPoint->carrierPickupPointId);
+    $packeteryOrderFields['id_branch'] = (int)$pickupPoint['carrierId'];
+    $packeteryOrderFields['carrier_pickup_point'] = pSQL($pickupPoint['carrierPickupPointId']);
 }
 
 $db = Db::getInstance();
