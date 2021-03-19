@@ -19,6 +19,8 @@ require_once('packetery.php');
 
 $context = Context::getContext();
 $cart = $context->cart;
+
+$pickupPoint = null;
 if (Tools::getIsset('pickup_point')) {
     $pickupPoint = Tools::getValue('pickup_point');
 }

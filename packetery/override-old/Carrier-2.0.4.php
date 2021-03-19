@@ -1,5 +1,4 @@
 <?php
-
 class Carrier extends CarrierCore
 { // Open brace must be on separate line for the PrestaShop override composition to work.
     /* This function adds Packetery branch name to carrier name
@@ -7,7 +6,6 @@ class Carrier extends CarrierCore
     function __construct($id = null, $id_lang = null)
     {
         parent::__construct($id, $id_lang);
-
         $db = Db::getInstance();
         $context = Context::getContext();
         $controller = Tools::getValue('controller');
@@ -22,7 +20,7 @@ class Carrier extends CarrierCore
             $id_carrier = null;
             $id_cart = null;
         }
-        $is_packetery_carrier = ($db->getValue('SELECT 1 FROM `' . _DB_PREFIX_ . 'packetery_address_delivery` WHERE `id_carrier` = ' . ((int)$id_carrier)) == 1);
+        $is_packetery_carrier = ($db->getValue('select 1 from `' . _DB_PREFIX_ . 'packetery_carrier` where id_carrier=' . ((int)$id_carrier)) == 1);
         if ($is_packetery_carrier) {
             $selected_branch = $db->getValue('select name_branch from `' . _DB_PREFIX_ . 'packetery_order` where id_cart=' . ((int)$id_cart));
             if ($selected_branch) {
@@ -31,5 +29,4 @@ class Carrier extends CarrierCore
         }
     }
 }
-
 ?>

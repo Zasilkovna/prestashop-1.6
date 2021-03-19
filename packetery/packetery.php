@@ -220,7 +220,10 @@ class Packetery extends Module
             return false;
         }
 
-        return true;
+        $packetery = new Packetery();
+        $result = $packetery->removeOverrideV204();
+
+        return $result;
     }
 
     /**
@@ -876,7 +879,6 @@ END;
     }
 
     /**
-     * Can't be used in Carrier.php - class is not loaded
      * @param int $carrierId
      * @return bool
      */
@@ -960,4 +962,43 @@ END;
             }
         }
     }
+
+    /**
+     * removing Carrier override in module 2.0.4 does not work, this is a workaround
+     * @return bool
+     */
+    public function removeOverrideV204()
+    {
+        $backupOverridePath = $this->getLocalPath() . 'override-old/Carrier-2.0.4.php';
+        $originalOverridePath = $this->getLocalPath() . 'override/classes/Carrier.php';
+        $uninstallResult = true;
+        $copyResult = Tools::copy($backupOverridePath, $originalOverridePath);
+        if ($copyResult) {
+            $uninstallResult = $this->uninstallOverrides();
+            Tools::deleteFile($originalOverridePath);
+        }
+
+        // from Module->addOverride
+        $path = PrestaShopAutoload::getInstance()->getClassPath('CarrierCore');
+        if (!$path) {
+            $path = 'modules' . DIRECTORY_SEPARATOR . 'Carrier' . DIRECTORY_SEPARATOR . 'Carrier.php';
+        }
+        $override_path = _PS_ROOT_DIR_ . DIRECTORY_SEPARATOR . 'override' . DIRECTORY_SEPARATOR . $path;
+
+        if (is_file($override_path) && is_readable($override_path)) {
+            $overrideContents = file_get_contents($override_path);
+            if (strpos($overrideContents, '$is_packetery_carrier') !== false) {
+                $errorMessage = $this->l('Packetery module failed to uninstall version 2.0.4 override. You can find more information in module documentation.');
+
+                // this does not show up during upgrade
+                $this->_errors[] = Tools::displayError($errorMessage);
+
+                PrestaShopLogger::addLog($errorMessage, 4, null, null, null, true);
+                return false;
+            }
+        }
+
+        return $uninstallResult;
+    }
+
 }
