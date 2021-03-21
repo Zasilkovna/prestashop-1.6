@@ -38,6 +38,7 @@ class Packetery extends Module
             'Offers your customers the option to choose pick-up point in Packetery network,
             and export orders to Packetery system.'
         );
+        $this->confirmUninstall = $this->l('Are you sure you want to uninstall the module? All module data will be deleted.');
 
         $this->module_key = 'aa9b6f2b47192e6caae86b500177a861';
 
@@ -158,14 +159,6 @@ class Packetery extends Module
         $sql = array();
         $db = Db::getInstance();
 
-        // backup possible old order table
-        if (count($db->executeS('show tables like "' . _DB_PREFIX_ . 'packetery_order"')) > 0) {
-            $db->execute('rename table `' . _DB_PREFIX_ . 'packetery_order` to `' . _DB_PREFIX_ . 'packetery_order_old`');
-            $have_old_table = true;
-        } else {
-            $have_old_table = false;
-        }
-
         // create tables
         if (!defined('_MYSQL_ENGINE_')) {
             define('_MYSQL_ENGINE_', 'MyISAM');
@@ -175,19 +168,6 @@ class Packetery extends Module
             if (!$db->execute($s)) {
                 return false;
             }
-        }
-
-        // copy data from old order table
-        if ($have_old_table) {
-            $fields = array();
-            foreach ($db->executeS('show columns from `' . _DB_PREFIX_ . 'packetery_order_old`') as $field) {
-                $fields[] = $field['Field'];
-            }
-            $db->execute(
-                'insert into `' . _DB_PREFIX_ . 'packetery_order`(`' . implode('`, `', $fields) . '`)
-                select * from `' . _DB_PREFIX_ . 'packetery_order_old`'
-            );
-            $db->execute('drop table `' . _DB_PREFIX_ . 'packetery_order_old`');
         }
 
         // module itself and hooks
@@ -240,7 +220,10 @@ class Packetery extends Module
             return false;
         }
 
-        return true;
+        $packetery = new Packetery();
+        $result = $packetery->removeOverrideV204();
+
+        return $result;
     }
 
     /**
@@ -255,18 +238,19 @@ class Packetery extends Module
 
         // remove admin tab
         $db = Db::getInstance();
-        if ($tab_id = $db->getValue(
-            'select id_tab from `' . _DB_PREFIX_ . 'tab` where class_name="AdminOrderPacketery"'
-        )
-        ) {
-            $db->execute('delete from `' . _DB_PREFIX_ . 'tab` WHERE id_tab=' . $tab_id);
-            $db->execute('delete from `' . _DB_PREFIX_ . 'tab_lang` WHERE id_tab=' . $tab_id);
-            $db->execute('delete from `' . _DB_PREFIX_ . 'access` WHERE id_tab=' . $tab_id);
+        $tabId = $db->getValue(
+            'SELECT `id_tab` FROM `' . _DB_PREFIX_ . 'tab` WHERE `class_name` = "AdminOrderPacketery"'
+        );
+        if ($tabId) {
+            $db->execute('DELETE FROM `' . _DB_PREFIX_ . 'tab` WHERE `id_tab` = ' . $tabId);
+            $db->execute('DELETE FROM `' . _DB_PREFIX_ . 'tab_lang` WHERE `id_tab` = ' . $tabId);
+            $db->execute('DELETE FROM `' . _DB_PREFIX_ . 'access` WHERE `id_tab` = ' . $tabId);
         }
 
-        // remove our carrier and payment table, keep order table for reinstall
-        $db->execute('drop table if exists `' . _DB_PREFIX_ . 'packetery_payment`');
-        $db->execute('drop table if exists `' . _DB_PREFIX_ . 'packetery_address_delivery`');
+        // remove all module tables
+        $db->execute('DROP TABLE IF EXISTS `' . _DB_PREFIX_ . 'packetery_payment`');
+        $db->execute('DROP TABLE IF EXISTS `' . _DB_PREFIX_ . 'packetery_address_delivery`');
+        $db->execute('DROP TABLE IF EXISTS `' . _DB_PREFIX_ . 'packetery_order`');
 
         // module itself and hooks
         if (!parent::uninstall()
@@ -748,7 +732,7 @@ END;
     public function hookHeader($params)
     {
         return '
-        <script type="text/javascript" src="https://widget.packeta.com/www/js/library.js"></script>
+        <script type="text/javascript" src="https://widget.packeta.com/v6/www/js/library.js"></script>
         <script type="text/javascript" src="' . _MODULE_DIR_ . 'packetery/views/js/front.js?v=' . $this->version . '"></script>       
         <link rel="stylesheet" href="' . _MODULE_DIR_ . 'packetery/views/css/packetery.css?v=' . $this->version . '" />
         ';
@@ -895,7 +879,6 @@ END;
     }
 
     /**
-     * Can't be used in Carrier.php - class is not loaded
      * @param int $carrierId
      * @return bool
      */
@@ -979,4 +962,43 @@ END;
             }
         }
     }
+
+    /**
+     * removing Carrier override in module 2.0.4 does not work, this is a workaround
+     * @return bool
+     */
+    public function removeOverrideV204()
+    {
+        $backupOverridePath = $this->getLocalPath() . 'override-old/Carrier-2.0.4.php';
+        $originalOverridePath = $this->getLocalPath() . 'override/classes/Carrier.php';
+        $uninstallResult = true;
+        $copyResult = Tools::copy($backupOverridePath, $originalOverridePath);
+        if ($copyResult) {
+            $uninstallResult = $this->uninstallOverrides();
+            Tools::deleteFile($originalOverridePath);
+        }
+
+        // from Module->addOverride
+        $path = PrestaShopAutoload::getInstance()->getClassPath('CarrierCore');
+        if (!$path) {
+            $path = 'modules' . DIRECTORY_SEPARATOR . 'Carrier' . DIRECTORY_SEPARATOR . 'Carrier.php';
+        }
+        $override_path = _PS_ROOT_DIR_ . DIRECTORY_SEPARATOR . 'override' . DIRECTORY_SEPARATOR . $path;
+
+        if (is_file($override_path) && is_readable($override_path)) {
+            $overrideContents = file_get_contents($override_path);
+            if (strpos($overrideContents, '$is_packetery_carrier') !== false) {
+                $errorMessage = $this->l('Packetery module failed to uninstall version 2.0.4 override. You can find more information in module documentation.');
+
+                // this does not show up during upgrade
+                $this->_errors[] = Tools::displayError($errorMessage);
+
+                PrestaShopLogger::addLog($errorMessage, 4, null, null, null, true);
+                return false;
+            }
+        }
+
+        return $uninstallResult;
+    }
+
 }

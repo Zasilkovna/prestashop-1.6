@@ -3,7 +3,7 @@
 # Module for PrestaShop 1.6
 
 ### Download link
-[Download version 2.0.5](https://github.com/Zasilkovna/prestashop-1.6/releases/download/2.0.5/prestashop-1.6-modul-2.0.5.zip)
+[Download the latest version](https://github.com/Zasilkovna/prestashop-1.6/releases/latest)
 
 ## System requirements
 For installation of Prestashop 1.6.x there is required to install following components:
@@ -87,12 +87,13 @@ Each of the configuration blocks is saved with its own "Add" or "Save" button.
 
 ## Uninstalling the module
 - To uninstall, find the module in the menu *Modules and Services* - *Modules and Services* and choose *Uninstall*.
+- Attention, in case of uninstallation, all database tables created by the module will be deleted.
 - If you want to remove the module completely, choose *Remove*.
 
-### Reinstallation
-- If you decide to reinstall the module, you may encounter an error during the installation
-  "Unable to install override: The method __construct in the class Carrier is already overridden."
-- In this case, you need to delete two files: `/cache/class_index.php` and `/override/classes/Carrier.php` before installation.
+## Known isssues
+- If You have seen (or found in menu *Advanced Parameters* - *Logs*) the error: "Packetery module failed to uninstall
+  version 2.0.4 override.", You can solve it by deleting the files:
+  `/cache/class_index.php` and `/override/classes/Carrier.php`.
 
 ## Information about the module
 
@@ -118,7 +119,7 @@ Each of the configuration blocks is saved with its own "Add" or "Save" button.
 # Modul pro PrestaShop 1.6
 
 ### Stažení modulu
-[Aktuální verze 2.0.5 (Stáhnout »)](https://github.com/Zasilkovna/prestashop-1.6/releases/download/2.0.5/prestashop-1.6-modul-2.0.5.zip)
+[Aktuální verze (Stáhnout »)](https://github.com/Zasilkovna/prestashop-1.6/releases/latest)
 
 ## Systémové požadavky
 Pro instalaci Prestashop 1.6.x jsou vyžadovány následující komponenty:
@@ -198,12 +199,13 @@ Každý z bloků konfigurace se ukládá vlastním tlačítkem "Přidat", nebo "
 
 ## Odinstalace modulu
 - Odinstalování provedete po vyhledání modulu v menu *Moduly a služby* - *Moduly a služby* kliknutím na *Odinstalovat*.
+- Pozor, v případě odinstalace dojde k odstranění všech databázových tabulek vytvořených modulem.
 - Pokud chcete modul úplně odstranit, kliknete na *Odstranit*.
 
-### Opětovná instalace
-- Pokud se rozhodnete modul znovu instalovat, můžete se při instalaci setkat s chybou
-  "Nelze nainstalovat přepsání: Metoda __construct ve třídě Carrier je již přepsána."
-- V tomto případě je potřeba před instalací smazat dva soubory: `/cache/class_index.php` a `/override/classes/Carrier.php`.
+## Známé problémy
+- Pokud jste obrdželi nebo v logu (v menu *Nástroje* - *Logy*) nalezli chybu: "Modulu Zásilkovny se nepodařilo
+  odinstalovat přepsání z verze 2.0.4.", tak to vyřešíte smazáním souborů:
+  `/cache/class_index.php` a `/override/classes/Carrier.php`.
 
 ## Informace o modulu
 

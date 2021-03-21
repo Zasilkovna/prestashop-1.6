@@ -62,9 +62,7 @@ window.initializePacketaWidget = function () {
                     $.ajax({
                         url: module_dir + "packetery/ajax.php",
                         data: {
-                            id_branch: pickupPoint.id,
-                            name_branch: pickupPoint.name,
-                            currency_branch: pickupPoint.currency
+                            pickup_point: pickupPoint,
                         },
                         type: "POST",
                         complete: function () {

@@ -6,12 +6,18 @@ if (!defined('_PS_VERSION_')) {
 
 function upgrade_module_2_0_5($object)
 {
+    $packetery = new Packetery();
+    $result = $packetery->removeOverrideV204();
+    if ($result === false) {
+        return $result;
+    }
+
     $result = Db::getInstance()->execute('
         ALTER TABLE `' . _DB_PREFIX_ . 'packetery_address_delivery`
         CHANGE `id_branch` `id_branch` int(11) NULL,
         CHANGE `name_branch` `name_branch` varchar(255) NULL,
         CHANGE `currency_branch` `currency_branch` char(3) NULL,
-        ADD `is_pickup_point` tinyint(1) NOT NULL
+        ADD `is_pickup_point` tinyint(1) NOT NULL DEFAULT 0
     ');
     if ($result === false) {
         return $result;
@@ -38,7 +44,13 @@ function upgrade_module_2_0_5($object)
         Db::getInstance()->insert('packetery_address_delivery', $carriersToPair);
     }
 
-    $result = Db::getInstance()->execute('DROP TABLE IF EXISTS `' . _DB_PREFIX_ . 'packetery_carrier`');
+    $result = Db::getInstance()->execute('
+        DROP TABLE IF EXISTS `' . _DB_PREFIX_ . 'packetery_carrier`;
+        
+        ALTER TABLE `' . _DB_PREFIX_ . 'packetery_order`
+        ADD `is_carrier` tinyint(1) NOT NULL DEFAULT 0,
+        ADD `carrier_pickup_point` varchar(40) NULL;        
+    ');
 
     if ($result) {
         Configuration::deleteByName('PACKETERY_FORCED_COUNTRY');

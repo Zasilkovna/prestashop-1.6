@@ -86,20 +86,21 @@ class AdminOrderPacketery extends AdminTab
 
         /* Select data */
         $data = $db->executeS(
-            'select
-                o.id_order, a.firstname, a.lastname, a.phone, a.phone_mobile, c.email,
-                o.total_paid total, po.id_branch, po.is_cod, o.id_currency,
-                a.company, a.address1, a.address2, a.postcode, a.city
-            from
-                `' . _DB_PREFIX_ . 'orders` o
-                join `' . _DB_PREFIX_ . 'packetery_order` po on(po.id_order=o.id_order)
-                join `' . _DB_PREFIX_ . 'customer` c on(c.id_customer=o.id_customer)
-                join `' . _DB_PREFIX_ . 'address` a on(a.id_address=o.id_address_delivery)
-            where o.id_order in (' . pSQL(implode(',', $ids)) . ')'
+            'SELECT
+                `o`.`id_order`, `a`.`firstname`, `a`.`lastname`, `a`.`phone`, `a`.`phone_mobile`, `c`.`email`,
+                `o`.`total_paid` `total`, `po`.`id_branch`, `po`.`is_cod`, `o`.`id_currency`,
+                `a`.`company`, `a`.`address1`, `a`.`address2`, `a`.`postcode`, `a`.`city`,
+                `po`.`is_carrier`, `po`.`carrier_pickup_point`
+            FROM
+                `' . _DB_PREFIX_ . 'orders` `o`
+                JOIN `' . _DB_PREFIX_ . 'packetery_order` `po` ON (`po`.`id_order` = `o`.`id_order`)
+                JOIN `' . _DB_PREFIX_ . 'customer` `c` ON (`c`.`id_customer` = `o`.`id_customer`)
+                JOIN `' . _DB_PREFIX_ . 'address` `a` ON (`a`.`id_address` = `o`.`id_address_delivery`)
+            WHERE `o`.`id_order` IN (' . pSQL(implode(',', $ids)) . ')'
         );
 
         $cnb_rates = null;
-        echo "version 5;\r\n";
+        echo "version 6;\r\n";
         echo ";;;;;;;;;;;;;;;;;;;;;;;\r\n";
         foreach ($data as $order) {
             $phone = "";
@@ -136,7 +137,7 @@ class AdminOrderPacketery extends AdminTab
                 . $this->csvEscape(
                     $streetName
                 ) . '";' . $this->csvEscape($streetNumber) . ';"' . $this->csvEscape($order['city']) .
-                '";"' . $this->csvEscape($order['postcode']) . '";;;;;' . "\r\n";
+                '";"' . $this->csvEscape($order['postcode']) . '";' . $this->csvEscape($order['carrier_pickup_point']) . ';;;;' . "\r\n";
         }
         $db->execute(
             'update `' . _DB_PREFIX_ . 'packetery_order` set exported=1 where id_order in(' . implode(',', $ids) . ')'
