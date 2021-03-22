@@ -19,8 +19,15 @@ if (!defined('_PS_VERSION_')) {
 
 class Packetery extends Module
 {
+    const ID_PREF_ID = 1;
+    const ID_PREF_REF = 2;
     // only for mixing with branch ids
     const ZPOINT = 'zpoint';
+
+    private static $idPreferenceOptions = [
+        self::ID_PREF_ID => 'Order ID',
+        self::ID_PREF_REF => 'Order Reference',
+    ];
 
     public static $is_before_carrier = false;
 
@@ -232,7 +239,7 @@ class Packetery extends Module
      */
     public function uninstall()
     {
-        foreach (array('PACKETERY_API_KEY', 'PACKETERY_ESHOP_DOMAIN') as $key) {
+        foreach (array('PACKETERY_API_KEY', 'PACKETERY_ESHOP_DOMAIN', 'PACKETERY_ID_PREFERENCE') as $key) {
             Configuration::deleteByName($key);
         }
 
@@ -280,7 +287,8 @@ class Packetery extends Module
         // leave the function if nothing is set
         if (
             !Tools::getIsset('packetery_api_key') &&
-            !Tools::getIsset('packetery_eshop_domain')
+            !Tools::getIsset('packetery_eshop_domain') &&
+            !Tools::getIsset('packetery_id_preference')
         ) {
             return;
         }
@@ -296,6 +304,10 @@ class Packetery extends Module
         // save e-shop domain
         if (Tools::getIsset('packetery_eshop_domain') && Tools::getValue('packetery_eshop_domain')) {
             Configuration::updateValue('PACKETERY_ESHOP_DOMAIN', trim(Tools::getValue('packetery_eshop_domain')));
+        }
+
+        if (Tools::getIsset('packetery_id_preference') && Tools::getValue('packetery_id_preference')) {
+            Configuration::updateValue('PACKETERY_ID_PREFERENCE', trim(Tools::getValue('packetery_id_preference')));
         }
     }
 
@@ -320,6 +332,13 @@ class Packetery extends Module
             $this->l('If you\'re using one Packetery account for multiple e-shops, enter the domain of current one here, so that your customers are properly informed about what package they are receiving.')
             . "</p></div>";
         $html .= "<div class='clear'></div>";
+
+        $html .= "<label>" . $this->l('As the order ID, use') . ": </label>";
+        $html .= "<div class='margin-form'><select name='packetery_id_preference'>";
+        foreach (self::$idPreferenceOptions as $optionValue => $optionTitle) {
+            $html .= "<option value='$optionValue'" . (Configuration::get('PACKETERY_ID_PREFERENCE') == $optionValue ? ' selected' : '') . ">" . $this->l($optionTitle) . "</option>";
+        }
+        $html .= "</select></div><div class='clear'></div>";
 
         $html .= "<div class='margin-form'><input class='button' type='submit' value='" .
             htmlspecialchars($this->l('Save'), ENT_QUOTES) . "'  /></div>";

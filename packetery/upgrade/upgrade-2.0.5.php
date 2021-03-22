@@ -55,6 +55,7 @@ function upgrade_module_2_0_5($object)
     if ($result) {
         Configuration::deleteByName('PACKETERY_FORCED_COUNTRY');
         Configuration::deleteByName('PACKETERY_FORCED_LANG');
+        Configuration::updateValue('PACKETERY_ID_PREFERENCE', Packetery::ID_PREF_ID);
     }
 
     return $result;
