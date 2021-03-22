@@ -90,7 +90,7 @@ class AdminOrderPacketery extends AdminTab
                 `o`.`id_order`, `a`.`firstname`, `a`.`lastname`, `a`.`phone`, `a`.`phone_mobile`, `c`.`email`,
                 `o`.`total_paid` `total`, `po`.`id_branch`, `po`.`is_cod`, `o`.`id_currency`,
                 `a`.`company`, `a`.`address1`, `a`.`address2`, `a`.`postcode`, `a`.`city`,
-                `po`.`is_carrier`, `po`.`carrier_pickup_point`
+                `po`.`is_carrier`, `po`.`carrier_pickup_point`, `o`.`reference` 
             FROM
                 `' . _DB_PREFIX_ . 'orders` `o`
                 JOIN `' . _DB_PREFIX_ . 'packetery_order` `po` ON (`po`.`id_order` = `o`.`id_order`)
@@ -127,8 +127,8 @@ class AdminOrderPacketery extends AdminTab
 
             $cod_total = $total;
 
-            echo ';"' . $this->csvEscape($order['id_order']) . '";"' .
-                $this->csvEscape($order['firstname']) . '";"' . $this->csvEscape($order['lastname']) .
+            echo ';"' . $this->csvEscape(Packetery::ID_PREF_REF === Configuration::get('PACKETERY_ID_PREFERENCE') ? $order['reference'] : $order['id_order']) .
+                '";"' . $this->csvEscape($order['firstname']) . '";"' . $this->csvEscape($order['lastname']) .
                 '";"' . $this->csvEscape($order['company']) . '";"' . $this->csvEscape($order['email']) .
                 '";"' . $this->csvEscape($phone) . '";"' . ($order['is_cod'] == 1 ? $this->csvEscape($cod_total) : "0") . '";"' . $currency->iso_code .
                 '";"' . $this->csvEscape($total) . '";"' . $weight . '";"'
@@ -197,39 +197,48 @@ class AdminOrderPacketery extends AdminTab
 
         /* Table structure and headings */
         echo "<table id='packetery-order-export' class='table'>";
-        echo "<tr><th>" . $this->l('Ord.nr.') . "</th><th>" . $this->l('Customer') . "</th><th>" . $this->l('Total Price') .
-            "</th><th>" . $this->l('Order Date') . "</th><th>" . $this->l('Is COD') . "</th><th>" .
-            $this->l('Destination branch') . "</th><th>" . $this->l('Exported') . "</th></tr>";
+        echo "<tr>
+            <th>" . $this->l('Ord.nr.') . "</th>
+            <th>" . $this->l('Reference') . "</th>
+            <th>" . $this->l('Customer') . "</th>
+            <th>" . $this->l('Total Price') . "</th>
+            <th>" . $this->l('Order Date') . "</th>
+            <th>" . $this->l('Is COD') . "</th>
+            <th>" . $this->l('Destination branch') . "</th>
+            <th>" . $this->l('Exported') . "</th>
+        </tr>";
 
         /* Select data */
         $orders = $db->executeS(
-            'select
-            o.id_order,
-            o.id_currency,
-            o.id_lang,
-            concat(c.firstname, " ", c.lastname) customer,
-            o.total_paid total,
-            o.date_add date,
-            po.is_cod,
-            po.name_branch,
-            po.exported
-            ' . $sql_from . ' order by o.date_add desc limit ' . (($page - 1) * $per_page) . ',' . $per_page
+            'SELECT
+            `o`.`id_order`,
+            `o`.`reference`,
+            `o`.`id_currency`,
+            `o`.`id_lang`,
+            CONCAT(`c`.`firstname`, " ", `c`.`lastname`) AS `customer`,
+            `o`.`total_paid` AS `total`,
+            `o`.`date_add` AS `date`,
+            `po`.`is_cod`,
+            `po`.`name_branch`,
+            `po`.`exported`
+            ' . $sql_from . ' ORDER BY `o`.`date_add` DESC LIMIT ' . (($page - 1) * $per_page) . ',' . $per_page
         );
 
         /* Displaying itself */
         foreach ($orders as $order) {
-            echo "<tr" . ($order['exported'] == 1 ? " style='background-color: #ddd'" : '') .
-                "><td><input name='packetery_order_id[]' value='$order[id_order]' type='checkbox'>
-                $order[id_order]</td><td>$order[customer]</td><td align='right'>" .
-                Tools::displayPrice($order['total'], new Currency($order['id_currency'])) .
-                "</td><td>" . Tools::displayDate($order['date'], $order['id_lang'], true) .
-                "</td><td><select name='packetery_order_is_cod[$order[id_order]]'>";
-            echo "<option value='0'" . ($order['is_cod'] == 0 ? ' selected="selected"' : '') .
-                '>' . $this->l('No') . "</option>";
-            echo "<option value='1'" . ($order['is_cod'] == 1 ? ' selected="selected"' : '') .
-                '>' . $this->l('Yes') . "</option>";
-            echo "</td><td>$order[name_branch]</td><td>" .
-                ($order['exported'] == 1 ? $this->l('Yes') : $this->l('No')) . "</td></tr>";
+            echo "<tr" . ($order['exported'] == 1 ? " style='background-color: #ddd'" : '') . ">
+                <td><input name='packetery_order_id[]' value='{$order['id_order']}' type='checkbox'> {$order['id_order']}</td>
+                <td>{$order['reference']}</td>
+                <td>{$order['customer']}</td>
+                <td align='right'>" . Tools::displayPrice($order['total'], new Currency($order['id_currency'])) . "</td>
+                <td>" . Tools::displayDate($order['date'], $order['id_lang'], true) . "</td>
+                <td><select name='packetery_order_is_cod[{$order['id_order']}]'>
+                    <option value='0'" . ($order['is_cod'] == 0 ? ' selected="selected"' : '') . '>' . $this->l('No') . "</option>
+                    <option value='1'" . ($order['is_cod'] == 1 ? ' selected="selected"' : '') . '>' . $this->l('Yes') . "</option>
+                </select></td>
+                <td>{$order['name_branch']}</td><td>" .
+                ($order['exported'] == 1 ? $this->l('Yes') : $this->l('No')) . "</td>
+            </tr>";
         }
 
         echo "</table>";

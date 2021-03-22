@@ -6,6 +6,7 @@ $_MODULE['<{packetery}prestashop>adminorderpacketery_c7fe8bdfa8dd44d23d1a5be0fe5
 $_MODULE['<{packetery}prestashop>adminorderpacketery_312076c23d0bc7e315bba8511b1526d9'] = 'Seznam objednávek';
 $_MODULE['<{packetery}prestashop>adminorderpacketery_453aceb005ceaf54a47da15fee8b2a26'] = 'Stránky';
 $_MODULE['<{packetery}prestashop>adminorderpacketery_0b647f6df914903b01f2659f54d90474'] = 'Č.obj.';
+$_MODULE['<{packetery}prestashop>adminorderpacketery_63d5049791d9d79d86e9a108b0a999ca'] = 'Kód';
 $_MODULE['<{packetery}prestashop>adminorderpacketery_ce26601dac0dea138b7295f02b7620a7'] = 'Zákazník';
 $_MODULE['<{packetery}prestashop>adminorderpacketery_f3547ae5e06426d87312eff7dda775aa'] = 'Cena celkem';
 $_MODULE['<{packetery}prestashop>adminorderpacketery_6fbc355a02359656f1e4540d58b784e1'] = 'Datum objednávky';
@@ -16,6 +17,8 @@ $_MODULE['<{packetery}prestashop>adminorderpacketery_bafd7322c6e97d25b6299b5d6fe
 $_MODULE['<{packetery}prestashop>adminorderpacketery_93cba07454f06a4a960172bbd6e2a435'] = 'Ano';
 $_MODULE['<{packetery}prestashop>adminorderpacketery_008e7128fecada3769b949e6bd243197'] = 'Uložit nastavení dobírek a exportovat vybrané';
 $_MODULE['<{packetery}prestashop>adminorderpacketery_04e710221979de3023907bd772432102'] = 'Exportovaný soubor je možné nahrát v zákaznické sekci Zásilkovny, na stránce Importovat soubor zásilek.';
+$_MODULE['<{packetery}prestashop>packetery_d79cf3f429596f77db95c65074663a54'] = 'id objednávky';
+$_MODULE['<{packetery}prestashop>packetery_1e860e56970a81a1ba3e1fcb7fccc846'] = 'kód objednávky';
 $_MODULE['<{packetery}prestashop>packetery_6af8bc349b863f2c3fdeeea2496e6c72'] = 'Zásilkovna, s.r.o.';
 $_MODULE['<{packetery}prestashop>packetery_c4b0cd796c76b526201e7e4909fabde8'] = 'Zásilkovna';
 $_MODULE['<{packetery}prestashop>packetery_a198deb5663dd03a7a184b5c6aa57a1f'] = 'Opravdu chcete odinstalovat modul? Budou odstraněna všechna data modulu.';
@@ -26,6 +29,7 @@ $_MODULE['<{packetery}prestashop>packetery_0cc39f9a63392ad0ed1f9a14931938b6'] = 
 $_MODULE['<{packetery}prestashop>packetery_656a6828d7ef1bb791e42087c4b5ee6e'] = 'Klíč API';
 $_MODULE['<{packetery}prestashop>packetery_6ca3fca3e34e2f4aa426d7dc974f1b31'] = 'Označení odesílatele';
 $_MODULE['<{packetery}prestashop>packetery_5429125b5b5b2ea3251e799902a37a6a'] = 'Pokud používáte jeden účet Zásilkovny pro více e-shopů, vyplňte zde identifikátor současně používaného, aby Vaši zákazníci byli dostatečně informováni, jaká zásilka je jim doručována.';
+$_MODULE['<{packetery}prestashop>packetery_c07518b15fc1ccf70a90a96d7969b8c2'] = 'Jako číslo objednávky u zásilek uvádět';
 $_MODULE['<{packetery}prestashop>packetery_c9cc8cce247e49bae79f15173ce97354'] = 'Uložit';
 $_MODULE['<{packetery}prestashop>packetery_7798b7c45fa643a0169a3a9e8ba8a6f9'] = 'Je dobírka';
 $_MODULE['<{packetery}prestashop>packetery_004bf6c9a40003140292e97330236c53'] = 'Akce';

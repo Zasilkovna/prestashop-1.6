@@ -19,6 +19,8 @@ if (!defined('_PS_VERSION_')) {
 
 class Packetery extends Module
 {
+    const ID_PREF_ID = 'id';
+    const ID_PREF_REF = 'reference';
     // only for mixing with branch ids
     const ZPOINT = 'zpoint';
 
@@ -232,7 +234,12 @@ class Packetery extends Module
      */
     public function uninstall()
     {
-        foreach (array('PACKETERY_API_KEY', 'PACKETERY_ESHOP_DOMAIN') as $key) {
+        $configKeys = [
+            'PACKETERY_API_KEY',
+            'PACKETERY_ESHOP_DOMAIN',
+            'PACKETERY_ID_PREFERENCE',
+        ];
+        foreach ($configKeys as $key) {
             Configuration::deleteByName($key);
         }
 
@@ -280,23 +287,22 @@ class Packetery extends Module
         // leave the function if nothing is set
         if (
             !Tools::getIsset('packetery_api_key') &&
-            !Tools::getIsset('packetery_eshop_domain')
+            !Tools::getIsset('packetery_eshop_domain') &&
+            !Tools::getIsset('packetery_id_preference')
         ) {
             return;
         }
 
         // save API KEY if changed
-        if (Tools::getIsset('packetery_api_key') && Tools::getValue('packetery_api_key')) {
-            if (trim(Tools::getValue('packetery_api_key')) != Configuration::get('PACKETERY_API_KEY')) {
-                Configuration::updateValue('PACKETERY_API_KEY', trim(Tools::getValue('packetery_api_key')));
-                @clearstatcache();
-            }
+        if (trim(Tools::getValue('packetery_api_key')) != Configuration::get('PACKETERY_API_KEY')) {
+            Configuration::updateValue('PACKETERY_API_KEY', trim(Tools::getValue('packetery_api_key')));
+            @clearstatcache();
         }
 
         // save e-shop domain
-        if (Tools::getIsset('packetery_eshop_domain') && Tools::getValue('packetery_eshop_domain')) {
-            Configuration::updateValue('PACKETERY_ESHOP_DOMAIN', trim(Tools::getValue('packetery_eshop_domain')));
-        }
+        Configuration::updateValue('PACKETERY_ESHOP_DOMAIN', trim(Tools::getValue('packetery_eshop_domain')));
+
+        Configuration::updateValue('PACKETERY_ID_PREFERENCE', trim(Tools::getValue('packetery_id_preference')));
     }
 
     /**
@@ -320,6 +326,18 @@ class Packetery extends Module
             $this->l('If you\'re using one Packetery account for multiple e-shops, enter the domain of current one here, so that your customers are properly informed about what package they are receiving.')
             . "</p></div>";
         $html .= "<div class='clear'></div>";
+
+        $html .= "<label>" . $this->l('As the order ID, use') . ": </label>";
+        $html .= "<div class='margin-form'><select name='packetery_id_preference'>";
+        $idPreferenceOptions = [
+            self::ID_PREF_ID => $this->l('Order ID'),
+            self::ID_PREF_REF => $this->l('Order Reference'),
+        ];
+        foreach ($idPreferenceOptions as $optionValue => $optionTitle) {
+            $selected = (Configuration::get('PACKETERY_ID_PREFERENCE') === $optionValue ? 'selected' : '');
+            $html .= "<option value='$optionValue' $selected>" . $optionTitle . "</option>";
+        }
+        $html .= "</select></div><div class='clear'></div>";
 
         $html .= "<div class='margin-form'><input class='button' type='submit' value='" .
             htmlspecialchars($this->l('Save'), ENT_QUOTES) . "'  /></div>";
