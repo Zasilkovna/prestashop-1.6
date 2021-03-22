@@ -103,12 +103,6 @@ class AdminOrderPacketery extends AdminTab
         echo "version 6;\r\n";
         echo ";;;;;;;;;;;;;;;;;;;;;;;\r\n";
         foreach ($data as $order) {
-            if (Packetery::ID_PREF_REF == Configuration::get('PACKETERY_ID_PREFERENCE')) {
-                $orderId = $order['reference'];
-            } else {
-                $orderId = $order['id_order'];
-            }
-
             $phone = "";
             foreach (array(
                          'phone',
@@ -133,8 +127,8 @@ class AdminOrderPacketery extends AdminTab
 
             $cod_total = $total;
 
-            echo ';"' . $this->csvEscape($orderId) . '";"' .
-                $this->csvEscape($order['firstname']) . '";"' . $this->csvEscape($order['lastname']) .
+            echo ';"' . $this->csvEscape(Packetery::ID_PREF_REF === Configuration::get('PACKETERY_ID_PREFERENCE') ? $order['reference'] : $order['id_order']) .
+                '";"' . $this->csvEscape($order['firstname']) . '";"' . $this->csvEscape($order['lastname']) .
                 '";"' . $this->csvEscape($order['company']) . '";"' . $this->csvEscape($order['email']) .
                 '";"' . $this->csvEscape($phone) . '";"' . ($order['is_cod'] == 1 ? $this->csvEscape($cod_total) : "0") . '";"' . $currency->iso_code .
                 '";"' . $this->csvEscape($total) . '";"' . $weight . '";"'
@@ -205,7 +199,7 @@ class AdminOrderPacketery extends AdminTab
         echo "<table id='packetery-order-export' class='table'>";
         echo "<tr>
             <th>" . $this->l('Ord.nr.') . "</th>
-            <th>" . $this->l('Ord.ref.') . "</th>
+            <th>" . $this->l('Reference') . "</th>
             <th>" . $this->l('Customer') . "</th>
             <th>" . $this->l('Total Price') . "</th>
             <th>" . $this->l('Order Date') . "</th>
@@ -233,16 +227,16 @@ class AdminOrderPacketery extends AdminTab
         /* Displaying itself */
         foreach ($orders as $order) {
             echo "<tr" . ($order['exported'] == 1 ? " style='background-color: #ddd'" : '') . ">
-                <td><input name='packetery_order_id[]' value='" . $order['id_order'] . "' type='checkbox'> " . $order['id_order'] . "</td>
-                <td>" . $order['reference'] . "</td>
-                <td>" . $order['customer'] . "</td>
+                <td><input name='packetery_order_id[]' value='{$order['id_order']}' type='checkbox'> {$order['id_order']}</td>
+                <td>{$order['reference']}</td>
+                <td>{$order['customer']}</td>
                 <td align='right'>" . Tools::displayPrice($order['total'], new Currency($order['id_currency'])) . "</td>
                 <td>" . Tools::displayDate($order['date'], $order['id_lang'], true) . "</td>
-                <td><select name='packetery_order_is_cod[" . $order['id_order'] . "]'>
+                <td><select name='packetery_order_is_cod[{$order['id_order']}]'>
                     <option value='0'" . ($order['is_cod'] == 0 ? ' selected="selected"' : '') . '>' . $this->l('No') . "</option>
                     <option value='1'" . ($order['is_cod'] == 1 ? ' selected="selected"' : '') . '>' . $this->l('Yes') . "</option>
                 </select></td>
-                <td>" . $order['name_branch'] . "</td><td>" .
+                <td>{$order['name_branch']}</td><td>" .
                 ($order['exported'] == 1 ? $this->l('Yes') : $this->l('No')) . "</td>
             </tr>";
         }

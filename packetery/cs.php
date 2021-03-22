@@ -6,7 +6,7 @@ $_MODULE['<{packetery}prestashop>adminorderpacketery_c7fe8bdfa8dd44d23d1a5be0fe5
 $_MODULE['<{packetery}prestashop>adminorderpacketery_312076c23d0bc7e315bba8511b1526d9'] = 'Seznam objednávek';
 $_MODULE['<{packetery}prestashop>adminorderpacketery_453aceb005ceaf54a47da15fee8b2a26'] = 'Stránky';
 $_MODULE['<{packetery}prestashop>adminorderpacketery_0b647f6df914903b01f2659f54d90474'] = 'Č.obj.';
-$_MODULE['<{packetery}prestashop>adminorderpacketery_421721be414ebc33bd0fd03d0eb759d7'] = 'Kód obj.';
+$_MODULE['<{packetery}prestashop>adminorderpacketery_63d5049791d9d79d86e9a108b0a999ca'] = 'Kód';
 $_MODULE['<{packetery}prestashop>adminorderpacketery_ce26601dac0dea138b7295f02b7620a7'] = 'Zákazník';
 $_MODULE['<{packetery}prestashop>adminorderpacketery_f3547ae5e06426d87312eff7dda775aa'] = 'Cena celkem';
 $_MODULE['<{packetery}prestashop>adminorderpacketery_6fbc355a02359656f1e4540d58b784e1'] = 'Datum objednávky';
