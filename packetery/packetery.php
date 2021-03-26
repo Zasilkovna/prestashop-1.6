@@ -179,7 +179,7 @@ class Packetery extends Module
             || !$this->registerHook('newOrder')
             || !$this->registerHook('header')
             || !$this->registerHook('displayFooter')
-            || !$this->registerHook('adminOrder')
+            || !$this->registerHook('displayAdminOrderLeft')
         ) {
             return false;
         }
@@ -269,7 +269,7 @@ class Packetery extends Module
             || !$this->unregisterHook('displayFooter')
             || !$this->unregisterHook('processCarrier')
             || !$this->unregisterHook('orderDetailDisplayed')
-            || !$this->unregisterHook('adminOrder')
+            || !$this->unregisterHook('displayAdminOrderLeft')
             || !$this->unregisterHook('paymentTop')
             || !$this->unregisterHook('backOfficeTop')
         ) {
@@ -294,6 +294,7 @@ class Packetery extends Module
         }
 
         // save API KEY if changed
+        // TODO: validate
         if (trim(Tools::getValue('packetery_api_key')) != Configuration::get('PACKETERY_API_KEY')) {
             Configuration::updateValue('PACKETERY_API_KEY', trim(Tools::getValue('packetery_api_key')));
             @clearstatcache();
@@ -675,25 +676,51 @@ END;
         $db->update('packetery_order', $fieldsToUpdate, '`id_cart` = ' . ((int)$params['cart']->id));
     }
 
-    /**
-     * Output additional carrier info in admin order detail
-     * @param $params
-     * @return string
-     */
-    public function hookAdminOrder($params)
+    public function hookDisplayAdminOrderLeft($params)
     {
-        if (!($res = Db::getInstance()->getRow(
-            'SELECT o.name_branch FROM `' . _DB_PREFIX_ . 'packetery_order` o
-            WHERE o.id_order = ' . ((int)$params['id_order'])
-        ))
-        ) {
-            return "";
+        $packeteryOrder = Db::getInstance()->getRow(
+            'SELECT `po`.`is_carrier`, `po`.`name_branch`, `c`.`iso_code` AS `country`
+            FROM `' . _DB_PREFIX_ . 'packetery_order` `po`
+            JOIN `' . _DB_PREFIX_ . 'orders` `o` ON `o`.`id_order` = `po`.`id_order`
+            JOIN `' . _DB_PREFIX_ . 'address` `a` ON `a`.`id_address` = `o`.`id_address_delivery` 
+            JOIN `' . _DB_PREFIX_ . 'country` `c` ON `c`.`id_country` = `a`.`id_country`
+            WHERE `po`.`id_order` = ' . ((int)$params['id_order'])
+        );
+        if (!$packeteryOrder) {
+            return '';
+        }
+        $this->context->smarty->assign('branch_name', $packeteryOrder['name_branch']);
+        $this->context->smarty->assign('css_url', $this->getPathUri() . 'views/css/admin_order.css?v=' . $this->version);
+        if ((int)$packeteryOrder['is_carrier'] === 1) {
+            $this->context->smarty->assign('service_name', $this->l('Carrier'));
+        } else {
+            $this->context->smarty->assign('service_name', $this->l('Pickup point'));
+            $apiKey = Configuration::get('PACKETERY_API_KEY');
+            if ($apiKey) {
+                $this->context->smarty->assign('change_pickup_point', $this->l('Change pickup point'));
+                $this->context->smarty->assign('api_key', $apiKey);
+                $this->context->smarty->assign('module_version', $this->version);
+                $this->context->smarty->assign('country', strtolower($packeteryOrder['country']));
+                $this->context->smarty->assign('ajax_url', $this->getPathUri() . 'ajax_backoffice.php');
+                $this->context->smarty->assign('order_id', $params['id_order']);
+
+                $cookie = new Cookie('psAdmin', '', (int)Configuration::get('PS_COOKIE_LIFETIME_BO'));
+                $employee = new Employee((int)$cookie->id_employee);
+                if ($employee->id_lang) {
+                    $lang = $employee->id_lang;
+                } else {
+                    $lang = Configuration::get('PS_LANG_DEFAULT');
+                }
+                $this->context->smarty->assign('lang', Language::getIsoById($lang));
+            }
         }
 
-        return "<p>" . sprintf(
-                $this->l('Selected packetery branch: %s'),
-                "<strong>" . $res['name_branch'] . "</strong>"
-            ) . "</p>";
+        return $this->context->smarty->fetch($this->local_path . 'views/templates/admin/display_order_left.tpl');
+    }
+
+    public function hookDisplayAdminOrderContentShip($params)
+    {
+        return 'hookDisplayAdminOrderContentShip';
     }
 
     /**
@@ -1020,6 +1047,31 @@ END;
         }
 
         return $uninstallResult;
+    }
+
+    public static function adminOrderChangeBranch()
+    {
+        if (!Tools::getIsset('order_id') || !Tools::getIsset('pickup_point')) {
+            return false;
+        }
+
+        $orderId = (int)Tools::getValue('order_id');
+        $pickupPoint = Tools::getValue('pickup_point');
+        if (!$orderId || !$pickupPoint) {
+            return false;
+        }
+
+        $packeteryOrderFields = [
+            'id_branch' => (int)$pickupPoint['id'],
+            'name_branch' => pSQL($pickupPoint['name']),
+            'currency_branch' => pSQL($pickupPoint['currency']),
+        ];
+        if ($pickupPoint['pickupPointType'] == 'external') {
+            $packeteryOrderFields['is_carrier'] = 1;
+            $packeteryOrderFields['id_branch'] = (int)$pickupPoint['carrierId'];
+            $packeteryOrderFields['carrier_pickup_point'] = pSQL($pickupPoint['carrierPickupPointId']);
+        }
+        return Db::getInstance()->update('packetery_order', $packeteryOrderFields, '`id_order` = ' . $orderId);
     }
 
 }
