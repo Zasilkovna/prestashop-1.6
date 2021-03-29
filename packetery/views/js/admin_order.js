@@ -4,21 +4,16 @@ $(document).ready(function () {
     $('.open-packeta-widget').on('click', function () {
         Packeta.Widget.pick(changePickupPointData['api_key'], function (pickupPoint) {
             if (pickupPoint != null) {
-                $.ajax({
-                    url: changePickupPointData['ajax_url'],
-                    data: {
-                        action: 'adminOrderChangeBranch',
-                        order_id: changePickupPointData['order_id'],
-                        pickup_point: pickupPoint,
-                    },
-                    type: "POST",
-                    success() {
-                        $('.picked-delivery-place').text(pickupPoint.name);
-                    },
+                $.post(changePickupPointData['module_dir'] + 'packetery/ajax_backoffice.php', {
+                    action: 'adminOrderChangeBranch',
+                    order_id: changePickupPointData['order_id'],
+                    pickup_point: pickupPoint,
+                }).done(function () {
+                    $('.picked-delivery-place').text(pickupPoint.name);
                 });
             }
         }, {
-            appIdentity: 'prestashop-1.6-packeta-' + changePickupPointData['module_version'],
+            appIdentity: changePickupPointData['app_identity'],
             country: changePickupPointData['country'],
             language: changePickupPointData['lang']
         });

@@ -10,5 +10,5 @@ if (!$employee->isLoggedBack()) {
 }
 
 if (Tools::getValue('action') === 'adminOrderChangeBranch') {
-    return Packetery::adminOrderChangeBranch();
+    Packetery::adminOrderChangeBranch();
 }

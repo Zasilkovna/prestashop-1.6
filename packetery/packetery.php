@@ -21,6 +21,8 @@ class Packetery extends Module
 {
     const ID_PREF_ID = 'id';
     const ID_PREF_REF = 'reference';
+    const WIDGET_URL = 'https://widget.packeta.com/v6/www/js/library.js';
+    const APP_IDENTITY_PREFIX = 'prestashop-1.6-packeta-';
     // only for mixing with branch ids
     const ZPOINT = 'zpoint';
 
@@ -611,7 +613,7 @@ class Packetery extends Module
         $must_select_point_text = $this->l('You must select a pick-up point before continuing');
         $select_point_text = $this->l('Please select a pick-up point');
         $selected_point_text = $this->l('Selected pick-up point');
-        $module_version = $this->version;
+        $appIdentity = self::APP_IDENTITY_PREFIX . $this->version;
 
         $lang = strtolower($lang);
 
@@ -626,7 +628,7 @@ class Packetery extends Module
             var selected_text = "$selected_point_text"; 
             var select_text = "$select_point_text";
             var must_select_text = "$must_select_point_text";
-            var module_version = "$module_version";
+            var app_identity = "$appIdentity";
             
             $(function(){
                 $("input.delivery_option_radio").on('change', function(){
@@ -691,7 +693,7 @@ END;
         }
 
         $this->context->controller->addCSS($this->_path . 'views/css/admin_order.css');
-        $this->context->controller->addJS('https://widget.packeta.com/v6/www/js/library.js');
+        $this->context->controller->addJS(self::WIDGET_URL);
         $this->context->controller->addJS($this->_path . 'views/js/admin_order.js?v=' . $this->version);
 
         $this->context->smarty->assign('branch_name', $packeteryOrder['name_branch']);
@@ -711,9 +713,9 @@ END;
 
                 $changePickupPointData = [
                     'api_key' => $apiKey,
-                    'module_version' => $this->version,
+                    'app_identity' => self::APP_IDENTITY_PREFIX . $this->version,
                     'country' => strtolower($packeteryOrder['country']),
-                    'ajax_url' => $this->getPathUri() . 'ajax_backoffice.php',
+                    'module_dir' => _MODULE_DIR_,
                     'order_id' => $params['id_order'],
                     'lang' => Language::getIsoById($lang),
                 ];
@@ -722,12 +724,7 @@ END;
             }
         }
 
-        return $this->context->smarty->fetch($this->local_path . 'views/templates/admin/display_order_left.tpl');
-    }
-
-    public function hookDisplayAdminOrderContentShip($params)
-    {
-        return 'hookDisplayAdminOrderContentShip';
+        return $this->display(__FILE__, 'display_order_left.tpl');
     }
 
     /**
@@ -784,7 +781,7 @@ END;
     public function hookHeader($params)
     {
         return '
-        <script type="text/javascript" src="https://widget.packeta.com/v6/www/js/library.js"></script>
+        <script type="text/javascript" src="' . self::WIDGET_URL . '"></script>
         <script type="text/javascript" src="' . _MODULE_DIR_ . 'packetery/views/js/front.js?v=' . $this->version . '"></script>       
         <link rel="stylesheet" href="' . _MODULE_DIR_ . 'packetery/views/css/packetery.css?v=' . $this->version . '" />
         ';
@@ -1064,9 +1061,6 @@ END;
 
         $orderId = (int)Tools::getValue('order_id');
         $pickupPoint = Tools::getValue('pickup_point');
-        if (!$orderId || !$pickupPoint) {
-            return false;
-        }
 
         $packeteryOrderFields = [
             'id_branch' => (int)$pickupPoint['id'],
@@ -1078,7 +1072,7 @@ END;
             $packeteryOrderFields['id_branch'] = (int)$pickupPoint['carrierId'];
             $packeteryOrderFields['carrier_pickup_point'] = pSQL($pickupPoint['carrierPickupPointId']);
         }
-        return Db::getInstance()->update('packetery_order', $packeteryOrderFields, '`id_order` = ' . $orderId);
+        Db::getInstance()->update('packetery_order', $packeteryOrderFields, '`id_order` = ' . $orderId);
     }
 
 }

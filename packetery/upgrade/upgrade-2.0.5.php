@@ -12,6 +12,16 @@ function upgrade_module_2_0_5($object)
         return $result;
     }
 
+    $result = $packetery->unregisterHook('adminOrder');
+    if ($result === false) {
+        return $result;
+    }
+
+    $result = $packetery->registerHook('displayAdminOrderLeft');
+    if ($result === false) {
+        return $result;
+    }
+
     $result = Db::getInstance()->execute('
         ALTER TABLE `' . _DB_PREFIX_ . 'packetery_address_delivery`
         CHANGE `id_branch` `id_branch` int(11) NULL,
