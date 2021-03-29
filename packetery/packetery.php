@@ -689,21 +689,18 @@ END;
         if (!$packeteryOrder) {
             return '';
         }
+
+        $this->context->controller->addCSS($this->_path . 'views/css/admin_order.css');
+        $this->context->controller->addJS('https://widget.packeta.com/v6/www/js/library.js');
+        $this->context->controller->addJS($this->_path . 'views/js/admin_order.js?v=' . $this->version);
+
         $this->context->smarty->assign('branch_name', $packeteryOrder['name_branch']);
-        $this->context->smarty->assign('css_url', $this->getPathUri() . 'views/css/admin_order.css?v=' . $this->version);
         if ((int)$packeteryOrder['is_carrier'] === 1) {
             $this->context->smarty->assign('service_name', $this->l('Carrier'));
         } else {
             $this->context->smarty->assign('service_name', $this->l('Pickup point'));
             $apiKey = Configuration::get('PACKETERY_API_KEY');
             if ($apiKey) {
-                $this->context->smarty->assign('change_pickup_point', $this->l('Change pickup point'));
-                $this->context->smarty->assign('api_key', $apiKey);
-                $this->context->smarty->assign('module_version', $this->version);
-                $this->context->smarty->assign('country', strtolower($packeteryOrder['country']));
-                $this->context->smarty->assign('ajax_url', $this->getPathUri() . 'ajax_backoffice.php');
-                $this->context->smarty->assign('order_id', $params['id_order']);
-
                 $cookie = new Cookie('psAdmin', '', (int)Configuration::get('PS_COOKIE_LIFETIME_BO'));
                 $employee = new Employee((int)$cookie->id_employee);
                 if ($employee->id_lang) {
@@ -711,7 +708,17 @@ END;
                 } else {
                     $lang = Configuration::get('PS_LANG_DEFAULT');
                 }
-                $this->context->smarty->assign('lang', Language::getIsoById($lang));
+
+                $changePickupPointData = [
+                    'api_key' => $apiKey,
+                    'module_version' => $this->version,
+                    'country' => strtolower($packeteryOrder['country']),
+                    'ajax_url' => $this->getPathUri() . 'ajax_backoffice.php',
+                    'order_id' => $params['id_order'],
+                    'lang' => Language::getIsoById($lang),
+                ];
+                $this->context->smarty->assign('change_pickup_point', $this->l('Change pickup point'));
+                $this->context->smarty->assign('change_pickup_point_data', rawurlencode(json_encode($changePickupPointData)));
             }
         }
 
