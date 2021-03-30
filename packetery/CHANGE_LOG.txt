@@ -5,3 +5,4 @@
       - Added: Widget v6 support.
       - Updated: In case of uninstallation, all database tables created by the module will be deleted.
       - Added: possibility of using either ID or Reference as order ID in export
+      - Updated: CSV export version upgraded to version 6
