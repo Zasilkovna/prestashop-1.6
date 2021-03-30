@@ -826,6 +826,9 @@ END;
         );
 
         foreach ($files as $local => $remote) {
+            if (file_exists($local) && filesize($local) === 0) {
+                unlink($local);
+            }
             if (date("d.m.Y", @filemtime($local)) != date("d.m.Y") && (!file_exists($local) || date("H") >= 1)) {
                 if ($this->configuration_errors()) {
                     if (file_exists($local)) {
@@ -912,7 +915,7 @@ END;
     {
         $res = array();
         $fn = _PS_MODULE_DIR_ . "packetery/address-delivery.xml";
-        if (function_exists("simplexml_load_file") && file_exists($fn)) {
+        if (function_exists("simplexml_load_file") && file_exists($fn) && filesize($fn) !== 0) {
             $xml = simplexml_load_file($fn);
             foreach ($xml->carriers->carrier as $branch) {
                 $res[(string)$branch->id] = (object)array(
@@ -992,7 +995,7 @@ END;
         $uninstallResult = true;
         $copyResult = Tools::copy($backupOverridePath, $originalOverridePath);
         if ($copyResult) {
-            $uninstallResult = $this->uninstallOverrides();
+            $uninstallResult = (bool)$this->uninstallOverrides();
             Tools::deleteFile($originalOverridePath);
         }
 
