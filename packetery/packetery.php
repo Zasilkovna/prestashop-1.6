@@ -697,9 +697,10 @@ END;
         $this->context->controller->addJS(self::WIDGET_URL);
         $this->context->controller->addJS($this->_path . 'views/js/admin_order.js?v=' . $this->version);
 
-        $this->context->smarty->assign('isCarrier', (bool)$packeteryOrder['is_carrier']);
+        $isCarrier = (bool)$packeteryOrder['is_carrier'];
+        $this->context->smarty->assign('isCarrier', $isCarrier);
         $this->context->smarty->assign('branchName', $packeteryOrder['name_branch']);
-        if ((int)$packeteryOrder['is_carrier'] === 0) {
+        if (!$isCarrier) {
             $employee = Context::getContext()->employee;
             $widgetOptions = [
                 'api_key' => $apiKey,
