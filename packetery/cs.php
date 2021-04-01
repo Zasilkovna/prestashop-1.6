@@ -56,4 +56,4 @@ $_MODULE['<{packetery}prestashop>packetery_ee5c5839980b47f1893220655a3de0fb'] = 
 $_MODULE['<{packetery}prestashop>packetery_128ca07a3ac6521356117915e983660d'] = 'Změnit výdejní místo';
 $_MODULE['<{packetery}prestashop>packetery_cca53b804cfed4f8e0d8a3227211fa75'] = 'Vybrané výdejní místo: %s';
 $_MODULE['<{packetery}prestashop>packetery_f0ccf2f719efbc8293a4d42f4261692c'] = 'Modulu Zásilkovny se nepodařilo odinstalovat přepsání z verze 2.0.4. Více informací naleznete v dokumentaci modulu.';
-$_MODULE['<{packetery}default-bootstrap>display_order_left_4a93d9164aad959a6abc2de389170ac9'] = 'Zásilkovna';
+$_MODULE['<{packetery}prestashop>display_order_left_4a93d9164aad959a6abc2de389170ac9'] = 'Zásilkovna';
