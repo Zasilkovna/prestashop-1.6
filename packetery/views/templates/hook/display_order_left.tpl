@@ -1,6 +1,6 @@
 <div class="panel">
     <div class="panel-heading">
-        <i class="icon-dropbox"></i> {l s='Packetery'}
+        <i class="icon-dropbox"></i> {l s='Packeta' mod='packetery'}
     </div>
     <div>
         <p>{$service_name}: <strong class="picked-delivery-place">{$branch_name}</strong></p>

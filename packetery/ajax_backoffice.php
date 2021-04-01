@@ -1,12 +1,15 @@
 <?php
+
+if (!defined('_PS_ADMIN_DIR_')) {
+    define('_PS_ADMIN_DIR_', getcwd());
+}
+
 require_once('../../config/config.inc.php');
-require_once('../../init.php');
 require_once('packetery.php');
 
-$cookie = new Cookie('psAdmin', '', (int)Configuration::get('PS_COOKIE_LIFETIME_BO'));
-$employee = new Employee((int)$cookie->id_employee);
-if (!$employee->isLoggedBack()) {
-    return false;
+if (!Context::getContext()->employee->isLoggedBack()) {
+    $packetery = new Packetery();
+    exit(json_encode(['error' => $packetery->l('Please log in to the administration again.')]));
 }
 
 if (Tools::getValue('action') === 'adminOrderChangeBranch') {

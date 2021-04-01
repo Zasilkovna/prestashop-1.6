@@ -680,6 +680,7 @@ END;
 
     public function hookDisplayAdminOrderLeft($params)
     {
+        $apiKey = Configuration::get('PACKETERY_API_KEY');
         $packeteryOrder = Db::getInstance()->getRow(
             'SELECT `po`.`is_carrier`, `po`.`name_branch`, `c`.`iso_code` AS `country`
             FROM `' . _DB_PREFIX_ . 'packetery_order` `po`
@@ -688,42 +689,29 @@ END;
             JOIN `' . _DB_PREFIX_ . 'country` `c` ON `c`.`id_country` = `a`.`id_country`
             WHERE `po`.`id_order` = ' . ((int)$params['id_order'])
         );
-        if (!$packeteryOrder) {
-            return '';
+        if (!$apiKey || !$packeteryOrder) {
+            return;
         }
 
-        $this->context->controller->addCSS($this->_path . 'views/css/admin_order.css');
+        $this->context->controller->addCSS($this->_path . 'views/css/admin_order.css?v=' . $this->version, 'all', null, false);
         $this->context->controller->addJS(self::WIDGET_URL);
         $this->context->controller->addJS($this->_path . 'views/js/admin_order.js?v=' . $this->version);
 
         $this->context->smarty->assign('branch_name', $packeteryOrder['name_branch']);
-        if ((int)$packeteryOrder['is_carrier'] === 1) {
-            $this->context->smarty->assign('service_name', $this->l('Carrier'));
-        } else {
-            $this->context->smarty->assign('service_name', $this->l('Pickup point'));
-            $apiKey = Configuration::get('PACKETERY_API_KEY');
-            if ($apiKey) {
-                $cookie = new Cookie('psAdmin', '', (int)Configuration::get('PS_COOKIE_LIFETIME_BO'));
-                $employee = new Employee((int)$cookie->id_employee);
-                if ($employee->id_lang) {
-                    $lang = $employee->id_lang;
-                } else {
-                    $lang = Configuration::get('PS_LANG_DEFAULT');
-                }
-
-                $changePickupPointData = [
-                    'api_key' => $apiKey,
-                    'app_identity' => self::APP_IDENTITY_PREFIX . $this->version,
-                    'country' => strtolower($packeteryOrder['country']),
-                    'module_dir' => _MODULE_DIR_,
-                    'order_id' => $params['id_order'],
-                    'lang' => Language::getIsoById($lang),
-                ];
-                $this->context->smarty->assign('change_pickup_point', $this->l('Change pickup point'));
-                $this->context->smarty->assign('change_pickup_point_data', rawurlencode(json_encode($changePickupPointData)));
-            }
+        if ((int)$packeteryOrder['is_carrier'] === 0) {
+            $employee = Context::getContext()->employee;
+            $changePickupPointData = [
+                'api_key' => $apiKey,
+                'app_identity' => self::APP_IDENTITY_PREFIX . $this->version,
+                'country' => strtolower($packeteryOrder['country']),
+                'module_dir' => _MODULE_DIR_,
+                'order_id' => $params['id_order'],
+                'lang' => Language::getIsoById($employee->id_lang ? $employee->id_lang : Configuration::get('PS_LANG_DEFAULT')),
+            ];
+            $this->context->smarty->assign('change_pickup_point', $this->l('Change pickup point'));
+            $this->context->smarty->assign('change_pickup_point_data', rawurlencode(json_encode($changePickupPointData)));
         }
-
+        $this->context->smarty->assign('service_name', ((int)$packeteryOrder['is_carrier'] === 0 ? $this->l('Pickup point') : $this->l('Carrier')));
         return $this->display(__FILE__, 'display_order_left.tpl');
     }
 
@@ -1073,6 +1061,8 @@ END;
             $packeteryOrderFields['carrier_pickup_point'] = pSQL($pickupPoint['carrierPickupPointId']);
         }
         Db::getInstance()->update('packetery_order', $packeteryOrderFields, '`id_order` = ' . $orderId);
+
+        echo json_encode(['result' => 'ok']);
     }
 
 }

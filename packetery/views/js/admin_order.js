@@ -8,8 +8,13 @@ $(document).ready(function () {
                     action: 'adminOrderChangeBranch',
                     order_id: changePickupPointData['order_id'],
                     pickup_point: pickupPoint,
-                }).done(function () {
-                    $('.picked-delivery-place').text(pickupPoint.name);
+                }).done(function (data) {
+                    var ajaxResult = JSON.parse(data);
+                    if (ajaxResult['error']) {
+                        $('<br><br><div class="alert alert-danger">' + ajaxResult['error'] + '</div>').insertAfter('.open-packeta-widget');
+                    } else {
+                        $('.picked-delivery-place').text(pickupPoint.name);
+                    }
                 });
             }
         }, {

@@ -7,19 +7,12 @@ if (!defined('_PS_VERSION_')) {
 function upgrade_module_2_0_5($object)
 {
     $packetery = new Packetery();
-    $result = $packetery->removeOverrideV204();
-    if ($result === false) {
-        return $result;
-    }
-
-    $result = $packetery->unregisterHook('adminOrder');
-    if ($result === false) {
-        return $result;
-    }
-
-    $result = $packetery->registerHook('displayAdminOrderLeft');
-    if ($result === false) {
-        return $result;
+    if (
+        !$packetery->removeOverrideV204() ||
+        !$packetery->unregisterHook('adminOrder') ||
+        !$packetery->registerHook('displayAdminOrderLeft')
+    ) {
+        return false;
     }
 
     $result = Db::getInstance()->execute('
