@@ -17,6 +17,7 @@ $_MODULE['<{packetery}prestashop>adminorderpacketery_bafd7322c6e97d25b6299b5d6fe
 $_MODULE['<{packetery}prestashop>adminorderpacketery_93cba07454f06a4a960172bbd6e2a435'] = 'Áno';
 $_MODULE['<{packetery}prestashop>adminorderpacketery_008e7128fecada3769b949e6bd243197'] = 'Uložiť nastavenie dobierok a exportovať vybrané';
 $_MODULE['<{packetery}prestashop>adminorderpacketery_04e710221979de3023907bd772432102'] = 'Exportovaný súbor môžete nahrať v klientskej oblasti webu Zásielkovňa, pod Podať zásielku, v časti Hromadné podanie – CSV.';
+$_MODULE['<{packetery}prestashop>ajax_backoffice_1c01e109818be1612f087bf808d99f71'] = 'Přihlaste se prosím znovu do administrace.';
 $_MODULE['<{packetery}prestashop>packetery_d79cf3f429596f77db95c65074663a54'] = 'id objednávky';
 $_MODULE['<{packetery}prestashop>packetery_1e860e56970a81a1ba3e1fcb7fccc846'] = 'kód objednávky';
 $_MODULE['<{packetery}prestashop>packetery_6af8bc349b863f2c3fdeeea2496e6c72'] = 'Zásilkovna, s.r.o.';
@@ -53,3 +54,7 @@ $_MODULE['<{packetery}prestashop>packetery_8b63916801419ebfdcb2ccf6e03be614'] = 
 $_MODULE['<{packetery}prestashop>packetery_1af83fd0a1fe0ab2cd96e07e4ed939b7'] = 'Místo odběru';
 $_MODULE['<{packetery}prestashop>packetery_cca53b804cfed4f8e0d8a3227211fa75'] = 'Vybrané miesto osobného odberu Zásielkovňa: %s';
 $_MODULE['<{packetery}prestashop>packetery_f0ccf2f719efbc8293a4d42f4261692c'] = 'Modulu Zásilkovny se nepodařilo odinstalovat přepsání z verze 2.0.4. Více informací naleznete v dokumentaci modulu.';
+$_MODULE['<{packetery}prestashop>display_order_left_4a93d9164aad959a6abc2de389170ac9'] = 'Zásilkovna';
+$_MODULE['<{packetery}prestashop>display_order_left_914419aa32f04011357d3b604a86d7eb'] = 'Dopravce';
+$_MODULE['<{packetery}prestashop>display_order_left_ee5c5839980b47f1893220655a3de0fb'] = 'Výdejní místo';
+$_MODULE['<{packetery}prestashop>display_order_left_128ca07a3ac6521356117915e983660d'] = 'Změnit výdejní místo';

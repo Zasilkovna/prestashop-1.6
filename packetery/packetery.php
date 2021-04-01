@@ -21,6 +21,8 @@ class Packetery extends Module
 {
     const ID_PREF_ID = 'id';
     const ID_PREF_REF = 'reference';
+    const WIDGET_URL = 'https://widget.packeta.com/v6/www/js/library.js';
+    const APP_IDENTITY_PREFIX = 'prestashop-1.6-packeta-';
     // only for mixing with branch ids
     const ZPOINT = 'zpoint';
 
@@ -179,7 +181,7 @@ class Packetery extends Module
             || !$this->registerHook('newOrder')
             || !$this->registerHook('header')
             || !$this->registerHook('displayFooter')
-            || !$this->registerHook('adminOrder')
+            || !$this->registerHook('displayAdminOrderLeft')
         ) {
             return false;
         }
@@ -269,7 +271,7 @@ class Packetery extends Module
             || !$this->unregisterHook('displayFooter')
             || !$this->unregisterHook('processCarrier')
             || !$this->unregisterHook('orderDetailDisplayed')
-            || !$this->unregisterHook('adminOrder')
+            || !$this->unregisterHook('displayAdminOrderLeft')
             || !$this->unregisterHook('paymentTop')
             || !$this->unregisterHook('backOfficeTop')
         ) {
@@ -294,6 +296,7 @@ class Packetery extends Module
         }
 
         // save API KEY if changed
+        // TODO: validate
         if (trim(Tools::getValue('packetery_api_key')) != Configuration::get('PACKETERY_API_KEY')) {
             Configuration::updateValue('PACKETERY_API_KEY', trim(Tools::getValue('packetery_api_key')));
             @clearstatcache();
@@ -610,7 +613,7 @@ class Packetery extends Module
         $must_select_point_text = $this->l('You must select a pick-up point before continuing');
         $select_point_text = $this->l('Please select a pick-up point');
         $selected_point_text = $this->l('Selected pick-up point');
-        $module_version = $this->version;
+        $appIdentity = self::APP_IDENTITY_PREFIX . $this->version;
 
         $lang = strtolower($lang);
 
@@ -625,7 +628,7 @@ class Packetery extends Module
             var selected_text = "$selected_point_text"; 
             var select_text = "$select_point_text";
             var must_select_text = "$must_select_point_text";
-            var module_version = "$module_version";
+            var app_identity = "$appIdentity";
             
             $(function(){
                 $("input.delivery_option_radio").on('change', function(){
@@ -675,25 +678,41 @@ END;
         $db->update('packetery_order', $fieldsToUpdate, '`id_cart` = ' . ((int)$params['cart']->id));
     }
 
-    /**
-     * Output additional carrier info in admin order detail
-     * @param $params
-     * @return string
-     */
-    public function hookAdminOrder($params)
+    public function hookDisplayAdminOrderLeft($params)
     {
-        if (!($res = Db::getInstance()->getRow(
-            'SELECT o.name_branch FROM `' . _DB_PREFIX_ . 'packetery_order` o
-            WHERE o.id_order = ' . ((int)$params['id_order'])
-        ))
-        ) {
-            return "";
+        $apiKey = Configuration::get('PACKETERY_API_KEY');
+        $packeteryOrder = Db::getInstance()->getRow(
+            'SELECT `po`.`is_carrier`, `po`.`name_branch`, `c`.`iso_code` AS `country`
+            FROM `' . _DB_PREFIX_ . 'packetery_order` `po`
+            JOIN `' . _DB_PREFIX_ . 'orders` `o` ON `o`.`id_order` = `po`.`id_order`
+            JOIN `' . _DB_PREFIX_ . 'address` `a` ON `a`.`id_address` = `o`.`id_address_delivery` 
+            JOIN `' . _DB_PREFIX_ . 'country` `c` ON `c`.`id_country` = `a`.`id_country`
+            WHERE `po`.`id_order` = ' . ((int)$params['id_order'])
+        );
+        if (!$apiKey || !$packeteryOrder) {
+            return;
         }
 
-        return "<p>" . sprintf(
-                $this->l('Selected packetery branch: %s'),
-                "<strong>" . $res['name_branch'] . "</strong>"
-            ) . "</p>";
+        $this->context->controller->addCSS($this->_path . 'views/css/admin_order.css?v=' . $this->version, 'all', null, false);
+        $this->context->controller->addJS(self::WIDGET_URL);
+        $this->context->controller->addJS($this->_path . 'views/js/admin_order.js?v=' . $this->version);
+
+        $isCarrier = (bool)$packeteryOrder['is_carrier'];
+        $this->context->smarty->assign('isCarrier', $isCarrier);
+        $this->context->smarty->assign('branchName', $packeteryOrder['name_branch']);
+        if (!$isCarrier) {
+            $employee = Context::getContext()->employee;
+            $widgetOptions = [
+                'api_key' => $apiKey,
+                'app_identity' => self::APP_IDENTITY_PREFIX . $this->version,
+                'country' => strtolower($packeteryOrder['country']),
+                'module_dir' => _MODULE_DIR_,
+                'order_id' => $params['id_order'],
+                'lang' => Language::getIsoById($employee ? $employee->id_lang : Configuration::get('PS_LANG_DEFAULT')),
+            ];
+            $this->context->smarty->assign('widgetOptions', $widgetOptions);
+        }
+        return $this->display(__FILE__, 'display_order_left.tpl');
     }
 
     /**
@@ -750,7 +769,7 @@ END;
     public function hookHeader($params)
     {
         return '
-        <script type="text/javascript" src="https://widget.packeta.com/v6/www/js/library.js"></script>
+        <script type="text/javascript" src="' . self::WIDGET_URL . '"></script>
         <script type="text/javascript" src="' . _MODULE_DIR_ . 'packetery/views/js/front.js?v=' . $this->version . '"></script>       
         <link rel="stylesheet" href="' . _MODULE_DIR_ . 'packetery/views/css/packetery.css?v=' . $this->version . '" />
         ';
@@ -1020,6 +1039,30 @@ END;
         }
 
         return $uninstallResult;
+    }
+
+    public static function adminOrderChangeBranch()
+    {
+        if (!Tools::getIsset('order_id') || !Tools::getIsset('pickup_point')) {
+            return false;
+        }
+
+        $orderId = (int)Tools::getValue('order_id');
+        $pickupPoint = Tools::getValue('pickup_point');
+
+        $packeteryOrderFields = [
+            'id_branch' => (int)$pickupPoint['id'],
+            'name_branch' => pSQL($pickupPoint['name']),
+            'currency_branch' => pSQL($pickupPoint['currency']),
+        ];
+        if ($pickupPoint['pickupPointType'] == 'external') {
+            $packeteryOrderFields['is_carrier'] = 1;
+            $packeteryOrderFields['id_branch'] = (int)$pickupPoint['carrierId'];
+            $packeteryOrderFields['carrier_pickup_point'] = pSQL($pickupPoint['carrierPickupPointId']);
+        }
+        Db::getInstance()->update('packetery_order', $packeteryOrderFields, '`id_order` = ' . $orderId);
+
+        echo json_encode(['result' => 'ok']);
     }
 
 }

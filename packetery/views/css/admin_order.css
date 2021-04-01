@@ -1,0 +1,19 @@
+
+.bootstrap a.open-packeta-widget {
+    color: #fff;
+    background-color: #46a74e;
+    border: 1px solid #3e9546;
+    text-decoration: none;
+    display: inline-block;
+    padding: 6px 12px;
+    font-size: 13px;
+}
+
+.bootstrap a.open-packeta-widget:hover, .bootstrap a.open-packeta-widget:focus {
+    background-color: #3a8a41;
+    border-color: #2c6a31;
+}
+
+.packetery-error {
+    display: none;
+}
