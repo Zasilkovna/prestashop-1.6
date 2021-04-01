@@ -13,3 +13,7 @@
     background-color: #3a8a41;
     border-color: #2c6a31;
 }
+
+.packetery-error {
+    display: none;
+}

@@ -697,21 +697,20 @@ END;
         $this->context->controller->addJS(self::WIDGET_URL);
         $this->context->controller->addJS($this->_path . 'views/js/admin_order.js?v=' . $this->version);
 
-        $this->context->smarty->assign('branch_name', $packeteryOrder['name_branch']);
+        $this->context->smarty->assign('isCarrier', (bool)$packeteryOrder['is_carrier']);
+        $this->context->smarty->assign('branchName', $packeteryOrder['name_branch']);
         if ((int)$packeteryOrder['is_carrier'] === 0) {
             $employee = Context::getContext()->employee;
-            $changePickupPointData = [
+            $widgetOptions = [
                 'api_key' => $apiKey,
                 'app_identity' => self::APP_IDENTITY_PREFIX . $this->version,
                 'country' => strtolower($packeteryOrder['country']),
                 'module_dir' => _MODULE_DIR_,
                 'order_id' => $params['id_order'],
-                'lang' => Language::getIsoById($employee->id_lang ? $employee->id_lang : Configuration::get('PS_LANG_DEFAULT')),
+                'lang' => Language::getIsoById($employee ? $employee->id_lang : Configuration::get('PS_LANG_DEFAULT')),
             ];
-            $this->context->smarty->assign('change_pickup_point', $this->l('Change pickup point'));
-            $this->context->smarty->assign('change_pickup_point_data', rawurlencode(json_encode($changePickupPointData)));
+            $this->context->smarty->assign('widgetOptions', $widgetOptions);
         }
-        $this->context->smarty->assign('service_name', ((int)$packeteryOrder['is_carrier'] === 0 ? $this->l('Pickup point') : $this->l('Carrier')));
         return $this->display(__FILE__, 'display_order_left.tpl');
     }
 

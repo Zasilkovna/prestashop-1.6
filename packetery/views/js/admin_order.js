@@ -1,26 +1,24 @@
 $(document).ready(function () {
-    var changePickupPointData = JSON.parse(decodeURIComponent($('input[name="change_pickup_point_data"]').val()));
+    var widgetOptions = $('.open-packeta-widget').data('widget-options');
 
-    $('.open-packeta-widget').on('click', function () {
-        Packeta.Widget.pick(changePickupPointData['api_key'], function (pickupPoint) {
+    $('.open-packeta-widget').on('click', function (event) {
+        event.preventDefault();
+        Packeta.Widget.pick(widgetOptions['api_key'], function (pickupPoint) {
             if (pickupPoint != null) {
-                $.post(changePickupPointData['module_dir'] + 'packetery/ajax_backoffice.php', {
+                $.post(widgetOptions['module_dir'] + 'packetery/ajax_backoffice.php', {
                     action: 'adminOrderChangeBranch',
-                    order_id: changePickupPointData['order_id'],
+                    order_id: widgetOptions['order_id'],
                     pickup_point: pickupPoint,
-                }).done(function (data) {
-                    var ajaxResult = JSON.parse(data);
-                    if (ajaxResult['error']) {
-                        $('<br><br><div class="alert alert-danger">' + ajaxResult['error'] + '</div>').insertAfter('.open-packeta-widget');
-                    } else {
-                        $('.picked-delivery-place').text(pickupPoint.name);
-                    }
+                }, 'json').done(function (data) {
+                    $('.picked-delivery-place').text(pickupPoint.name);
+                }).fail(function (data) {
+                    $('.packetery-error').text(JSON.parse(data.responseText).error).slideDown();
                 });
             }
         }, {
-            appIdentity: changePickupPointData['app_identity'],
-            country: changePickupPointData['country'],
-            language: changePickupPointData['lang']
+            appIdentity: widgetOptions['app_identity'],
+            country: widgetOptions['country'],
+            language: widgetOptions['lang']
         });
     });
 });

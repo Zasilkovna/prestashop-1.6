@@ -9,7 +9,9 @@ require_once('packetery.php');
 
 if (!Context::getContext()->employee->isLoggedBack()) {
     $packetery = new Packetery();
-    exit(json_encode(['error' => $packetery->l('Please log in to the administration again.')]));
+    header($_SERVER['SERVER_PROTOCOL'] . ' 403 Forbidden');
+    echo json_encode(['error' => $packetery->l('Please log in to the administration again.')]);
+    exit;
 }
 
 if (Tools::getValue('action') === 'adminOrderChangeBranch') {
