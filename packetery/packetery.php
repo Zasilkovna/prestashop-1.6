@@ -36,11 +36,11 @@ class Packetery extends Module
         $this->limited_countries = [];
         parent::__construct();
 
-        $this->author = $this->l('Packetery, Ltd.');
-        $this->displayName = $this->l('Packetery');
+        $this->author = $this->l('Packeta s.r.o.');
+        $this->displayName = $this->l('Packeta');
         $this->description = $this->l(
-            'Offers your customers the option to choose pick-up point in Packetery network,
-            and export orders to Packetery system.'
+            'Offers your customers the option to choose pickup point in Packeta network,
+            and export orders to Packeta system.'
         );
         $this->confirmUninstall = $this->l('Are you sure you want to uninstall the module? All module data will be deleted.');
 
@@ -104,7 +104,7 @@ class Packetery extends Module
 
         if (!self::transportMethod()) {
             $error[] = $this->l(
-                'No way to access Packetery API is available on the web server:
+                'No way to access Packeta API is available on the web server:
                 please allow CURL module or allow_url_fopen setting.'
             );
             $have_error = true;
@@ -113,11 +113,11 @@ class Packetery extends Module
         $key = Configuration::get('PACKETERY_API_KEY');
         $test = "https://www.zasilkovna.cz/api/$key/test";
         if (!$key) {
-            $error[] = $this->l('Packetery API key is not set.');
+            $error[] = $this->l('Packeta API key is not set.');
             $have_error = true;
         } elseif (!$error) {
             if ($this->fetch($test) != 1) {
-                $error[] = $this->l('Cannot access Packetery API with specified key. Possibly the API key is wrong.');
+                $error[] = $this->l('Cannot access Packeta API with specified key. Possibly the API key is wrong.');
                 $have_error = true;
             } else {
                 $data = Tools::jsonDecode(
@@ -127,7 +127,7 @@ class Packetery extends Module
                     $cookie = Context::getContext()->cookie;
                     $def_lang = (int)($cookie->id_lang ? $cookie->id_lang : Configuration::get('PS_LANG_DEFAULT'));
                     $def_lang_iso = Language::getIsoById($def_lang);
-                    $error[] = $this->l('New version of Prestashop Packetery module is available.') . ' '
+                    $error[] = $this->l('New version of Prestashop Packeta module is available.') . ' '
                         . $data->message->$def_lang_iso;
                 }
             }
@@ -326,7 +326,7 @@ class Packetery extends Module
         $html .= "<label>" . $this->l('Sender label') . ": </label>";
         $html .= "<div class='margin-form'><input type='text' name='packetery_eshop_domain' value='" .
             htmlspecialchars(Configuration::get('PACKETERY_ESHOP_DOMAIN'), ENT_QUOTES) . "' /><p>" .
-            $this->l('If you\'re using one Packetery account for multiple e-shops, enter the domain of current one here, so that your customers are properly informed about what package they are receiving.')
+            $this->l('If you\'re using one Packeta account for multiple e-shops, enter the domain of current one here, so that your customers are properly informed about what package they are receiving.')
             . "</p></div>";
         $html .= "<div class='clear'></div>";
 
@@ -536,7 +536,7 @@ class Packetery extends Module
         $this->cListAllCarriersPost();
 
         $html = '';
-        $html .= '<h2>' . $this->l('Packetery Shipping Module Settings') . '</h2>';
+        $html .= '<h2>' . $this->l('Packeta Shipping Module Settings') . '</h2>';
         $errors = array();
 
         /* Display configuration errors */
@@ -610,9 +610,9 @@ class Packetery extends Module
 
         /* Prepare langs to be used by JS */
         $mod_dir = _MODULE_DIR_;
-        $must_select_point_text = $this->l('You must select a pick-up point before continuing');
-        $select_point_text = $this->l('Please select a pick-up point');
-        $selected_point_text = $this->l('Selected pick-up point');
+        $must_select_point_text = $this->l('You must select a pickup point before continuing');
+        $select_point_text = $this->l('Please select a pickup point');
+        $selected_point_text = $this->l('Selected pickup point');
         $appIdentity = self::APP_IDENTITY_PREFIX . $this->version;
 
         $lang = strtolower($lang);
@@ -731,7 +731,7 @@ END;
         }
 
         return "<p>" . sprintf(
-                $this->l('Selected packetery branch: %s'),
+                $this->l('Selected Packeta branch: %s'),
                 "<strong>" . $res['name_branch'] . "</strong>"
             ) . "</p>";
     }
@@ -1028,7 +1028,7 @@ END;
         if (is_file($override_path) && is_readable($override_path)) {
             $overrideContents = file_get_contents($override_path);
             if (strpos($overrideContents, '$is_packetery_carrier') !== false) {
-                $errorMessage = $this->l('Packetery module failed to uninstall version 2.0.4 override. You can find more information in module documentation.');
+                $errorMessage = $this->l('Packeta module failed to uninstall version 2.0.4 override. You can find more information in module documentation.');
 
                 // this does not show up during upgrade
                 $this->_errors[] = Tools::displayError($errorMessage);

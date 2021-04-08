@@ -44,7 +44,7 @@ class AdminOrderPacketery extends AdminTab
         $this->initialized = true;
     }
 
-    // not sure why I had to do this to make it work
+    // adoption of Module translation method
     public function l($str, $class = 'AdminOrderPacketery', $addslashes = false, $htmlentities = true)
     {
         $this->ensureInitialized();
@@ -151,7 +151,7 @@ class AdminOrderPacketery extends AdminTab
      */
     public function display()
     {
-        echo '<h2>' . $this->l('Packetery Order Export') . '</h2>';
+        echo '<h2>' . $this->l('Packeta Order Export') . '</h2>';
 
         $errors = array();
         $have_error = $this->packetery->configuration_errors($errors);
@@ -160,7 +160,7 @@ class AdminOrderPacketery extends AdminTab
         }
         if ($have_error) {
             echo "<p style='font-weight: bold;'>" . $this->l(
-                    'Before you will be able to use this page, please go to Packetery module configuration.'
+                    'Please go to Packeta module configuration before You start to use this page.'
                 ) . "</p>";
             return;
         } else {
@@ -247,7 +247,7 @@ class AdminOrderPacketery extends AdminTab
                 $this->l('Save COD setting and export selected'),
                 ENT_QUOTES
             ) . "' class='button'>";
-        echo "<br><br><p>" . $this->l('The exported file can be uploaded in Packetery client area, under Consign Package, section Mass Consignment – CSV.') . "</p>";
+        echo "<br><br><p>" . $this->l('The exported file can be uploaded in Packeta client area, under Parcels import, section Import parcels file.') . "</p>";
         echo "</fieldset>";
         echo "</form>";
         echo "<script type='text/javascript' src='//www.zasilkovna.cz/api/" .
