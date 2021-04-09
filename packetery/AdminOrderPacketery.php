@@ -204,7 +204,7 @@ class AdminOrderPacketery extends AdminTab
             <th>" . $this->l('Total Price') . "</th>
             <th>" . $this->l('Order Date') . "</th>
             <th>" . $this->l('Is COD') . "</th>
-            <th>" . $this->l('Destination branch') . "</th>
+            <th>" . $this->l('Destination pickup point') . "</th>
             <th>" . $this->l('Exported') . "</th>
         </tr>";
 

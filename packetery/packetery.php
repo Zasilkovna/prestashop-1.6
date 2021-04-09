@@ -731,7 +731,7 @@ END;
         }
 
         return "<p>" . sprintf(
-                $this->l('Selected Packeta branch: %s'),
+                $this->l('Selected Packeta pickup point: %s'),
                 "<strong>" . $res['name_branch'] . "</strong>"
             ) . "</p>";
     }
