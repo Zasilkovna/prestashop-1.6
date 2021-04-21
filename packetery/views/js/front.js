@@ -83,7 +83,7 @@ window.initializePacketaWidget = function () {
                         e.preventDefault();
                     });
                 }
-            }, {appIdentity: 'prestashop-1.6-packeta-' + module_version, country: country, language: lang});
+            }, {appIdentity: app_identity, country: country, language: lang});
         });
     }
 };

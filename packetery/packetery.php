@@ -19,6 +19,10 @@ if (!defined('_PS_VERSION_')) {
 
 class Packetery extends Module
 {
+    const ID_PREF_ID = 'id';
+    const ID_PREF_REF = 'reference';
+    const WIDGET_URL = 'https://widget.packeta.com/v6/www/js/library.js';
+    const APP_IDENTITY_PREFIX = 'prestashop-1.6-packeta-';
     // only for mixing with branch ids
     const ZPOINT = 'zpoint';
 
@@ -32,11 +36,11 @@ class Packetery extends Module
         $this->limited_countries = [];
         parent::__construct();
 
-        $this->author = $this->l('Packetery, Ltd.');
-        $this->displayName = $this->l('Packetery');
+        $this->author = $this->l('Packeta s.r.o.');
+        $this->displayName = $this->l('Packeta');
         $this->description = $this->l(
-            'Offers your customers the option to choose pick-up point in Packetery network,
-            and export orders to Packetery system.'
+            'Offers your customers the option to choose pickup point in Packeta network,
+            and export orders to Packeta system.'
         );
         $this->confirmUninstall = $this->l('Are you sure you want to uninstall the module? All module data will be deleted.');
 
@@ -100,7 +104,7 @@ class Packetery extends Module
 
         if (!self::transportMethod()) {
             $error[] = $this->l(
-                'No way to access Packetery API is available on the web server:
+                'No way to access Packeta API is available on the web server:
                 please allow CURL module or allow_url_fopen setting.'
             );
             $have_error = true;
@@ -109,11 +113,11 @@ class Packetery extends Module
         $key = Configuration::get('PACKETERY_API_KEY');
         $test = "https://www.zasilkovna.cz/api/$key/test";
         if (!$key) {
-            $error[] = $this->l('Packetery API key is not set.');
+            $error[] = $this->l('Packeta API key is not set.');
             $have_error = true;
         } elseif (!$error) {
             if ($this->fetch($test) != 1) {
-                $error[] = $this->l('Cannot access Packetery API with specified key. Possibly the API key is wrong.');
+                $error[] = $this->l('Cannot access Packeta API with specified key. Possibly the API key is wrong.');
                 $have_error = true;
             } else {
                 $data = Tools::jsonDecode(
@@ -123,7 +127,7 @@ class Packetery extends Module
                     $cookie = Context::getContext()->cookie;
                     $def_lang = (int)($cookie->id_lang ? $cookie->id_lang : Configuration::get('PS_LANG_DEFAULT'));
                     $def_lang_iso = Language::getIsoById($def_lang);
-                    $error[] = $this->l('New version of Prestashop Packetery module is available.') . ' '
+                    $error[] = $this->l('New version of Prestashop Packeta module is available.') . ' '
                         . $data->message->$def_lang_iso;
                 }
             }
@@ -177,7 +181,7 @@ class Packetery extends Module
             || !$this->registerHook('newOrder')
             || !$this->registerHook('header')
             || !$this->registerHook('displayFooter')
-            || !$this->registerHook('adminOrder')
+            || !$this->registerHook('displayAdminOrderLeft')
         ) {
             return false;
         }
@@ -232,7 +236,12 @@ class Packetery extends Module
      */
     public function uninstall()
     {
-        foreach (array('PACKETERY_API_KEY', 'PACKETERY_ESHOP_DOMAIN') as $key) {
+        $configKeys = [
+            'PACKETERY_API_KEY',
+            'PACKETERY_ESHOP_DOMAIN',
+            'PACKETERY_ID_PREFERENCE',
+        ];
+        foreach ($configKeys as $key) {
             Configuration::deleteByName($key);
         }
 
@@ -262,7 +271,7 @@ class Packetery extends Module
             || !$this->unregisterHook('displayFooter')
             || !$this->unregisterHook('processCarrier')
             || !$this->unregisterHook('orderDetailDisplayed')
-            || !$this->unregisterHook('adminOrder')
+            || !$this->unregisterHook('displayAdminOrderLeft')
             || !$this->unregisterHook('paymentTop')
             || !$this->unregisterHook('backOfficeTop')
         ) {
@@ -280,23 +289,23 @@ class Packetery extends Module
         // leave the function if nothing is set
         if (
             !Tools::getIsset('packetery_api_key') &&
-            !Tools::getIsset('packetery_eshop_domain')
+            !Tools::getIsset('packetery_eshop_domain') &&
+            !Tools::getIsset('packetery_id_preference')
         ) {
             return;
         }
 
         // save API KEY if changed
-        if (Tools::getIsset('packetery_api_key') && Tools::getValue('packetery_api_key')) {
-            if (trim(Tools::getValue('packetery_api_key')) != Configuration::get('PACKETERY_API_KEY')) {
-                Configuration::updateValue('PACKETERY_API_KEY', trim(Tools::getValue('packetery_api_key')));
-                @clearstatcache();
-            }
+        // TODO: validate
+        if (trim(Tools::getValue('packetery_api_key')) != Configuration::get('PACKETERY_API_KEY')) {
+            Configuration::updateValue('PACKETERY_API_KEY', trim(Tools::getValue('packetery_api_key')));
+            @clearstatcache();
         }
 
         // save e-shop domain
-        if (Tools::getIsset('packetery_eshop_domain') && Tools::getValue('packetery_eshop_domain')) {
-            Configuration::updateValue('PACKETERY_ESHOP_DOMAIN', trim(Tools::getValue('packetery_eshop_domain')));
-        }
+        Configuration::updateValue('PACKETERY_ESHOP_DOMAIN', trim(Tools::getValue('packetery_eshop_domain')));
+
+        Configuration::updateValue('PACKETERY_ID_PREFERENCE', trim(Tools::getValue('packetery_id_preference')));
     }
 
     /**
@@ -317,9 +326,21 @@ class Packetery extends Module
         $html .= "<label>" . $this->l('Sender label') . ": </label>";
         $html .= "<div class='margin-form'><input type='text' name='packetery_eshop_domain' value='" .
             htmlspecialchars(Configuration::get('PACKETERY_ESHOP_DOMAIN'), ENT_QUOTES) . "' /><p>" .
-            $this->l('If you\'re using one Packetery account for multiple e-shops, enter the domain of current one here, so that your customers are properly informed about what package they are receiving.')
+            $this->l('If you\'re using one Packeta account for multiple e-shops, enter the domain of current one here, so that your customers are properly informed about what package they are receiving.')
             . "</p></div>";
         $html .= "<div class='clear'></div>";
+
+        $html .= "<label>" . $this->l('As the order ID, use') . ": </label>";
+        $html .= "<div class='margin-form'><select name='packetery_id_preference'>";
+        $idPreferenceOptions = [
+            self::ID_PREF_ID => $this->l('Order ID'),
+            self::ID_PREF_REF => $this->l('Order Reference'),
+        ];
+        foreach ($idPreferenceOptions as $optionValue => $optionTitle) {
+            $selected = (Configuration::get('PACKETERY_ID_PREFERENCE') === $optionValue ? 'selected' : '');
+            $html .= "<option value='$optionValue' $selected>" . $optionTitle . "</option>";
+        }
+        $html .= "</select></div><div class='clear'></div>";
 
         $html .= "<div class='margin-form'><input class='button' type='submit' value='" .
             htmlspecialchars($this->l('Save'), ENT_QUOTES) . "'  /></div>";
@@ -515,7 +536,7 @@ class Packetery extends Module
         $this->cListAllCarriersPost();
 
         $html = '';
-        $html .= '<h2>' . $this->l('Packetery Shipping Module Settings') . '</h2>';
+        $html .= '<h2>' . $this->l('Packeta Shipping Module Settings') . '</h2>';
         $errors = array();
 
         /* Display configuration errors */
@@ -589,10 +610,10 @@ class Packetery extends Module
 
         /* Prepare langs to be used by JS */
         $mod_dir = _MODULE_DIR_;
-        $must_select_point_text = $this->l('You must select a pick-up point before continuing');
-        $select_point_text = $this->l('Please select a pick-up point');
-        $selected_point_text = $this->l('Selected pick-up point');
-        $module_version = $this->version;
+        $must_select_point_text = $this->l('You must select a pickup point before continuing');
+        $select_point_text = $this->l('Please select a pickup point');
+        $selected_point_text = $this->l('Selected pickup point');
+        $appIdentity = self::APP_IDENTITY_PREFIX . $this->version;
 
         $lang = strtolower($lang);
 
@@ -607,7 +628,7 @@ class Packetery extends Module
             var selected_text = "$selected_point_text"; 
             var select_text = "$select_point_text";
             var must_select_text = "$must_select_point_text";
-            var module_version = "$module_version";
+            var app_identity = "$appIdentity";
             
             $(function(){
                 $("input.delivery_option_radio").on('change', function(){
@@ -657,25 +678,41 @@ END;
         $db->update('packetery_order', $fieldsToUpdate, '`id_cart` = ' . ((int)$params['cart']->id));
     }
 
-    /**
-     * Output additional carrier info in admin order detail
-     * @param $params
-     * @return string
-     */
-    public function hookAdminOrder($params)
+    public function hookDisplayAdminOrderLeft($params)
     {
-        if (!($res = Db::getInstance()->getRow(
-            'SELECT o.name_branch FROM `' . _DB_PREFIX_ . 'packetery_order` o
-            WHERE o.id_order = ' . ((int)$params['id_order'])
-        ))
-        ) {
-            return "";
+        $apiKey = Configuration::get('PACKETERY_API_KEY');
+        $packeteryOrder = Db::getInstance()->getRow(
+            'SELECT `po`.`is_carrier`, `po`.`name_branch`, `c`.`iso_code` AS `country`
+            FROM `' . _DB_PREFIX_ . 'packetery_order` `po`
+            JOIN `' . _DB_PREFIX_ . 'orders` `o` ON `o`.`id_order` = `po`.`id_order`
+            JOIN `' . _DB_PREFIX_ . 'address` `a` ON `a`.`id_address` = `o`.`id_address_delivery` 
+            JOIN `' . _DB_PREFIX_ . 'country` `c` ON `c`.`id_country` = `a`.`id_country`
+            WHERE `po`.`id_order` = ' . ((int)$params['id_order'])
+        );
+        if (!$apiKey || !$packeteryOrder) {
+            return;
         }
 
-        return "<p>" . sprintf(
-                $this->l('Selected packetery branch: %s'),
-                "<strong>" . $res['name_branch'] . "</strong>"
-            ) . "</p>";
+        $this->context->controller->addCSS($this->_path . 'views/css/admin_order.css?v=' . $this->version, 'all', null, false);
+        $this->context->controller->addJS(self::WIDGET_URL);
+        $this->context->controller->addJS($this->_path . 'views/js/admin_order.js?v=' . $this->version);
+
+        $isCarrier = (bool)$packeteryOrder['is_carrier'];
+        $this->context->smarty->assign('isCarrier', $isCarrier);
+        $this->context->smarty->assign('branchName', $packeteryOrder['name_branch']);
+        if (!$isCarrier) {
+            $employee = Context::getContext()->employee;
+            $widgetOptions = [
+                'api_key' => $apiKey,
+                'app_identity' => self::APP_IDENTITY_PREFIX . $this->version,
+                'country' => strtolower($packeteryOrder['country']),
+                'module_dir' => _MODULE_DIR_,
+                'order_id' => $params['id_order'],
+                'lang' => Language::getIsoById($employee ? $employee->id_lang : Configuration::get('PS_LANG_DEFAULT')),
+            ];
+            $this->context->smarty->assign('widgetOptions', $widgetOptions);
+        }
+        return $this->display(__FILE__, 'display_order_left.tpl');
     }
 
     /**
@@ -694,7 +731,7 @@ END;
         }
 
         return "<p>" . sprintf(
-                $this->l('Selected packetery branch: %s'),
+                $this->l('Selected Packeta pickup point: %s'),
                 "<strong>" . $res['name_branch'] . "</strong>"
             ) . "</p>";
     }
@@ -732,7 +769,7 @@ END;
     public function hookHeader($params)
     {
         return '
-        <script type="text/javascript" src="https://widget.packeta.com/v6/www/js/library.js"></script>
+        <script type="text/javascript" src="' . self::WIDGET_URL . '"></script>
         <script type="text/javascript" src="' . _MODULE_DIR_ . 'packetery/views/js/front.js?v=' . $this->version . '"></script>       
         <link rel="stylesheet" href="' . _MODULE_DIR_ . 'packetery/views/css/packetery.css?v=' . $this->version . '" />
         ';
@@ -808,6 +845,9 @@ END;
         );
 
         foreach ($files as $local => $remote) {
+            if (file_exists($local) && filesize($local) === 0) {
+                unlink($local);
+            }
             if (date("d.m.Y", @filemtime($local)) != date("d.m.Y") && (!file_exists($local) || date("H") >= 1)) {
                 if ($this->configuration_errors()) {
                     if (file_exists($local)) {
@@ -894,7 +934,7 @@ END;
     {
         $res = array();
         $fn = _PS_MODULE_DIR_ . "packetery/address-delivery.xml";
-        if (function_exists("simplexml_load_file") && file_exists($fn)) {
+        if (function_exists("simplexml_load_file") && file_exists($fn) && filesize($fn) !== 0) {
             $xml = simplexml_load_file($fn);
             foreach ($xml->carriers->carrier as $branch) {
                 $res[(string)$branch->id] = (object)array(
@@ -974,7 +1014,7 @@ END;
         $uninstallResult = true;
         $copyResult = Tools::copy($backupOverridePath, $originalOverridePath);
         if ($copyResult) {
-            $uninstallResult = $this->uninstallOverrides();
+            $uninstallResult = (bool)$this->uninstallOverrides();
             Tools::deleteFile($originalOverridePath);
         }
 
@@ -988,7 +1028,7 @@ END;
         if (is_file($override_path) && is_readable($override_path)) {
             $overrideContents = file_get_contents($override_path);
             if (strpos($overrideContents, '$is_packetery_carrier') !== false) {
-                $errorMessage = $this->l('Packetery module failed to uninstall version 2.0.4 override. You can find more information in module documentation.');
+                $errorMessage = $this->l('Packeta module failed to uninstall version 2.0.4 override. You can find more information in module documentation.');
 
                 // this does not show up during upgrade
                 $this->_errors[] = Tools::displayError($errorMessage);
@@ -999,6 +1039,30 @@ END;
         }
 
         return $uninstallResult;
+    }
+
+    public static function adminOrderChangeBranch()
+    {
+        if (!Tools::getIsset('order_id') || !Tools::getIsset('pickup_point')) {
+            return false;
+        }
+
+        $orderId = (int)Tools::getValue('order_id');
+        $pickupPoint = Tools::getValue('pickup_point');
+
+        $packeteryOrderFields = [
+            'id_branch' => (int)$pickupPoint['id'],
+            'name_branch' => pSQL($pickupPoint['name']),
+            'currency_branch' => pSQL($pickupPoint['currency']),
+        ];
+        if ($pickupPoint['pickupPointType'] == 'external') {
+            $packeteryOrderFields['is_carrier'] = 1;
+            $packeteryOrderFields['id_branch'] = (int)$pickupPoint['carrierId'];
+            $packeteryOrderFields['carrier_pickup_point'] = pSQL($pickupPoint['carrierPickupPointId']);
+        }
+        Db::getInstance()->update('packetery_order', $packeteryOrderFields, '`id_order` = ' . $orderId);
+
+        echo json_encode(['result' => 'ok']);
     }
 
 }

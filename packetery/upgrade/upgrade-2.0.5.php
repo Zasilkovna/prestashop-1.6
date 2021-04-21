@@ -7,9 +7,12 @@ if (!defined('_PS_VERSION_')) {
 function upgrade_module_2_0_5($object)
 {
     $packetery = new Packetery();
-    $result = $packetery->removeOverrideV204();
-    if ($result === false) {
-        return $result;
+    if (
+        !$packetery->removeOverrideV204() ||
+        !$packetery->unregisterHook('adminOrder') ||
+        !$packetery->registerHook('displayAdminOrderLeft')
+    ) {
+        return false;
     }
 
     $result = Db::getInstance()->execute('
@@ -55,6 +58,7 @@ function upgrade_module_2_0_5($object)
     if ($result) {
         Configuration::deleteByName('PACKETERY_FORCED_COUNTRY');
         Configuration::deleteByName('PACKETERY_FORCED_LANG');
+        Configuration::updateValue('PACKETERY_ID_PREFERENCE', Packetery::ID_PREF_ID);
     }
 
     return $result;

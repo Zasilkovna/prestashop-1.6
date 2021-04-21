@@ -60,6 +60,7 @@ Each of the configuration blocks is saved with its own "Add" or "Save" button.
 - **API key** - your API key can be found in the [Packeta client section](https://client.packeta.com/en/support/)
   in section of Client support
 - **Sender name** - the sender name you have set in the client section of the sender list
+- **As the order ID, use** - select whether to use ID or Reference as order ID in export
 
 ### Carrier settings
 - To add a carrier enter the menu *Shipping* - *Carriers*.
@@ -172,6 +173,7 @@ Každý z bloků konfigurace se ukládá vlastním tlačítkem "Přidat", nebo "
 ### Nastavení modulu
 - **Klíč API**  - váš klíč API naleznete v [klientské sekci Zásilkovny](https://client.packeta.com/cs/support/) v části **Klientská podpora**
 - **Označení odesílatele** - označení odesílatele které máte nastaveno v [klientské sekci](https://client.packeta.com/cs/senders/) v seznamu odesílatelů
+- **Jako číslo objednávky u zásilek uvádět** - vyberte, zda se má při exportu použít id nebo kód jako číslo objednávky
 
 ### Nastavení dopravců
 - Dopravce vytvoříte v menu *Doručení* - *Dopravci*.
