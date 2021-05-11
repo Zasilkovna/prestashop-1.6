@@ -730,6 +730,7 @@ END;
             return;
         }
         $orderData = self::getPickupPointInfoForOrder('id_cart', (int)$params['objOrder']->id_cart);
+
         return $this->displaySmartyPickupPointInfo($orderData, 'display_order_confirmation.tpl');
     }
 
@@ -744,6 +745,7 @@ END;
             return;
         }
         $orderData = self::getPickupPointInfoForOrder('id_order', (int)$params['order']->id);
+
         return $this->displaySmartyPickupPointInfo($orderData, 'display_order_detail.tpl');
     }
 
@@ -759,6 +761,7 @@ END;
         }
         $this->context->smarty->assign('title', $this->l('Selected Packeta pickup point'));
         $this->context->smarty->assign('pickupPointOrAddressDeliveryName', $orderData['name_branch']);
+
         return $this->display(__FILE__, $templateFilename);
     }
 
@@ -796,11 +799,11 @@ END;
     private static function getPickupPointInfoForOrder($key, $id)
     {
         return Db::getInstance()->getRow(
-            sprintf("SELECT `po`.`name_branch`, `po`.`id_branch`, `po`.`is_carrier`, `pa`.`is_pickup_point`
-            FROM `%spacketery_order` `po`
-            JOIN `%sorders` `o` ON `o`.`id_order` = `po`.`id_order`  
-            JOIN `%spacketery_address_delivery` `pa` ON `pa`.`id_carrier` = `o`.`id_carrier`  
-            WHERE `po`.`%s` = %s", _DB_PREFIX_, _DB_PREFIX_, _DB_PREFIX_, $key, $id)
+            sprintf('SELECT `po`.`name_branch`, `po`.`id_branch`, `po`.`is_carrier`, `pa`.`is_pickup_point`
+            FROM `' . _DB_PREFIX_ . 'packetery_order` `po`
+            JOIN `' . _DB_PREFIX_ . 'orders` `o` ON `o`.`id_order` = `po`.`id_order`  
+            JOIN `' . _DB_PREFIX_ . 'packetery_address_delivery` `pa` ON `pa`.`id_carrier` = `o`.`id_carrier`  
+            WHERE `po`.`%s` = %s', $key, $id)
         );
     }
 
