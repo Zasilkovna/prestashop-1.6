@@ -197,7 +197,9 @@ class Packetery extends Module
         }
 
         // optional hooks (allow fail for older versions of PrestaShop)
-        $this->registerHook('orderDetailDisplayed');
+        $this->registerHook('displayOrderConfirmation');
+        $this->registerHook('displayOrderDetail');
+        $this->registerHook('actionGetExtraMailTemplateVars');
         $this->registerHook('backOfficeTop');
         $this->registerHook('beforeCarrier');
         $this->registerHook('displayMobileHeader');
@@ -270,7 +272,9 @@ class Packetery extends Module
             || !$this->unregisterHook('header')
             || !$this->unregisterHook('displayFooter')
             || !$this->unregisterHook('processCarrier')
-            || !$this->unregisterHook('orderDetailDisplayed')
+            || !$this->unregisterHook('displayOrderConfirmation')
+            || !$this->unregisterHook('displayOrderDetail')
+            || !$this->unregisterHook('actionGetExtraMailTemplateVars')
             || !$this->unregisterHook('displayAdminOrderLeft')
             || !$this->unregisterHook('paymentTop')
             || !$this->unregisterHook('backOfficeTop')
@@ -716,26 +720,92 @@ END;
     }
 
     /**
-     * Output additional carrier info in frontend order detail
-     * @param $params
+     * Shows information about selected pickup point, right above big green message
+     * @param array $params
      * @return string|void
      */
-    public function hookOrderDetailDisplayed($params)
+    public function hookDisplayOrderConfirmation($params)
     {
-        if (!($res = Db::getInstance()->getRow(
-            'SELECT o.name_branch FROM `' . _DB_PREFIX_ . 'packetery_order` o WHERE o.id_order = ' .
-            ((int)$params['order']->id)
-        ))
-        ) {
+        if (!isset($params['objOrder'])) {
             return;
         }
+        $orderData = self::getPickupPointInfoForOrder('id_cart', (int)$params['objOrder']->id_cart);
 
-        return "<p>" . sprintf(
-                $this->l('Selected Packeta pickup point: %s'),
-                "<strong>" . $res['name_branch'] . "</strong>"
-            ) . "</p>";
+        return $this->displaySmartyPickupPointInfo($orderData, 'display_order_confirmation.tpl');
     }
 
+    /**
+     * Show information about selected pickup point in frontend order detail, between address and products
+     * @param array $params
+     * @return string|void
+     */
+    public function hookDisplayOrderDetail($params)
+    {
+        if (!isset($params['order'])) {
+            return;
+        }
+        $orderData = self::getPickupPointInfoForOrder('id_order', (int)$params['order']->id);
+
+        return $this->displaySmartyPickupPointInfo($orderData, 'display_order_detail.tpl');
+    }
+
+    /**
+     * @param array $orderData
+     * @param string $templateFilename
+     * @return string|void
+     */
+    private function displaySmartyPickupPointInfo(array $orderData, $templateFilename)
+    {
+        if (!$orderData || (int)$orderData['is_pickup_point'] === 0) {
+            return;
+        }
+        $this->context->smarty->assign('title', $this->l('Selected Packeta pickup point'));
+        $this->context->smarty->assign('pickupPointOrAddressDeliveryName', $orderData['name_branch']);
+
+        return $this->display(__FILE__, $templateFilename);
+    }
+
+    /**
+     * Called when sending email, will add extra variables to email templates.
+     * Order confirmation template is located in mails/language-code/order_conf - both html and txt.
+     * Add {packetery_carrier_extra_info} where you need, usually after {carrier}.
+     * @param $params
+     * @return void
+     */
+    public function hookActionGetExtraMailTemplateVars(&$params)
+    {
+        if (!isset($params['cart'])) {
+            return;
+        }
+        $orderData = self::getPickupPointInfoForOrder('id_cart', (int)$params['cart']->id);
+        if (!$orderData || (int)$orderData['is_pickup_point'] === 0) {
+            return;
+        }
+        $pickupPoint = $orderData['name_branch'];
+        if ((bool)$orderData['is_carrier'] === false) {
+            $pickupPoint .= sprintf(' (%s)', $orderData['id_branch']);
+        }
+        $params['extra_template_vars'] = array(
+            '{packetery_pickup_point_label}' => sprintf("%s:", $this->l('Selected Packeta pickup point')),
+            '{packetery_pickup_point}' => $pickupPoint,
+        );
+    }
+
+    /**
+     * @param string $key db column to match - id_cart or id_order
+     * @param int $id
+     * @return array|bool|object|null
+     */
+    private static function getPickupPointInfoForOrder($key, $id)
+    {
+        return Db::getInstance()->getRow(
+            sprintf('SELECT `po`.`name_branch`, `po`.`id_branch`, `po`.`is_carrier`, `pa`.`is_pickup_point`
+            FROM `' . _DB_PREFIX_ . 'packetery_order` `po`
+            JOIN `' . _DB_PREFIX_ . 'orders` `o` ON `o`.`id_order` = `po`.`id_order`  
+            JOIN `' . _DB_PREFIX_ . 'packetery_address_delivery` `pa` ON `pa`.`id_carrier` = `o`.`id_carrier`  
+            WHERE `po`.`%s` = %s', $key, $id)
+        );
+    }
 
     /**
      * Sets new carrier ID after update

@@ -8,3 +8,4 @@
       - Added: information about branch or address delivery carrier into order administration
         and possibility to change branch using widget
       - Updated: CSV export version upgraded to version 6
+2.0.6 - Added: information about chosen pickup point to order confirmation and e-mail
