@@ -13,7 +13,7 @@ For installation of Prestashop 1.6.x there is required to install following comp
   - mod_security allowed
   - mod_auth_basic denied
   - RECOMMENDED: at least 64Mb of memory reserved for PHP, the more the better
-- PHP: version 5.2 and newer
+- PHP: version 5.6 and newer
 - MySQL: version 5.0 and newer
 - PHP extension:
   - PDO_MySQL
