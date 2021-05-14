@@ -25,6 +25,8 @@ class Packetery extends Module
     const APP_IDENTITY_PREFIX = 'prestashop-1.6-packeta-';
     // only for mixing with branch ids
     const ZPOINT = 'zpoint';
+    // don't forget to update translation
+    const MINIMUM_PHP_VERSION = '5.6';
 
     public static $is_before_carrier = false;
 
@@ -32,7 +34,7 @@ class Packetery extends Module
     {
         $this->name = 'packetery';
         $this->tab = 'shipping_logistics';
-        $this->version = '2.0.5';
+        $this->version = '2.0.6';
         $this->limited_countries = [];
         parent::__construct();
 
@@ -155,11 +157,31 @@ class Packetery extends Module
     }
 
     /**
+     * Checks if the requirement for the minimum PHP version is met.
+     * @return bool
+     */
+    public function checkRequirements() {
+        if (version_compare(PHP_VERSION, self::MINIMUM_PHP_VERSION, '<')) {
+            $errorMessage = $this->l('You are using too old PHP version, please upgrade to version 5.6 or higher.');
+            $this->_errors[] = $errorMessage;
+            PrestaShopLogger::addLog(sprintf("%s: %s", $this->l('Packeta module'), $errorMessage), 5, null, null, null, true);
+
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
      * Module installation script
      * @return bool
      */
     public function install()
     {
+        if (!$this->checkRequirements()) {
+            return false;
+        }
+
         $sql = array();
         $db = Db::getInstance();
 
