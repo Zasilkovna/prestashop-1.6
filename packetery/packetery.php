@@ -165,6 +165,7 @@ class Packetery extends Module
             $errorMessage = $this->l('You are using too old PHP version, please upgrade to version 5.6 or higher.');
             $this->_errors[] = $errorMessage;
             PrestaShopLogger::addLog(sprintf("%s: %s", $this->l('Packeta module'), $errorMessage), 5, null, null, null, true);
+
             return false;
         }
 
