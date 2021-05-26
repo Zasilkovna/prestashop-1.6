@@ -931,39 +931,34 @@ END;
     private function ensureUpdatedAPI()
     {
         $key = Configuration::get('PACKETERY_API_KEY');
-        $files = array(
-            _PS_MODULE_DIR_ . "packetery/address-delivery.xml" =>
-                "https://www.zasilkovna.cz/api/v4/$key/branch.xml?address-delivery"
-        );
+        $localFilePath = _PS_MODULE_DIR_ . "packetery/address-delivery.xml";
+        $remoteUrl = "https://www.zasilkovna.cz/api/v4/$key/branch.xml?address-delivery";
+        if (file_exists($localFilePath) && filesize($localFilePath) === 0) {
+            unlink($localFilePath);
+        }
+        if (!file_exists($localFilePath) || date('Y-m-d', filemtime($localFilePath)) !== date('Y-m-d')) {
+            if ($this->configuration_errors()) {
+                if (file_exists($localFilePath) && time() - filemtime($localFilePath) > 5 * 24 * 60 * 60) {
+                    unlink($localFilePath);
+                }
 
-        foreach ($files as $local => $remote) {
-            if (file_exists($local) && filesize($local) === 0) {
-                unlink($local);
+                return;
             }
-            if (!file_exists($local) || date('Y-m-d', filemtime($local)) !== date('Y-m-d')) {
-                if ($this->configuration_errors()) {
-                    if (file_exists($local) && time() - filemtime($local) > 5 * 24 * 60 * 60) {
-                        unlink($local);
-                    }
 
-                    return;
-                }
+            ignore_user_abort(true);
+            $response = Tools::file_get_contents($remoteUrl);
+            if (!$response) {
+                return;
+            }
 
-                ignore_user_abort(true);
-                $response = Tools::file_get_contents($remote);
-                if (!$response) {
-                    return;
-                }
+            $xml = simplexml_load_string($response);
+            if ($xml === false) {
+                return;
+            }
 
-                $xml = simplexml_load_string($response);
-                if ($xml === false) {
-                    return;
-                }
-
-                $data = $xml->asXML();
-                if ($data) {
-                    file_put_contents($local, $data);
-                }
+            $data = $xml->asXML();
+            if ($data) {
+                file_put_contents($localFilePath, $data);
             }
         }
     }
