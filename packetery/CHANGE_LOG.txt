@@ -10,3 +10,5 @@
       - Updated: CSV export version upgraded to version 6
 2.0.6 - Added: information about chosen pickup point to order confirmation and e-mail
       - Added: minimum required PHP version checking during install and upgrade
+      - Updated: faster and more reliable loading of address delivery carriers;
+        no more downloading of pickup points

@@ -931,71 +931,35 @@ END;
     private function ensureUpdatedAPI()
     {
         $key = Configuration::get('PACKETERY_API_KEY');
-        $files = array(
-            _PS_MODULE_DIR_ . "packetery/address-delivery.xml" =>
-                "https://www.zasilkovna.cz/api/v4/$key/branch.xml"
-        );
-
-        foreach ($files as $local => $remote) {
-            if (file_exists($local) && filesize($local) === 0) {
-                unlink($local);
-            }
-            if (date("d.m.Y", @filemtime($local)) != date("d.m.Y") && (!file_exists($local) || date("H") >= 1)) {
-                if ($this->configuration_errors()) {
-                    if (file_exists($local)) {
-                        $error_count = @Tools::file_get_contents($local . ".error");
-                        if ($error_count > 5) {
-                            unlink($local);
-                        } else {
-                            touch($local);
-                        }
-                        @file_put_contents($local . ".error", $error_count + 1);
-                    }
-                    return;
-                }
-
-                $data = $this->parseBranches($remote);
-
-                file_put_contents($local, $data);
-                @unlink($local . ".error");
-            }
+        $localFilePath = _PS_MODULE_DIR_ . "packetery/address-delivery.xml";
+        $remoteUrl = "https://www.zasilkovna.cz/api/v4/$key/branch.xml?address-delivery";
+        if (file_exists($localFilePath) && filesize($localFilePath) === 0) {
+            unlink($localFilePath);
         }
-    }
-
-    /**
-     * Parses through carriers list and selects address deliveries only
-     * @param $branch_url
-     * @return bool|mixed
-     */
-    public function parseBranches($branch_url)
-    {
-        ignore_user_abort(true);
-        $module = new Packetery();
-        if ($response = Tools::file_get_contents($branch_url)) {
-            if (Tools::strpos($response, 'invalid API key') == false) {
-                $xml = simplexml_load_string($response);
-
-                $toRemove = [];
-                foreach ($xml->carriers->carrier as $k => $carrier) {
-                    if ("$carrier->pickupPoints" == "true") {
-                        $dom = dom_import_simplexml($carrier);
-                        $toRemove[] = $dom;
-                    }
+        if (!file_exists($localFilePath) || date('Y-m-d', filemtime($localFilePath)) !== date('Y-m-d')) {
+            if ($this->configuration_errors()) {
+                if (file_exists($localFilePath) && time() - filemtime($localFilePath) > 5 * 24 * 60 * 60) {
+                    unlink($localFilePath);
                 }
 
-                $dom = dom_import_simplexml($xml->branches);
-                $toRemove[] = $dom;
-
-                foreach ($toRemove as $row) {
-                    $row->parentNode->removeChild($row);
-                }
-
-                return $xml->asXML();
-            } else {
-                return false;
+                return;
             }
-        } else {
-            return false;
+
+            ignore_user_abort(true);
+            $response = Tools::file_get_contents($remoteUrl);
+            if (!$response) {
+                return;
+            }
+
+            $xml = simplexml_load_string($response);
+            if ($xml === false) {
+                return;
+            }
+
+            $data = $xml->asXML();
+            if ($data) {
+                file_put_contents($localFilePath, $data);
+            }
         }
     }
 
@@ -1026,13 +990,15 @@ END;
     {
         $res = array();
         $fn = _PS_MODULE_DIR_ . "packetery/address-delivery.xml";
-        if (function_exists("simplexml_load_file") && file_exists($fn) && filesize($fn) !== 0) {
-            $xml = simplexml_load_file($fn);
-            foreach ($xml->carriers->carrier as $branch) {
-                $res[(string)$branch->id] = (object)array(
-                    'name' => (string)$branch->name,
-                    'currency' => (string)$branch->currency,
-                );
+        if (function_exists('simplexml_load_string') && file_exists($fn) && filesize($fn) !== 0) {
+            $xml = simplexml_load_string(file_get_contents($fn));
+            foreach ($xml->carriers->carrier as $carrier) {
+                if ((string)$carrier->pickupPoints === 'false') {
+                       $res[(string)$carrier->id] = (object)array(
+                        'name' => (string)$carrier->name,
+                        'currency' => (string)$carrier->currency,
+                    );
+                }
             }
             if (function_exists('mb_convert_encoding')) {
                 $fn = create_function(
