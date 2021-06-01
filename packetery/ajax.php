@@ -33,6 +33,7 @@ $packeteryOrderFields = [
     'id_branch' => (int)$pickupPoint['id'],
     'name_branch' => pSQL($pickupPoint['name']),
     'currency_branch' => pSQL($pickupPoint['currency']),
+    'is_pickup_point' => true,
 ];
 if ($pickupPoint['pickupPointType'] == 'external') {
     $packeteryOrderFields['is_carrier'] = 1;

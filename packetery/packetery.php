@@ -677,7 +677,9 @@ END;
             return;
         }
 
-        $fieldsToUpdate = [];
+        $fieldsToUpdate = [
+            'is_pickup_point' => (bool)$carrier['is_pickup_point'],
+        ];
         $db = Db::getInstance();
         if (!$carrier['is_pickup_point']) {
             // address delivery
@@ -708,7 +710,7 @@ END;
     {
         $apiKey = Configuration::get('PACKETERY_API_KEY');
         $packeteryOrder = Db::getInstance()->getRow(
-            'SELECT `po`.`is_carrier`, `po`.`name_branch`, `c`.`iso_code` AS `country`
+            'SELECT `po`.`is_pickup_point`, `po`.`name_branch`, `c`.`iso_code` AS `country`
             FROM `' . _DB_PREFIX_ . 'packetery_order` `po`
             JOIN `' . _DB_PREFIX_ . 'orders` `o` ON `o`.`id_order` = `po`.`id_order`
             JOIN `' . _DB_PREFIX_ . 'address` `a` ON `a`.`id_address` = `o`.`id_address_delivery` 
@@ -723,10 +725,10 @@ END;
         $this->context->controller->addJS(self::WIDGET_URL);
         $this->context->controller->addJS($this->_path . 'views/js/admin_order.js?v=' . $this->version);
 
-        $isCarrier = (bool)$packeteryOrder['is_carrier'];
-        $this->context->smarty->assign('isCarrier', $isCarrier);
+        $isPickupPointDelivery = (bool)$packeteryOrder['is_pickup_point'];
+        $this->context->smarty->assign('isPickupPointDelivery', $isPickupPointDelivery);
         $this->context->smarty->assign('branchName', $packeteryOrder['name_branch']);
-        if (!$isCarrier) {
+        if ($isPickupPointDelivery) {
             $employee = Context::getContext()->employee;
             $widgetOptions = [
                 'api_key' => $apiKey,
@@ -1112,6 +1114,7 @@ END;
             'id_branch' => (int)$pickupPoint['id'],
             'name_branch' => pSQL($pickupPoint['name']),
             'currency_branch' => pSQL($pickupPoint['currency']),
+            'is_pickup_point' => true,
         ];
         if ($pickupPoint['pickupPointType'] == 'external') {
             $packeteryOrderFields['is_carrier'] = 1;
