@@ -23,8 +23,5 @@ function upgrade_module_2_0_6($object)
         return false;
     }
 
-    return Db::getInstance()->execute('
-        ALTER TABLE `' . _DB_PREFIX_ . 'packetery_order` ADD `is_pickup_point` tinyint(1) NOT NULL DEFAULT 0;
-        UPDATE `' . _DB_PREFIX_ . 'packetery_order` SET `is_pickup_point` = 1 WHERE `name_branch` NOT LIKE "% HD";
-    ');
+    return true;
 }

@@ -677,9 +677,7 @@ END;
             return;
         }
 
-        $fieldsToUpdate = [
-            'is_pickup_point' => (bool)$carrier['is_pickup_point'],
-        ];
+        $fieldsToUpdate = [];
         $db = Db::getInstance();
         if (!$carrier['is_pickup_point']) {
             // address delivery
@@ -710,9 +708,10 @@ END;
     {
         $apiKey = Configuration::get('PACKETERY_API_KEY');
         $packeteryOrder = Db::getInstance()->getRow(
-            'SELECT `po`.`is_pickup_point`, `po`.`name_branch`, `c`.`iso_code` AS `country`
+            'SELECT `pa`.`is_pickup_point`, `po`.`name_branch`, `c`.`iso_code` AS `country`
             FROM `' . _DB_PREFIX_ . 'packetery_order` `po`
             JOIN `' . _DB_PREFIX_ . 'orders` `o` ON `o`.`id_order` = `po`.`id_order`
+            JOIN `' . _DB_PREFIX_ . 'packetery_address_delivery` `pa` ON `o`.`id_carrier` = `pa`.`id_carrier`
             JOIN `' . _DB_PREFIX_ . 'address` `a` ON `a`.`id_address` = `o`.`id_address_delivery` 
             JOIN `' . _DB_PREFIX_ . 'country` `c` ON `c`.`id_country` = `a`.`id_country`
             WHERE `po`.`id_order` = ' . ((int)$params['id_order'])
@@ -1114,7 +1113,6 @@ END;
             'id_branch' => (int)$pickupPoint['id'],
             'name_branch' => pSQL($pickupPoint['name']),
             'currency_branch' => pSQL($pickupPoint['currency']),
-            'is_pickup_point' => true,
         ];
         if ($pickupPoint['pickupPointType'] == 'external') {
             $packeteryOrderFields['is_carrier'] = 1;
