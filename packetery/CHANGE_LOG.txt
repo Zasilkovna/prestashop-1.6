@@ -12,3 +12,4 @@
       - Added: minimum required PHP version checking during install and upgrade
       - Updated: faster and more reliable loading of address delivery carriers;
         no more downloading of pickup points
+      - Fixed: disabled pickup point change for address delivery in order administration
