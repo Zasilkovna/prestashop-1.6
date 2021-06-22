@@ -1,16 +1,25 @@
 <?php
 
+// WARNING: there has to be the checkRequirements call at the beginning of each upgrade method
+
 if (!defined('_PS_VERSION_')) {
     exit;
 }
 
+/**
+ * @param Packetery $object
+ * @return bool
+ */
 function upgrade_module_2_0_5($object)
 {
-    $packetery = new Packetery();
+    if (!$object->checkRequirements()) {
+        return false;
+    }
+
     if (
-        !$packetery->removeOverrideV204() ||
-        !$packetery->unregisterHook('adminOrder') ||
-        !$packetery->registerHook('displayAdminOrderLeft')
+        !$object->removeOverrideV204() ||
+        !$object->unregisterHook('adminOrder') ||
+        !$object->registerHook('displayAdminOrderLeft')
     ) {
         return false;
     }

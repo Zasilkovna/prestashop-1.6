@@ -8,3 +8,10 @@
       - Added: information about branch or address delivery carrier into order administration
         and possibility to change branch using widget
       - Updated: CSV export version upgraded to version 6
+2.0.6 - Added: information about chosen pickup point to order confirmation and e-mail
+      - Added: minimum required PHP version checking during install and upgrade
+      - Updated: faster and more reliable loading of address delivery carriers;
+        no more downloading of pickup points
+      - Fixed: disabled pickup point change for address delivery in order administration
+      - Fixed: with a manually created pickup point order, an entry was not created in the list of Packetery orders
+        and it was not possible to set pickup point in the order detail

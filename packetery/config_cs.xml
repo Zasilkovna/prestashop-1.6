@@ -2,7 +2,7 @@
 <module>
 	<name>packetery</name>
 	<displayName><![CDATA[Z&aacute;silkovna]]></displayName>
-	<version><![CDATA[2.0.5]]></version>
+	<version><![CDATA[2.0.6]]></version>
 	<description><![CDATA[Offers your customers the option to choose pickup point in Packeta network,
             and export orders to Packeta system.]]></description>
 	<author><![CDATA[Z&aacute;silkovna, s.r.o.]]></author>

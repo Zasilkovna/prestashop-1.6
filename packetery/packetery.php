@@ -25,6 +25,8 @@ class Packetery extends Module
     const APP_IDENTITY_PREFIX = 'prestashop-1.6-packeta-';
     // only for mixing with branch ids
     const ZPOINT = 'zpoint';
+    // don't forget to update translation
+    const MINIMUM_PHP_VERSION = '5.6';
 
     public static $is_before_carrier = false;
 
@@ -32,7 +34,7 @@ class Packetery extends Module
     {
         $this->name = 'packetery';
         $this->tab = 'shipping_logistics';
-        $this->version = '2.0.5';
+        $this->version = '2.0.6';
         $this->limited_countries = [];
         parent::__construct();
 
@@ -155,11 +157,31 @@ class Packetery extends Module
     }
 
     /**
+     * Checks if the requirement for the minimum PHP version is met.
+     * @return bool
+     */
+    public function checkRequirements() {
+        if (version_compare(PHP_VERSION, self::MINIMUM_PHP_VERSION, '<')) {
+            $errorMessage = $this->l('You are using too old PHP version, please upgrade to version 5.6 or higher.');
+            $this->_errors[] = $errorMessage;
+            PrestaShopLogger::addLog(sprintf("%s: %s", $this->l('Packeta module'), $errorMessage), 5, null, null, null, true);
+
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
      * Module installation script
      * @return bool
      */
     public function install()
     {
+        if (!$this->checkRequirements()) {
+            return false;
+        }
+
         $sql = array();
         $db = Db::getInstance();
 
@@ -197,7 +219,9 @@ class Packetery extends Module
         }
 
         // optional hooks (allow fail for older versions of PrestaShop)
-        $this->registerHook('orderDetailDisplayed');
+        $this->registerHook('displayOrderConfirmation');
+        $this->registerHook('displayOrderDetail');
+        $this->registerHook('actionGetExtraMailTemplateVars');
         $this->registerHook('backOfficeTop');
         $this->registerHook('beforeCarrier');
         $this->registerHook('displayMobileHeader');
@@ -270,7 +294,9 @@ class Packetery extends Module
             || !$this->unregisterHook('header')
             || !$this->unregisterHook('displayFooter')
             || !$this->unregisterHook('processCarrier')
-            || !$this->unregisterHook('orderDetailDisplayed')
+            || !$this->unregisterHook('displayOrderConfirmation')
+            || !$this->unregisterHook('displayOrderDetail')
+            || !$this->unregisterHook('actionGetExtraMailTemplateVars')
             || !$this->unregisterHook('displayAdminOrderLeft')
             || !$this->unregisterHook('paymentTop')
             || !$this->unregisterHook('backOfficeTop')
@@ -646,25 +672,24 @@ END;
      */
     public function hookNewOrder($params)
     {
-        $carrier = self::getPacketeryCarrier((int)$params['order']->id_carrier);
+        $carrier = $this->getPacketeryCarrier((int)$params['order']->id_carrier);
         if (!$carrier) {
             return;
         }
 
-        $fieldsToUpdate = [];
-        $db = Db::getInstance();
+        $orderData = [
+            'id_cart' => (int)$params['cart']->id,
+            'id_order' => (int)$params['order']->id,
+        ];
         if (!$carrier['is_pickup_point']) {
             // address delivery
-            $db->insert('packetery_order', ['id_cart' => (int)$params['cart']->id], false, true, Db::INSERT_IGNORE);
-            $fieldsToUpdate['id_branch'] = (int)$carrier['id_branch'];
-            $fieldsToUpdate['name_branch'] = pSQL($carrier['name_branch']);
-            $fieldsToUpdate['currency_branch'] = pSQL($carrier['currency_branch']);
+            $orderData['id_branch'] = (int)$carrier['id_branch'];
+            $orderData['name_branch'] = pSQL($carrier['name_branch']);
+            $orderData['currency_branch'] = pSQL($carrier['currency_branch']);
         }
 
-        // Update cart order id in packetery_order
-        $fieldsToUpdate['id_order'] = (int)$params['order']->id;
-
         $carrierIsCod = ($carrier['is_cod'] == 1);
+        $db = Db::getInstance();
         $paymentIsCod = ($db->getValue(
                 'SELECT `is_cod` FROM `' . _DB_PREFIX_ . 'packetery_payment`
                 WHERE `module_name` = "' . pSQL($params['order']->module) . '"'
@@ -672,19 +697,20 @@ END;
 
         // If payment or carrier is set as cod - set order as cod
         if ($carrierIsCod || $paymentIsCod) {
-            $fieldsToUpdate['is_cod'] = 1;
+            $orderData['is_cod'] = 1;
         }
 
-        $db->update('packetery_order', $fieldsToUpdate, '`id_cart` = ' . ((int)$params['cart']->id));
+        $db->insert('packetery_order', $orderData, false, true, Db::ON_DUPLICATE_KEY);
     }
 
     public function hookDisplayAdminOrderLeft($params)
     {
         $apiKey = Configuration::get('PACKETERY_API_KEY');
         $packeteryOrder = Db::getInstance()->getRow(
-            'SELECT `po`.`is_carrier`, `po`.`name_branch`, `c`.`iso_code` AS `country`
+            'SELECT `pa`.`is_pickup_point`, `po`.`name_branch`, `c`.`iso_code` AS `country`
             FROM `' . _DB_PREFIX_ . 'packetery_order` `po`
             JOIN `' . _DB_PREFIX_ . 'orders` `o` ON `o`.`id_order` = `po`.`id_order`
+            JOIN `' . _DB_PREFIX_ . 'packetery_address_delivery` `pa` ON `o`.`id_carrier` = `pa`.`id_carrier`
             JOIN `' . _DB_PREFIX_ . 'address` `a` ON `a`.`id_address` = `o`.`id_address_delivery` 
             JOIN `' . _DB_PREFIX_ . 'country` `c` ON `c`.`id_country` = `a`.`id_country`
             WHERE `po`.`id_order` = ' . ((int)$params['id_order'])
@@ -697,10 +723,10 @@ END;
         $this->context->controller->addJS(self::WIDGET_URL);
         $this->context->controller->addJS($this->_path . 'views/js/admin_order.js?v=' . $this->version);
 
-        $isCarrier = (bool)$packeteryOrder['is_carrier'];
-        $this->context->smarty->assign('isCarrier', $isCarrier);
+        $isPickupPointDelivery = (bool)$packeteryOrder['is_pickup_point'];
+        $this->context->smarty->assign('isPickupPointDelivery', $isPickupPointDelivery);
         $this->context->smarty->assign('branchName', $packeteryOrder['name_branch']);
-        if (!$isCarrier) {
+        if ($isPickupPointDelivery) {
             $employee = Context::getContext()->employee;
             $widgetOptions = [
                 'api_key' => $apiKey,
@@ -716,26 +742,92 @@ END;
     }
 
     /**
-     * Output additional carrier info in frontend order detail
-     * @param $params
+     * Shows information about selected pickup point, right above big green message
+     * @param array $params
      * @return string|void
      */
-    public function hookOrderDetailDisplayed($params)
+    public function hookDisplayOrderConfirmation($params)
     {
-        if (!($res = Db::getInstance()->getRow(
-            'SELECT o.name_branch FROM `' . _DB_PREFIX_ . 'packetery_order` o WHERE o.id_order = ' .
-            ((int)$params['order']->id)
-        ))
-        ) {
+        if (!isset($params['objOrder'])) {
             return;
         }
+        $orderData = self::getPickupPointInfoForOrder('id_cart', (int)$params['objOrder']->id_cart);
 
-        return "<p>" . sprintf(
-                $this->l('Selected Packeta pickup point: %s'),
-                "<strong>" . $res['name_branch'] . "</strong>"
-            ) . "</p>";
+        return $this->displaySmartyPickupPointInfo($orderData, 'display_order_confirmation.tpl');
     }
 
+    /**
+     * Show information about selected pickup point in frontend order detail, between address and products
+     * @param array $params
+     * @return string|void
+     */
+    public function hookDisplayOrderDetail($params)
+    {
+        if (!isset($params['order'])) {
+            return;
+        }
+        $orderData = self::getPickupPointInfoForOrder('id_order', (int)$params['order']->id);
+
+        return $this->displaySmartyPickupPointInfo($orderData, 'display_order_detail.tpl');
+    }
+
+    /**
+     * @param array $orderData
+     * @param string $templateFilename
+     * @return string|void
+     */
+    private function displaySmartyPickupPointInfo(array $orderData, $templateFilename)
+    {
+        if (!$orderData || (int)$orderData['is_pickup_point'] === 0) {
+            return;
+        }
+        $this->context->smarty->assign('title', $this->l('Selected Packeta pickup point'));
+        $this->context->smarty->assign('pickupPointOrAddressDeliveryName', $orderData['name_branch']);
+
+        return $this->display(__FILE__, $templateFilename);
+    }
+
+    /**
+     * Called when sending email, will add extra variables to email templates.
+     * Order confirmation template is located in mails/language-code/order_conf - both html and txt.
+     * Add {packetery_carrier_extra_info} where you need, usually after {carrier}.
+     * @param $params
+     * @return void
+     */
+    public function hookActionGetExtraMailTemplateVars(&$params)
+    {
+        if (!isset($params['cart'])) {
+            return;
+        }
+        $orderData = self::getPickupPointInfoForOrder('id_cart', (int)$params['cart']->id);
+        if (!$orderData || (int)$orderData['is_pickup_point'] === 0) {
+            return;
+        }
+        $pickupPoint = $orderData['name_branch'];
+        if ((bool)$orderData['is_carrier'] === false) {
+            $pickupPoint .= sprintf(' (%s)', $orderData['id_branch']);
+        }
+        $params['extra_template_vars'] = array(
+            '{packetery_pickup_point_label}' => sprintf("%s:", $this->l('Selected Packeta pickup point')),
+            '{packetery_pickup_point}' => $pickupPoint,
+        );
+    }
+
+    /**
+     * @param string $key db column to match - id_cart or id_order
+     * @param int $id
+     * @return array|bool|object|null
+     */
+    private static function getPickupPointInfoForOrder($key, $id)
+    {
+        return Db::getInstance()->getRow(
+            sprintf('SELECT `po`.`name_branch`, `po`.`id_branch`, `po`.`is_carrier`, `pa`.`is_pickup_point`
+            FROM `' . _DB_PREFIX_ . 'packetery_order` `po`
+            JOIN `' . _DB_PREFIX_ . 'orders` `o` ON `o`.`id_order` = `po`.`id_order`  
+            JOIN `' . _DB_PREFIX_ . 'packetery_address_delivery` `pa` ON `pa`.`id_carrier` = `o`.`id_carrier`  
+            WHERE `po`.`%s` = %s', $key, $id)
+        );
+    }
 
     /**
      * Sets new carrier ID after update
@@ -839,71 +931,35 @@ END;
     private function ensureUpdatedAPI()
     {
         $key = Configuration::get('PACKETERY_API_KEY');
-        $files = array(
-            _PS_MODULE_DIR_ . "packetery/address-delivery.xml" =>
-                "https://www.zasilkovna.cz/api/v4/$key/branch.xml"
-        );
-
-        foreach ($files as $local => $remote) {
-            if (file_exists($local) && filesize($local) === 0) {
-                unlink($local);
-            }
-            if (date("d.m.Y", @filemtime($local)) != date("d.m.Y") && (!file_exists($local) || date("H") >= 1)) {
-                if ($this->configuration_errors()) {
-                    if (file_exists($local)) {
-                        $error_count = @Tools::file_get_contents($local . ".error");
-                        if ($error_count > 5) {
-                            unlink($local);
-                        } else {
-                            touch($local);
-                        }
-                        @file_put_contents($local . ".error", $error_count + 1);
-                    }
-                    return;
-                }
-
-                $data = $this->parseBranches($remote);
-
-                file_put_contents($local, $data);
-                @unlink($local . ".error");
-            }
+        $localFilePath = _PS_MODULE_DIR_ . "packetery/address-delivery.xml";
+        $remoteUrl = "https://www.zasilkovna.cz/api/v4/$key/branch.xml?address-delivery";
+        if (file_exists($localFilePath) && filesize($localFilePath) === 0) {
+            unlink($localFilePath);
         }
-    }
-
-    /**
-     * Parses through carriers list and selects address deliveries only
-     * @param $branch_url
-     * @return bool|mixed
-     */
-    public function parseBranches($branch_url)
-    {
-        ignore_user_abort(true);
-        $module = new Packetery();
-        if ($response = Tools::file_get_contents($branch_url)) {
-            if (Tools::strpos($response, 'invalid API key') == false) {
-                $xml = simplexml_load_string($response);
-
-                $toRemove = [];
-                foreach ($xml->carriers->carrier as $k => $carrier) {
-                    if ("$carrier->pickupPoints" == "true") {
-                        $dom = dom_import_simplexml($carrier);
-                        $toRemove[] = $dom;
-                    }
+        if (!file_exists($localFilePath) || date('Y-m-d', filemtime($localFilePath)) !== date('Y-m-d')) {
+            if ($this->configuration_errors()) {
+                if (file_exists($localFilePath) && time() - filemtime($localFilePath) > 5 * 24 * 60 * 60) {
+                    unlink($localFilePath);
                 }
 
-                $dom = dom_import_simplexml($xml->branches);
-                $toRemove[] = $dom;
-
-                foreach ($toRemove as $row) {
-                    $row->parentNode->removeChild($row);
-                }
-
-                return $xml->asXML();
-            } else {
-                return false;
+                return;
             }
-        } else {
-            return false;
+
+            ignore_user_abort(true);
+            $response = Tools::file_get_contents($remoteUrl);
+            if (!$response) {
+                return;
+            }
+
+            $xml = simplexml_load_string($response);
+            if ($xml === false) {
+                return;
+            }
+
+            $data = $xml->asXML();
+            if ($data) {
+                file_put_contents($localFilePath, $data);
+            }
         }
     }
 
@@ -934,13 +990,15 @@ END;
     {
         $res = array();
         $fn = _PS_MODULE_DIR_ . "packetery/address-delivery.xml";
-        if (function_exists("simplexml_load_file") && file_exists($fn) && filesize($fn) !== 0) {
-            $xml = simplexml_load_file($fn);
-            foreach ($xml->carriers->carrier as $branch) {
-                $res[(string)$branch->id] = (object)array(
-                    'name' => (string)$branch->name,
-                    'currency' => (string)$branch->currency,
-                );
+        if (function_exists('simplexml_load_string') && file_exists($fn) && filesize($fn) !== 0) {
+            $xml = simplexml_load_string(file_get_contents($fn));
+            foreach ($xml->carriers->carrier as $carrier) {
+                if ((string)$carrier->pickupPoints === 'false') {
+                       $res[(string)$carrier->id] = (object)array(
+                        'name' => (string)$carrier->name,
+                        'currency' => (string)$carrier->currency,
+                    );
+                }
             }
             if (function_exists('mb_convert_encoding')) {
                 $fn = create_function(
