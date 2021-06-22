@@ -672,25 +672,24 @@ END;
      */
     public function hookNewOrder($params)
     {
-        $carrier = self::getPacketeryCarrier((int)$params['order']->id_carrier);
+        $carrier = $this->getPacketeryCarrier((int)$params['order']->id_carrier);
         if (!$carrier) {
             return;
         }
 
-        $fieldsToUpdate = [];
-        $db = Db::getInstance();
+        $orderData = [
+            'id_cart' => (int)$params['cart']->id,
+            'id_order' => (int)$params['order']->id,
+        ];
         if (!$carrier['is_pickup_point']) {
             // address delivery
-            $db->insert('packetery_order', ['id_cart' => (int)$params['cart']->id], false, true, Db::INSERT_IGNORE);
-            $fieldsToUpdate['id_branch'] = (int)$carrier['id_branch'];
-            $fieldsToUpdate['name_branch'] = pSQL($carrier['name_branch']);
-            $fieldsToUpdate['currency_branch'] = pSQL($carrier['currency_branch']);
+            $orderData['id_branch'] = (int)$carrier['id_branch'];
+            $orderData['name_branch'] = pSQL($carrier['name_branch']);
+            $orderData['currency_branch'] = pSQL($carrier['currency_branch']);
         }
 
-        // Update cart order id in packetery_order
-        $fieldsToUpdate['id_order'] = (int)$params['order']->id;
-
         $carrierIsCod = ($carrier['is_cod'] == 1);
+        $db = Db::getInstance();
         $paymentIsCod = ($db->getValue(
                 'SELECT `is_cod` FROM `' . _DB_PREFIX_ . 'packetery_payment`
                 WHERE `module_name` = "' . pSQL($params['order']->module) . '"'
@@ -698,10 +697,10 @@ END;
 
         // If payment or carrier is set as cod - set order as cod
         if ($carrierIsCod || $paymentIsCod) {
-            $fieldsToUpdate['is_cod'] = 1;
+            $orderData['is_cod'] = 1;
         }
 
-        $db->update('packetery_order', $fieldsToUpdate, '`id_cart` = ' . ((int)$params['cart']->id));
+        $db->insert('packetery_order', $orderData, false, true, Db::ON_DUPLICATE_KEY);
     }
 
     public function hookDisplayAdminOrderLeft($params)
