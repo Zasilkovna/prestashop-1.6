@@ -772,11 +772,11 @@ END;
     }
 
     /**
-     * @param array $orderData
+     * @param array|false $orderData
      * @param string $templateFilename
      * @return string|void
      */
-    private function displaySmartyPickupPointInfo(array $orderData, $templateFilename)
+    private function displaySmartyPickupPointInfo($orderData, $templateFilename)
     {
         if (!$orderData || (int)$orderData['is_pickup_point'] === 0) {
             return;
