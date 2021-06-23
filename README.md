@@ -66,11 +66,8 @@ Each of the configuration blocks is saved with its own "Add" or "Save" button.
 - To add a carrier enter the menu *Shipping* - *Carriers*.
 - In the module settings, you select whether it is a *Packeta pickup point* or delivery to the address.
 - If you select YES for the carrier in the "Is COD" column, the orders of this carrier
-  will be always cash on delivery.
-- If you want cash on delivery to be controlled by the payment method and not the carrier, fill NO
-  in the "Is cash on delivery" column for the carrier, and set YES in the "Is COD" column for
-  the payment method.
-- For carriers whose shipments will not be transported by Packetery, select "- no -".
+  will be always cash on delivery no matter what payment method you choose.
+- For carriers whose shipments will not be transported by Packeta, select "- no -".
 
 #### Set country restrictions
 - In the carrier settings you specify for which zones is the selected carrier allowed and for what price.
@@ -78,10 +75,35 @@ Each of the configuration blocks is saved with its own "Add" or "Save" button.
 - It is also necessary to enable selected payment modules in the menu *Modules and Services* - *Payment* at the bottom of the page
   in the *Country Restrictions* menu.
 
+### Payment settings
+- If you want cash on delivery to be controlled by the payment method and not the carrier, fill NO
+  in the "Is cash on delivery" column for the carrier, and set YES in the "Is COD" column for
+  the payment method by clicking on "Set COD setting" button.
+
+### How to display the selected pickup point in the order confirmation email
+- Unfortunately, PrestaShop 1.6 does not allow automatic insertion of information about the selected
+  pickup point into the email.
+- We have therefore prepared keys that you can insert into your "order confirmation" email template
+  at the place where you want to display information about the pickup point.
+
+#### The following keys can be used in the template:
+- {packetery_pickup_point_label} - description Selected pickup point:
+- {packetery_pickup_point} - displays the name of the pickup point
+- Editing email templates is very simple:
+- Templates are located in the mails/xx folder (xx is the language of the template, 
+  eg. for emails in english it is the mails/en folder) of your PrestaShop 1.6 installation.
+
+#### The following files need to be modified:
+- order_conf.txt - text version of the email
+- order_conf.html - email in html format.
+- Find the {carrier} key (carrier name) in the files listed and add {packetery_pickup_point} after it
+- You can paste the information elsewhere in the template.
+
 ## List of Packetery orders
 - The list of orders can be found in the menu *Orders* - *Packetery*.
 - Check the list of orders you want to export. You can set whether the order is cash on delivery.
-- To export the data to CSV, click on the "Save COD List and Export Selected" button.
+- You can save the checked orders by clicking the *Save COD List and Export Selected*
+  button to a CSV file, which you then upload to the client section » Parcels import.
 
 ## Module update
 - To update the module, download the new version and upload it in the menu *Modules and Services* - *Modules and Services*.
@@ -107,9 +129,14 @@ Each of the configuration blocks is saved with its own "Add" or "Save" button.
 - If there is any problem with the module feel free to contact us on support@packeta.com
 
 #### Provided functions:
-- Widget integration for selection pickup points in the eshop cart
-- Delivery on address by a Packetery external shipment carrier
-- Export shipments to a csv file that can be imported in the [client section](https://client.packeta.com/).
+- Integration of [widget v6](https://widget.packeta.com/v6) for selection of pickup points in the e-shop cart.
+- Support for pickup points of external carriers.
+- Delivery to the address via Packeta external carriers.
+- Information about the selected pickup point/carrier in the PrestaShop order detail.
+- In the PrestaShop order detail, it is possible to change the selected pickup point using the v6 widget.
+- Display of information about the selected pickup point in the last step of the order, 
+  in the "order confirmation" email and in the order detail of the registered user.
+- Export shipments to a CSV file, which can be imported in the [client section](https://client.packeta.com/).
 
 ### Limitations
 - the module does not currently support multistore
@@ -179,10 +206,7 @@ Každý z bloků konfigurace se ukládá vlastním tlačítkem "Přidat", nebo "
 - Dopravce vytvoříte v menu *Doručení* - *Dopravci*.
 - V nastavení modulu vyberete, zda jde o *Výdejní místo Zásilkovny* nebo doručení na adresu.
 - Pokud zvolíte u dopravce ve sloupci "Je dobírka" ANO, budou objednávky s použitím
-  tohoto dopravce vždy na dobírku.
-- Pokud chcete, aby se dobírka řídila podle platební metody, a ne podle dopravce, nechte
-  u dopravce ve sloupci "Je dobírka" NE, a nastavte dobírku ve sloupci "Je dobírka" u
-  způsobu platby.
+  tohoto dopravce vždy na dobírku bez ohledu na zvolenou platební metodu.
 - U dopravců, jejichž zásilky nebudou přepravované Zásilkovnou, zvolíte "-- ne --".
 
 #### Nastavení omezení na zemi
@@ -191,10 +215,33 @@ Každý z bloků konfigurace se ukládá vlastním tlačítkem "Přidat", nebo "
 - Dále je potřeba povolit vybrané platební moduly v menu *Moduly a služby* - *Platba* ve spodní části stránky
   v nabídce *Omezení pro země*.
 
+### Nastavení platby
+- Pokud chcete, aby se dobírka řídila pouze podle platební metody, a ne podle dopravce, nechte
+  u dopravce ve sloupci "Je dobírka" NE, a nastavte dobírku u platební metody 
+  kliknutím na tlačítko "Nastavit jako dobírku". 
+- Pro zrušení dobírky u platební metody klikněte na tlačítko "Zrušit jako dobírku".
+
+### Jak zobrazit vybrané výdejní místo v emailu potvrzení objednávky
+- PrestaShop 1.6 bohužel neumožňuje automatické vložení informace o vybraném výdejním místě  do emailu.
+- Připravili jsme proto klíče, které můžete vložit do vaší emailové šablony "potvrzení objednávky" na místo, kde chcete zobrazit informace o výdejním místě.
+
+#### V šabloně lze použít tyto klíče:
+- {packetery_pickup_point_label} - popisek Vybrané výdejní místo:
+- {packetery_pickup_point} - zobrazí název výdejního místa
+- Úprava šablon emailu je velmi jednoduchá:
+- Šablony jsou umístěny ve složce mails/xx (xx je jazyk šablony, např pro  emaily v češtině jde o složku mails/cs)  vaší instalace PrestaShopu 1.6.
+
+#### Je potřeba upravit tyto soubory:
+- order_conf.txt  - textová verze emailu
+- order_conf.html – email v html formátu.
+- V uvedených souborech vyhledejte klíč {carrier} (název dopravce) a za něj přidejte {packetery_pickup_point}
+- Informaci můžete vložit i na jiné místo šablony.
+
 ## Seznam objednávek Zásilkovna
 - Seznam objednávek naleznete v menu *Objednávky* - *Zásilkovna*.
-- Zaškrtněte seznam objednávek, které chcete exportovat.  U objednávky můžete nastavit zda se jedná o dobírku.
-- Pro export dat do CSV klikněte na tlačítko "Uložit seznam dobírek a exportovat vybrané".
+- Zaškrtněte seznam objednávek, které chcete exportovat. U objednávky můžete nastavit zda se jedná o dobírku.
+- Označené objednávky můžete kliknutím na tlačítko *Uložit nastavení dobírky a exportovat vybrané* uložit
+  do CSV souboru, který poté nahrajete do klientské sekce » Import zásilek.
 
 ## Aktualizace modulu
 - Pro aktualizaci modulu stáhněte novou verzi a nahrajte ji v menu *Moduly a služby* - *Moduly a služby*.
@@ -220,8 +267,13 @@ Každý z bloků konfigurace se ukládá vlastním tlačítkem "Přidat", nebo "
 - Při problému s použitím modulu nás kontaktujte na adrese technicka.podpora@zasilkovna.cz.
 
 #### Poskytované funkce
-- Integrace widgetu pro výběr výdejních míst v košíku eshopu.
+- Integrace [widgetu v6](https://widget.packeta.com/v6) pro výběr výdejních míst v košíku eshopu.
+- Podpora výdejních míst externích dopravců.
 - Doručení na adresu přes externí dopravce Zásilkovny.
+- Informace o vybraném výdejním místě/dopravci v detailu objednávky PrestaShopu.
+- V detailu objednávky PrestaShopu je možné změnit vybrané výdejní místo pomocí widgetu v6.
+- Zobrazení informace o vybraném výdejní místě v posledním kroku objednávky, v emailu "potvrzení objednávky"
+  a v detailu objednávky registrovaného uživatele.
 - Export zásilek do csv souboru, který lze importovat v [klientské sekci](https://client.packeta.com/).
 
 ### Omezení
