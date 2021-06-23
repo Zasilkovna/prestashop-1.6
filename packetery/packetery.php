@@ -790,27 +790,35 @@ END;
     /**
      * Called when sending email, will add extra variables to email templates.
      * Order confirmation template is located in mails/language-code/order_conf - both html and txt.
-     * Add {packetery_carrier_extra_info} where you need, usually after {carrier}.
-     * @param $params
+     * Add {packetery_pickup_point_label} and {packetery_pickup_point} where you need, usually after {carrier}.
+     * @param array $params
      * @return void
      */
-    public function hookActionGetExtraMailTemplateVars(&$params)
+    public function hookActionGetExtraMailTemplateVars(array &$params)
     {
+        // to not show when not needed
+        $params['extra_template_vars'] = [
+            '{packetery_pickup_point_label}' => '',
+            '{packetery_pickup_point}' => '',
+        ];
+
         if (!isset($params['cart'])) {
             return;
         }
+
         $orderData = self::getPickupPointInfoForOrder('id_cart', (int)$params['cart']->id);
         if (!$orderData || (int)$orderData['is_pickup_point'] === 0) {
             return;
         }
+
         $pickupPoint = $orderData['name_branch'];
         if ((bool)$orderData['is_carrier'] === false) {
             $pickupPoint .= sprintf(' (%s)', $orderData['id_branch']);
         }
-        $params['extra_template_vars'] = array(
+        $params['extra_template_vars'] = [
             '{packetery_pickup_point_label}' => sprintf("%s:", $this->l('Selected Packeta pickup point')),
             '{packetery_pickup_point}' => $pickupPoint,
-        );
+        ];
     }
 
     /**
