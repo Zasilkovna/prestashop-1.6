@@ -791,10 +791,10 @@ END;
      * Called when sending email, will add extra variables to email templates.
      * Order confirmation template is located in mails/language-code/order_conf - both html and txt.
      * Add {packetery_pickup_point_label} and {packetery_pickup_point} where you need, usually after {carrier}.
-     * @param $params
+     * @param array $params
      * @return void
      */
-    public function hookActionGetExtraMailTemplateVars(&$params)
+    public function hookActionGetExtraMailTemplateVars(array &$params)
     {
         // to not show when not needed
         $params['extra_template_vars'] = [
