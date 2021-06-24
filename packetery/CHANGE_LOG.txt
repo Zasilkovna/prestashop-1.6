@@ -15,3 +15,5 @@
       - Fixed: disabled pickup point change for address delivery in order administration
       - Fixed: with a manually created pickup point order, an entry was not created in the list of Packetery orders
         and it was not possible to set pickup point in the order detail
+      - Removed: API key validation using API
+      - Added: API key format validation

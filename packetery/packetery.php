@@ -112,18 +112,17 @@ class Packetery extends Module
             $have_error = true;
         }
 
-        $key = Configuration::get('PACKETERY_API_KEY');
-        $test = "https://www.zasilkovna.cz/api/$key/test";
-        if (!$key) {
+        $apiKey = Configuration::get('PACKETERY_API_KEY');
+        if (!$apiKey) {
             $error[] = $this->l('Packeta API key is not set.');
             $have_error = true;
         } elseif (!$error) {
-            if ($this->fetch($test) != 1) {
-                $error[] = $this->l('Cannot access Packeta API with specified key. Possibly the API key is wrong.');
+            if ((bool)preg_match('/^[a-z\d]{16}$/', $apiKey) === false) {
+                $error[] = $this->l('The API key must be 16 characters long (digits and letters).');
                 $have_error = true;
             } else {
                 $data = Tools::jsonDecode(
-                    $this->fetch("https://www.zasilkovna.cz/api/$key/version-check-prestashop?my=" . $this->version)
+                    $this->fetch("https://www.zasilkovna.cz/api/$apiKey/version-check-prestashop?my=" . $this->version)
                 );
                 if (self::compareVersions($data->version, $this->version) > 0) {
                     $cookie = Context::getContext()->cookie;
