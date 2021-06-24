@@ -17,3 +17,4 @@
         and it was not possible to set pickup point in the order detail
       - Removed: API key validation using API
       - Added: API key format validation
+      - Removed: checking new version of the module using API
