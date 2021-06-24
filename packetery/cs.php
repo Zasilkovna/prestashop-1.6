@@ -23,7 +23,6 @@ $_MODULE['<{packetery}prestashop>packetery_4a93d9164aad959a6abc2de389170ac9'] = 
 $_MODULE['<{packetery}prestashop>packetery_a198deb5663dd03a7a184b5c6aa57a1f'] = 'Opravdu chcete odinstalovat modul? Budou odstraněna všechna data modulu.';
 $_MODULE['<{packetery}prestashop>packetery_2873b137b572ed977e4478e0cb52e4b1'] = 'Není zadán klíč API Zásilkovna.';
 $_MODULE['<{packetery}prestashop>packetery_b849256f88bdae772ccc31f5d6152ece'] = 'API klíč musí mít 16 znaků (číslice a písmena).';
-$_MODULE['<{packetery}prestashop>packetery_417a1696a121c02c563b0db9e5f975df'] = 'Je k dispozici nová verze modulu Zásilkovna pro PrestaShop.';
 $_MODULE['<{packetery}prestashop>packetery_ae5bcba5880983fe71d23b5facb1ca72'] = 'Používáte příliš starou verzi PHP, upgradujte prosím na verzi 5.6 nebo vyšší.';
 $_MODULE['<{packetery}prestashop>packetery_251139b9a981a048a62cb3efb63388ee'] = 'Modul Zásilkovna';
 $_MODULE['<{packetery}prestashop>packetery_0cc39f9a63392ad0ed1f9a14931938b6'] = 'Nastavení modulu';
