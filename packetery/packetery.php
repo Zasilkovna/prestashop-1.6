@@ -742,7 +742,7 @@ END;
     }
 
     /**
-     * Shows information about selected pickup point, right above big green message
+     * Shows information about selected pickup point, in the last step of the cart when confirming the order
      * @param array $params
      * @return string|void
      */
@@ -751,9 +751,7 @@ END;
         if (!isset($params['objOrder'])) {
             return;
         }
-        $orderData = self::getPickupPointInfoForOrder('id_cart', (int)$params['objOrder']->id_cart);
-
-        return $this->displaySmartyPickupPointInfo($orderData, 'display_order_confirmation.tpl');
+        return $this->displayPickupPointInfo($params['objOrder'], 'display_order_confirmation.tpl');
     }
 
     /**
@@ -766,25 +764,23 @@ END;
         if (!isset($params['order'])) {
             return;
         }
-        $orderData = self::getPickupPointInfoForOrder('id_order', (int)$params['order']->id);
-
-        return $this->displaySmartyPickupPointInfo($orderData, 'display_order_detail.tpl');
+        return $this->displayPickupPointInfo($params['order'], 'display_order_detail.tpl');
     }
 
     /**
-     * @param array $orderData
-     * @param string $templateFilename
+     * @param Order $order
+     * @param string $templateName
      * @return string|void
      */
-    private function displaySmartyPickupPointInfo(array $orderData, $templateFilename)
+    private function displayPickupPointInfo($order, $templateName)
     {
-        if (!$orderData || (int)$orderData['is_pickup_point'] === 0) {
-            return;
-        }
-        $this->context->smarty->assign('title', $this->l('Selected Packeta pickup point'));
-        $this->context->smarty->assign('pickupPointOrAddressDeliveryName', $orderData['name_branch']);
+        $orderData = self::getPickupPointInfoForOrder('id_order', (int)$order->id);
+        if ($orderData && (bool)$orderData['is_pickup_point'] === true) {
+            $this->context->smarty->assign('title', $this->l('Selected Packeta pickup point'));
+            $this->context->smarty->assign('pickupPointOrAddressDeliveryName', $orderData['name_branch']);
 
-        return $this->display(__FILE__, $templateFilename);
+            return $this->display(__FILE__, $templateName);
+        }
     }
 
     /**
@@ -829,12 +825,11 @@ END;
     private static function getPickupPointInfoForOrder($key, $id)
     {
         return Db::getInstance()->getRow(
-            sprintf('SELECT `po`.`name_branch`, `po`.`id_branch`, `po`.`is_carrier`, `pa`.`is_pickup_point`
+            'SELECT `po`.`name_branch`, `po`.`id_branch`, `po`.`is_carrier`, `pad`.`is_pickup_point`
             FROM `' . _DB_PREFIX_ . 'packetery_order` `po`
             JOIN `' . _DB_PREFIX_ . 'orders` `o` ON `o`.`id_order` = `po`.`id_order`  
-            JOIN `' . _DB_PREFIX_ . 'packetery_address_delivery` `pa` ON `pa`.`id_carrier` = `o`.`id_carrier`  
-            WHERE `po`.`%s` = %s', $key, $id)
-        );
+            JOIN `' . _DB_PREFIX_ . 'packetery_address_delivery` `pad` ON `pad`.`id_carrier` = `o`.`id_carrier`  
+            WHERE `po`.`' . $key . '` = ' . $id);
     }
 
     /**
