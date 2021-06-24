@@ -116,22 +116,9 @@ class Packetery extends Module
         if (!$apiKey) {
             $error[] = $this->l('Packeta API key is not set.');
             $have_error = true;
-        } elseif (!$error) {
-            if ((bool)preg_match('/^[a-z\d]{16}$/', $apiKey) === false) {
-                $error[] = $this->l('The API key must be 16 characters long (digits and letters).');
-                $have_error = true;
-            } else {
-                $data = Tools::jsonDecode(
-                    $this->fetch("https://www.zasilkovna.cz/api/$apiKey/version-check-prestashop?my=" . $this->version)
-                );
-                if (self::compareVersions($data->version, $this->version) > 0) {
-                    $cookie = Context::getContext()->cookie;
-                    $def_lang = (int)($cookie->id_lang ? $cookie->id_lang : Configuration::get('PS_LANG_DEFAULT'));
-                    $def_lang_iso = Language::getIsoById($def_lang);
-                    $error[] = $this->l('New version of Prestashop Packeta module is available.') . ' '
-                        . $data->message->$def_lang_iso;
-                }
-            }
+        } elseif (!$error && (bool)preg_match('/^[a-z\d]{16}$/', $apiKey) === false) {
+            $error[] = $this->l('The API key must be 16 characters long (digits and letters).');
+            $have_error = true;
         }
 
         return $have_error;
