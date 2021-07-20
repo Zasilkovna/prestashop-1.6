@@ -34,7 +34,7 @@ class Packetery extends Module
     {
         $this->name = 'packetery';
         $this->tab = 'shipping_logistics';
-        $this->version = '2.0.6';
+        $this->version = '2.0.7';
         $this->limited_countries = [];
         parent::__construct();
 
@@ -237,7 +237,75 @@ class Packetery extends Module
         $packetery = new Packetery();
         $result = $packetery->removeOverrideV204();
 
+        $settingsQA = $this->createQuickAccess('index.php?controller=AdminModules&configure=packetery&module_name=packetery', 'Packeta - Settings');
+        $settingsQA->id = $this->getQuickAccessId($settingsQA->link);
+        $settingsQA->save();
+
+        $ordersQA = $this->createQuickAccess('index.php?controller=AdminOrderPacketery', 'Packeta - Orders');
+        $ordersQA->id = $this->getQuickAccessId($ordersQA->link);
+        $ordersQA->save();
+
         return $result;
+    }
+
+    /**
+     * @param string $link
+     * @param string $label
+     * @return \QuickAccessCore
+     */
+    public function createQuickAccess($link, $label) {
+        $quickAccess = new QuickAccessCore();
+        $quickAccess->link = $link;
+
+        foreach (LanguageCore::getLanguages(false) as $lang) {
+            $langId = $lang['id_lang'];
+            $langIso = $lang['iso_code'];
+            $quickAccess->name[$langId] = $this->getTranslationByIso($label, $langIso);
+        }
+
+        $quickAccess->new_window = 0;
+        return $quickAccess;
+    }
+
+    /**
+     * @param string $text
+     * @param string $langIso
+     * @param string $section
+     * @return string|null
+     */
+    public function getTranslationByIso($text, $langIso, $section = 'packetery') {
+        global $_MODULE;
+
+        $langFile = _PS_MODULE_DIR_ . 'packetery/' . $langIso . '.php';
+        if (!is_file($langFile)) {
+            return $text;
+        }
+
+        $origGlobal = $_MODULE;
+        include $langFile;
+        $default_key = '<{packetery}prestashop>' . $section . '_' . md5($text);
+
+        $translatedText = $text;
+        if (isset($_MODULE[$default_key])) {
+            $translatedText = $_MODULE[$default_key];
+        }
+
+        $_MODULE = $origGlobal;
+        return $translatedText;
+    }
+
+    /**
+     * @param string $link
+     * @return int|null
+     */
+    public function getQuickAccessId($link) {
+        $id = Db::getInstance()->getValue('SELECT id_quick_access FROM '._DB_PREFIX_.'quick_access WHERE link = "'.pSQL($link).'"');
+
+        if (is_numeric($id)) {
+            return (int)$id;
+        }
+
+        return null;
     }
 
     /**
@@ -289,6 +357,12 @@ class Packetery extends Module
         ) {
             return false;
         }
+
+        $settingsQA = new QuickAccessCore($this->getQuickAccessId('index.php?controller=AdminModules&configure=packetery&module_name=packetery'));
+        $settingsQA->delete();
+
+        $ordersQA = new QuickAccessCore($this->getQuickAccessId('index.php?controller=AdminOrderPacketery'));
+        $ordersQA->delete();
 
         return true;
     }
