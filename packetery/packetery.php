@@ -259,39 +259,11 @@ class Packetery extends Module
 
         foreach (LanguageCore::getLanguages(false) as $lang) {
             $langId = $lang['id_lang'];
-            $langIso = $lang['iso_code'];
-            $quickAccess->name[$langId] = $this->getTranslationByIso($label, $langIso);
+            $quickAccess->name[$langId] = $this->l($label);
         }
 
         $quickAccess->new_window = 0;
         return $quickAccess;
-    }
-
-    /**
-     * @param string $text
-     * @param string $langIso
-     * @param string $section
-     * @return string|null
-     */
-    public function getTranslationByIso($text, $langIso, $section = 'packetery') {
-        global $_MODULE;
-
-        $langFile = _PS_MODULE_DIR_ . 'packetery/' . $langIso . '.php';
-        if (!is_file($langFile)) {
-            return $text;
-        }
-
-        $origGlobal = $_MODULE;
-        include $langFile;
-        $default_key = '<{packetery}prestashop>' . $section . '_' . md5($text);
-
-        $translatedText = $text;
-        if (isset($_MODULE[$default_key])) {
-            $translatedText = $_MODULE[$default_key];
-        }
-
-        $_MODULE = $origGlobal;
-        return $translatedText;
     }
 
     /**
