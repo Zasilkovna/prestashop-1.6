@@ -257,7 +257,7 @@ class Packetery extends Module
         $quickAccess = new QuickAccessCore();
         $quickAccess->link = $link;
 
-        foreach (LanguageCore::getLanguages(false) as $lang) {
+        foreach (Language::getLanguages(false) as $lang) {
             $langId = $lang['id_lang'];
             $quickAccess->name[$langId] = $this->l($label);
         }
@@ -272,12 +272,7 @@ class Packetery extends Module
      */
     public function getQuickAccessId($link) {
         $id = Db::getInstance()->getValue('SELECT id_quick_access FROM '._DB_PREFIX_.'quick_access WHERE link = "'.pSQL($link).'"');
-
-        if (is_numeric($id)) {
-            return (int)$id;
-        }
-
-        return null;
+	    return (is_numeric($id) ? (int)$id : null);
     }
 
     /**
