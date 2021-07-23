@@ -99,7 +99,6 @@ class AdminOrderPacketery extends AdminTab
             WHERE `o`.`id_order` IN (' . pSQL(implode(',', $ids)) . ')'
         );
 
-        $cnb_rates = null;
         echo "version 6;\r\n";
         echo ";;;;;;;;;;;;;;;;;;;;;;;\r\n";
         foreach ($data as $order) {
@@ -113,9 +112,7 @@ class AdminOrderPacketery extends AdminTab
                     $phone = trim($order[$field]);
             }
 
-			$streetName = $order['address1'];
-			$streetNumber = (!empty($order['address2'] ? $order['address2'] : null));
-
+            $streetName = $order['address1'];
             $currency = new Currency($order['id_currency']);
             $precision = $currency->decimals ? 2 : 0;
 
@@ -136,7 +133,7 @@ class AdminOrderPacketery extends AdminTab
                 '";"' . Configuration::get('PACKETERY_ESHOP_DOMAIN') . '";;;"'
                 . $this->csvEscape(
                     $streetName
-                ) . '";' . $this->csvEscape($streetNumber) . ';"' . $this->csvEscape($order['city']) .
+                ) . '";;"' . $this->csvEscape($order['city']) .
                 '";"' . $this->csvEscape($order['postcode']) . '";' . $this->csvEscape($order['carrier_pickup_point']) . ';;;;' . "\r\n";
         }
         $db->execute(

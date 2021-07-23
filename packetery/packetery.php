@@ -125,24 +125,6 @@ class Packetery extends Module
     }
 
     /**
-     * Compares two versions
-     * @param $v1
-     * @param $v2
-     * @return mixed
-     */
-    public function compareVersions($v1, $v2)
-    {
-        return array_reduce(
-            array_map(
-                create_function('$a,$b', 'return $a - $b;'),
-                explode('.', $v1),
-                explode('.', $v2)
-            ),
-            create_function('$a,$b', 'return ($a ? $a : $b);')
-        );
-    }
-
-    /**
      * Checks if the requirement for the minimum PHP version is met.
      * @return bool
      */
@@ -854,63 +836,6 @@ END;
         <script type="text/javascript" src="' . _MODULE_DIR_ . 'packetery/views/js/front.js?v=' . $this->version . '"></script>       
         <link rel="stylesheet" href="' . _MODULE_DIR_ . 'packetery/views/css/packetery.css?v=' . $this->version . '" />
         ';
-    }
-
-    /**
-     * get data from packetery api
-     * @param $url
-     * @return bool|mixed|string
-     */
-    private function fetch($url)
-    {
-        $transportMethod = self::transportMethod();
-        if (Tools::substr($transportMethod, -1) == 's') {
-            $url = preg_replace('/^http:/', 'https:', $url);
-            $transportMethod = Tools::substr($transportMethod, 0, -1);
-            $ssl = true;
-        } else {
-            $ssl = false;
-        }
-
-        switch ($transportMethod) {
-            case 'curl':
-                $ch = curl_init();
-                curl_setopt($ch, CURLOPT_URL, $url);
-                curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-                curl_setopt($ch, CURLOPT_BINARYTRANSFER, true);
-                curl_setopt($ch, CURLOPT_IPRESOLVE, CURL_IPRESOLVE_V4);
-                curl_setopt($ch, CURLOPT_AUTOREFERER, false);
-                curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 5);
-                curl_setopt($ch, CURLOPT_TIMEOUT, 10);
-                if ($ssl) {
-                    curl_setopt($ch, CURLOPT_CAINFO, _MODULE_DIR_ . "packetery/godaddy.crt");
-                }
-                $body = curl_exec($ch);
-                if (curl_errno($ch) > 0) {
-                    return false;
-                }
-                return $body;
-            case 'fopen':
-                if (function_exists('stream_context_create')) {
-                    // set longer timeout here, because we cannot detect timeout errors
-                    $ctx = stream_context_create(
-                        array(
-                            'http' => array(
-                                'timeout' => 60
-                            ),
-                            'ssl' => array(
-                                'cafile' => _MODULE_DIR_ . "packetery/godaddy.crt",
-                                'verify_peer' => true
-                            )
-                        )
-                    );
-                    return Tools::file_get_contents($url, false, $ctx);
-                }
-                return Tools::file_get_contents($url);
-
-            default:
-                return false;
-        }
     }
 
     /*
