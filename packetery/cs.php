@@ -11,11 +11,12 @@ $_MODULE['<{packetery}prestashop>adminorderpacketery_ce26601dac0dea138b7295f02b7
 $_MODULE['<{packetery}prestashop>adminorderpacketery_f3547ae5e06426d87312eff7dda775aa'] = 'Cena celkem';
 $_MODULE['<{packetery}prestashop>adminorderpacketery_6fbc355a02359656f1e4540d58b784e1'] = 'Datum objednávky';
 $_MODULE['<{packetery}prestashop>adminorderpacketery_7798b7c45fa643a0169a3a9e8ba8a6f9'] = 'Je dobírka';
+$_MODULE['<{packetery}prestashop>adminorderpacketery_8c489d0946f66d17d73f26366a4bf620'] = 'Hmotnost';
 $_MODULE['<{packetery}prestashop>adminorderpacketery_e80d50c020e2486595c969fae46393d1'] = 'Cílové výdejní místo';
 $_MODULE['<{packetery}prestashop>adminorderpacketery_0001316ad0c7eb0f1a8e298fd6e5d070'] = 'Exportováno';
 $_MODULE['<{packetery}prestashop>adminorderpacketery_bafd7322c6e97d25b6299b5d6fe8920b'] = 'Ne';
 $_MODULE['<{packetery}prestashop>adminorderpacketery_93cba07454f06a4a960172bbd6e2a435'] = 'Ano';
-$_MODULE['<{packetery}prestashop>adminorderpacketery_008e7128fecada3769b949e6bd243197'] = 'Uložit nastavení dobírek a exportovat vybrané';
+$_MODULE['<{packetery}prestashop>adminorderpacketery_779272d61fbf9b0c2b8fd0a03d3ddefd'] = 'Uložit a exportovat vybrané';
 $_MODULE['<{packetery}prestashop>adminorderpacketery_9f6171da6f4ad06fcaf01b22d4c6a152'] = 'Exportovaný soubor je možné nahrát v zákaznické sekci Zásilkovny, na stránce Import zásilek - Importovat soubor zásilek.';
 $_MODULE['<{packetery}prestashop>ajax_backoffice_1c01e109818be1612f087bf808d99f71'] = 'Přihlaste se prosím znovu do administrace.';
 $_MODULE['<{packetery}prestashop>packetery_1f826254296262cdecdfd05553dc9818'] = 'Zásilkovna, s.r.o.';

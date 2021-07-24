@@ -69,12 +69,15 @@ class AdminOrderPacketery extends AdminTab
         $db = Db::getInstance();
 
         /* Update is_cod for packetery orders */
-        $is_cods = (is_array(Tools::getValue('packetery_order_is_cod')) ? Tools::getValue('packetery_order_is_cod') : array());
-        foreach ($is_cods as $id => $is_cod) {
-            $db->execute(
-                'update `' . _DB_PREFIX_ . 'packetery_order` set is_cod=' .
-                ((int)$is_cod) . ' where id_order=' . ((int)$id)
-            );
+        $orders = Tools::getValue('packetery_order');
+
+        foreach ($orders as $id => $order) {
+            $updateFields = [
+                'is_cod' => (int)$order['is_cod'],
+                'weight' => ($order['weight'] !== "" ? (float)$order['weight'] : null),
+
+            ];
+            Db::getInstance()->update('packetery_order', $updateFields, '`id_order` = ' . $id,0,true);
         }
 
         /* Get packetery order IDs */
@@ -90,7 +93,7 @@ class AdminOrderPacketery extends AdminTab
                 `o`.`id_order`, `a`.`firstname`, `a`.`lastname`, `a`.`phone`, `a`.`phone_mobile`, `c`.`email`,
                 `o`.`total_paid` `total`, `po`.`id_branch`, `po`.`is_cod`, `o`.`id_currency`,
                 `a`.`company`, `a`.`address1`, `a`.`address2`, `a`.`postcode`, `a`.`city`,
-                `po`.`is_carrier`, `po`.`carrier_pickup_point`, `o`.`reference` 
+                `po`.`is_carrier`, `po`.`carrier_pickup_point`, `po`.`weight`, `o`.`reference` 
             FROM
                 `' . _DB_PREFIX_ . 'orders` `o`
                 JOIN `' . _DB_PREFIX_ . 'packetery_order` `po` ON (`po`.`id_order` = `o`.`id_order`)
@@ -118,10 +121,7 @@ class AdminOrderPacketery extends AdminTab
 
             /* Convert prices to correct currency */
             $total = round($order['total'], $precision);
-
-            $orderCore = new OrderCore($order['id_order']);
-            $weight = $orderCore->getTotalWeight();
-
+            $weight = $this->getTotalWeight((int)$order['id_order'], $order['weight']);
             $cod_total = $total;
 
             echo ';"' . $this->csvEscape(Packetery::ID_PREF_REF === Configuration::get('PACKETERY_ID_PREFERENCE') ? $order['reference'] : $order['id_order']) .
@@ -192,6 +192,8 @@ class AdminOrderPacketery extends AdminTab
         }
         echo $paging;
 
+        $weightUnit = Configuration::get('PS_WEIGHT_UNIT');
+
         /* Table structure and headings */
         echo "<table id='packetery-order-export' class='table'>";
         echo "<tr>
@@ -201,6 +203,7 @@ class AdminOrderPacketery extends AdminTab
             <th>" . $this->l('Total Price') . "</th>
             <th>" . $this->l('Order Date') . "</th>
             <th>" . $this->l('Is COD') . "</th>
+            <th>" . $this->l('Weight') . " ({$weightUnit})</th>
             <th>" . $this->l('Destination pickup point') . "</th>
             <th>" . $this->l('Exported') . "</th>
         </tr>";
@@ -215,6 +218,7 @@ class AdminOrderPacketery extends AdminTab
             CONCAT(`c`.`firstname`, " ", `c`.`lastname`) AS `customer`,
             `o`.`total_paid` AS `total`,
             `o`.`date_add` AS `date`,
+            `po`.`weight`,
             `po`.`is_cod`,
             `po`.`name_branch`,
             `po`.`exported`
@@ -223,16 +227,20 @@ class AdminOrderPacketery extends AdminTab
 
         /* Displaying itself */
         foreach ($orders as $order) {
+            $orderId = (int)$order['id_order'];
+            $weight = $this->getTotalWeight($orderId, $order['weight']);
+
             echo "<tr" . ($order['exported'] == 1 ? " style='background-color: #ddd'" : '') . ">
-                <td><input name='packetery_order_id[]' value='{$order['id_order']}' type='checkbox'> {$order['id_order']}</td>
+                <td><input name='packetery_order_id[]' value='{$orderId}' type='checkbox'> {$orderId}</td>
                 <td>{$order['reference']}</td>
                 <td>{$order['customer']}</td>
                 <td align='right'>" . Tools::displayPrice($order['total'], new Currency($order['id_currency'])) . "</td>
                 <td>" . Tools::displayDate($order['date'], $order['id_lang'], true) . "</td>
-                <td><select name='packetery_order_is_cod[{$order['id_order']}]'>
+                <td><select name='packetery_order[{$orderId}][is_cod]'>
                     <option value='0'" . ($order['is_cod'] == 0 ? ' selected="selected"' : '') . '>' . $this->l('No') . "</option>
                     <option value='1'" . ($order['is_cod'] == 1 ? ' selected="selected"' : '') . '>' . $this->l('Yes') . "</option>
                 </select></td>
+                <td><input name='packetery_order[{$orderId}][weight]' value='{$weight}' type='number' step='any' min='0.01'></td>
                 <td>{$order['name_branch']}</td><td>" .
                 ($order['exported'] == 1 ? $this->l('Yes') : $this->l('No')) . "</td>
             </tr>";
@@ -241,7 +249,7 @@ class AdminOrderPacketery extends AdminTab
         echo "</table>";
         echo $paging;
         echo "<br><input type='submit' value='" . htmlspecialchars(
-                $this->l('Save COD setting and export selected'),
+                $this->l('Save and export selected'),
                 ENT_QUOTES
             ) . "' class='button'>";
         echo "<br><br><p>" . $this->l('The exported file can be uploaded in Packeta client area, under Parcels import, section Import parcels file.') . "</p>";
@@ -264,5 +272,17 @@ class AdminOrderPacketery extends AdminTab
                     });
                 });
             </script>';
+    }
+
+    /**
+     * @param int $orderId
+     * @param string|null $weight
+     *
+     * @return float
+     */
+    private function getTotalWeight($orderId, $weight)
+    {
+        $orderCore = new OrderCore($orderId);
+        return (is_null($weight) ? $orderCore->getTotalWeight() : (float)$weight);
     }
 }

@@ -24,6 +24,7 @@ $sql = array(
             `exported` tinyint(1) NOT NULL DEFAULT 0,
             `is_carrier` tinyint(1) NOT NULL DEFAULT 0,
             `carrier_pickup_point` varchar(40) NULL,
+            `weight` decimal(20,6) NULL,
             UNIQUE(`id_order`),
             UNIQUE(`id_cart`)
         ) ENGINE=' . _MYSQL_ENGINE_ . ' DEFAULT CHARSET=utf8;',
