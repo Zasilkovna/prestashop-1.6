@@ -243,13 +243,29 @@ class Packetery extends Module
     }
 
 	public function saveQuickLinks() {
-		$settingsQA = $this->createQuickAccess('index.php?controller=AdminModules&configure=packetery&module_name=packetery', 'Packeta - Settings');
+		$settingsQA = $this->createQuickAccess($this->createQuickAccessSettingsUrl(), 'Packeta - Settings');
 		$settingsQA->id = $this->getQuickAccessId($settingsQA->link);
 		$settingsQA->save();
 
-		$ordersQA = $this->createQuickAccess('index.php?controller=AdminOrderPacketery', 'Packeta - Orders');
+		$ordersQA = $this->createQuickAccess($this->createQuickAccessOrdersUrl(), 'Packeta - Orders');
 		$ordersQA->id = $this->getQuickAccessId($ordersQA->link);
 		$ordersQA->save();
+    }
+
+    /**
+     * Use controller name to create a link
+     *
+     * @param string $controller
+     * @param array $params
+     * @param bool $with_token include or not the token in the url
+     *
+     * @return string url
+     */
+    public function getAdminLink($controller, array $params = [], $with_token = true) {
+        $id_lang = Context::getContext()->language->id;
+        $params += ($with_token ? ['token' => Tools::getAdminTokenLite($controller)] : []);
+
+        return Dispatcher::getInstance()->createUrl($controller, $id_lang, $params, false);
     }
 
     /**
@@ -268,6 +284,17 @@ class Packetery extends Module
 
         $quickAccess->new_window = 0;
         return $quickAccess;
+    }
+
+    private function createQuickAccessSettingsUrl() {
+        return $this->getAdminLink('AdminModules', [
+            'configure' => $this->name,
+            'module_name' => $this->name,
+        ], false);
+    }
+
+    private function createQuickAccessOrdersUrl() {
+        return $this->getAdminLink('AdminOrderPacketery', [], false);
     }
 
     /**
@@ -329,10 +356,10 @@ class Packetery extends Module
             return false;
         }
 
-        $settingsQA = new QuickAccessCore($this->getQuickAccessId('index.php?controller=AdminModules&configure=packetery&module_name=packetery'));
+        $settingsQA = new QuickAccessCore($this->getQuickAccessId($this->createQuickAccessSettingsUrl()));
         $settingsQA->delete();
 
-        $ordersQA = new QuickAccessCore($this->getQuickAccessId('index.php?controller=AdminOrderPacketery'));
+        $ordersQA = new QuickAccessCore($this->getQuickAccessId($this->createQuickAccessOrdersUrl()));
         $ordersQA->delete();
 
         return true;
