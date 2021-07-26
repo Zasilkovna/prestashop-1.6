@@ -237,15 +237,19 @@ class Packetery extends Module
         $packetery = new Packetery();
         $result = $packetery->removeOverrideV204();
 
-        $settingsQA = $this->createQuickAccess('index.php?controller=AdminModules&configure=packetery&module_name=packetery', 'Packeta - Settings');
-        $settingsQA->id = $this->getQuickAccessId($settingsQA->link);
-        $settingsQA->save();
-
-        $ordersQA = $this->createQuickAccess('index.php?controller=AdminOrderPacketery', 'Packeta - Orders');
-        $ordersQA->id = $this->getQuickAccessId($ordersQA->link);
-        $ordersQA->save();
+        $this->saveQuickLinks();
 
         return $result;
+    }
+
+	public function saveQuickLinks() {
+		$settingsQA = $this->createQuickAccess('index.php?controller=AdminModules&configure=packetery&module_name=packetery', 'Packeta - Settings');
+		$settingsQA->id = $this->getQuickAccessId($settingsQA->link);
+		$settingsQA->save();
+
+		$ordersQA = $this->createQuickAccess('index.php?controller=AdminOrderPacketery', 'Packeta - Orders');
+		$ordersQA->id = $this->getQuickAccessId($ordersQA->link);
+		$ordersQA->save();
     }
 
     /**
