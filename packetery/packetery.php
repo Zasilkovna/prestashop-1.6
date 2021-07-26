@@ -257,15 +257,17 @@ class Packetery extends Module
      *
      * @param string $controller
      * @param array $params
-     * @param bool $with_token include or not the token in the url
+     * @param bool $withToken include or not the token in the url
      *
      * @return string url
      */
-    public function getAdminLink($controller, array $params = [], $with_token = true) {
-        $id_lang = Context::getContext()->language->id;
-        $params += ($with_token ? ['token' => Tools::getAdminTokenLite($controller)] : []);
+    public function getAdminLink($controller, array $params = [], $withToken = true) {
+        $idLang = Context::getContext()->language->id;
+        if ($withToken) {
+            $params['token'] = Tools::getAdminTokenLite($controller);
+        }
 
-        return Dispatcher::getInstance()->createUrl($controller, $id_lang, $params, false);
+        return Dispatcher::getInstance()->createUrl($controller, $idLang, $params, false);
     }
 
     /**
