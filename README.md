@@ -137,6 +137,7 @@ Each of the configuration blocks is saved with its own "Add" or "Save" button.
 - Display of information about the selected pickup point in the last step of the order, 
   in the "order confirmation" email and in the order detail of the registered user.
 - Export shipments to a CSV file, which can be imported in the [client section](https://client.packeta.com/).
+- It is now possible to set the weight of the shipment in the list of Packeta orders, before sending it to Packeta (since version 2.0.7).
 
 ### Limitations
 - the module does not currently support multistore
@@ -275,6 +276,7 @@ Každý z bloků konfigurace se ukládá vlastním tlačítkem "Přidat", nebo "
 - Zobrazení informace o vybraném výdejní místě v posledním kroku objednávky, v emailu "potvrzení objednávky"
   a v detailu objednávky registrovaného uživatele.
 - Export zásilek do csv souboru, který lze importovat v [klientské sekci](https://client.packeta.com/).
+- V seznamu objednávek Zásilkovny je nyní možné upravit hmotnost zásilky, před odesláním do Zásilkovny (od verze 2.0.7).
 
 ### Omezení
 - Modul v současné době nepodporuje multistore.
