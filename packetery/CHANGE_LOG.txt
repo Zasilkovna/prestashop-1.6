@@ -18,4 +18,5 @@
       - Removed: API key validation using API
       - Added: API key format validation
       - Removed: checking new version of the module using API
-2.0.7 - Quick access links added during installation and removed during uninstallation
+2.0.7 - Added: possibility to edit the weight before packet
+      - Quick access links added during installation and removed during uninstallation

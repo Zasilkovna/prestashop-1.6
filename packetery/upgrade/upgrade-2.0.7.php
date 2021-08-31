@@ -1,7 +1,4 @@
 <?php
-
-// WARNING: there has to be the checkRequirements call at the beginning of each upgrade method
-
 if (!defined('_PS_VERSION_')) {
     exit;
 }
@@ -12,6 +9,15 @@ if (!defined('_PS_VERSION_')) {
  */
 function upgrade_module_2_0_7($object)
 {
+    $result = Db::getInstance()->execute('
+        ALTER TABLE `' . _DB_PREFIX_ . 'packetery_order`
+        ADD `weight` DECIMAL(20,6) NULL
+    ');
+  
+    if ($result === false) {
+      return false;
+    }
+  
     if (!$object->checkRequirements()) {
         return false;
     }
