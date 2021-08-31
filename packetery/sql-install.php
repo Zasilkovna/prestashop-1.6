@@ -15,31 +15,31 @@
 
 $sql = array(
     'CREATE TABLE IF NOT EXISTS `' . _DB_PREFIX_ . 'packetery_order` (
-            `id_order` int,
-            `id_cart` int,
-            `id_branch` int NOT NULL,
-            `name_branch` varchar(255) NOT NULL,
-            `currency_branch` char(3) NOT NULL,
+            `id_order` INT,
+            `id_cart` INT,
+            `id_branch` INT NOT NULL,
+            `name_branch` VARCHAR(255) NOT NULL,
+            `currency_branch` CHAR(3) NOT NULL,
             `is_cod` tinyint(1) NOT NULL DEFAULT 0,
             `exported` tinyint(1) NOT NULL DEFAULT 0,
             `is_carrier` tinyint(1) NOT NULL DEFAULT 0,
-            `carrier_pickup_point` varchar(40) NULL,
-            `weight` decimal(20,6) NULL,
+            `carrier_pickup_point` VARCHAR(40) NULL,
+            `weight` DECIMAL(20,6) NULL,
             UNIQUE(`id_order`),
             UNIQUE(`id_cart`)
         ) ENGINE=' . _MYSQL_ENGINE_ . ' DEFAULT CHARSET=utf8;',
 
-    'create table if not exists `' . _DB_PREFIX_ . 'packetery_payment` (
+    'CREATE TABLE IF NOT EXISTS `' . _DB_PREFIX_ . 'packetery_payment` (
             `module_name` varchar(255) not null primary key,
             `is_cod` tinyint(1) not null default 0
         ) engine=' . _MYSQL_ENGINE_ . ' default charset=utf8;',
 
-    'create table if not exists `' . _DB_PREFIX_ . 'packetery_address_delivery` (
-            `id_carrier` int not null primary key,
-            `id_branch` int null,
-            `name_branch` varchar(255) null,
-            `currency_branch` char(3) null,
-            `is_cod` tinyint(1) not null default 0,
-            `is_pickup_point` tinyint(1) not null default 0
-        ) engine=' . _MYSQL_ENGINE_ . ' default charset=utf8;'
+    'CREATE TABLE IF NOT EXISTS `' . _DB_PREFIX_ . 'packetery_address_delivery` (
+            `id_carrier` INT NOT NULL PRIMARY KEY,
+            `id_branch` INT NULL,
+            `name_branch` VARCHAR(255) NULL,
+            `currency_branch` CHAR(3) NULL,
+            `is_cod` tinyint(1) NOT NULL DEFAULT 0,
+            `is_pickup_point` tinyint(1) NOT NULL DEFAULT 0
+        ) engine=' . _MYSQL_ENGINE_ . ' DEFAULT charset=utf8;'
 );

@@ -73,11 +73,11 @@ class AdminOrderPacketery extends AdminTab
 
         foreach ($orders as $id => $order) {
             $updateFields = [
-                'is_cod' => (int)$order['is_cod'],
-                'weight' => ($order['weight'] !== "" ? (float)$order['weight'] : null),
+                'is_cod' => (bool)$order['is_cod'],
+                'weight' => ($order['weight'] !== "" ? (float)str_replace([',', ' '], ['.', ''], $order['weight']) : null),
 
             ];
-            Db::getInstance()->update('packetery_order', $updateFields, '`id_order` = ' . $id,0,true);
+            $db->update('packetery_order', $updateFields, '`id_order` = ' . (int)$id, 0, true);
         }
 
         /* Get packetery order IDs */
@@ -240,7 +240,7 @@ class AdminOrderPacketery extends AdminTab
                     <option value='0'" . ($order['is_cod'] == 0 ? ' selected="selected"' : '') . '>' . $this->l('No') . "</option>
                     <option value='1'" . ($order['is_cod'] == 1 ? ' selected="selected"' : '') . '>' . $this->l('Yes') . "</option>
                 </select></td>
-                <td><input name='packetery_order[{$orderId}][weight]' value='{$weight}' type='number' step='any' min='0.01'></td>
+                <td><input name='packetery_order[{$orderId}][weight]' size='10' value='{$weight}' type='text'></td>
                 <td>{$order['name_branch']}</td><td>" .
                 ($order['exported'] == 1 ? $this->l('Yes') : $this->l('No')) . "</td>
             </tr>";
@@ -263,10 +263,7 @@ class AdminOrderPacketery extends AdminTab
                 window.packetery.jQuery(function() {
                     var $ = window.packetery.jQuery;
                     $("#packetery-order-export").find("tr").css({cursor: "pointer"}).end().on("click", "tr", function(e) {
-                        if($(e.target).is("input")) return;
-                        if($(e.target).is("select")) return;
-                        if($(e.target).is("option")) return;
-    
+                        if($(e.target).is("input, select, option")) return;
                         var i = $(this).find("input");
                         i.attr("checked", !i.is(":checked"));
                     });
