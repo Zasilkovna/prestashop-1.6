@@ -219,7 +219,75 @@ class Packetery extends Module
         $packetery = new Packetery();
         $result = $packetery->removeOverrideV204();
 
+        $this->saveQuickLinks();
+
         return $result;
+    }
+
+	public function saveQuickLinks() {
+		$settingsQA = $this->createQuickAccess($this->createQuickAccessSettingsUrl(), 'Packeta - Settings');
+		$settingsQA->id = $this->getQuickAccessId($settingsQA->link);
+		$settingsQA->save();
+
+		$ordersQA = $this->createQuickAccess($this->createQuickAccessOrdersUrl(), 'Packeta - Orders');
+		$ordersQA->id = $this->getQuickAccessId($ordersQA->link);
+		$ordersQA->save();
+    }
+
+    /**
+     * Use controller name to create a link
+     *
+     * @param string $controller
+     * @param array $params
+     * @param bool $withToken include or not the token in the url
+     *
+     * @return string url
+     */
+    public function getAdminLink($controller, array $params = [], $withToken = true) {
+        $idLang = Context::getContext()->language->id;
+        if ($withToken) {
+            $params['token'] = Tools::getAdminTokenLite($controller);
+        }
+
+        return Dispatcher::getInstance()->createUrl($controller, $idLang, $params, false);
+    }
+
+    /**
+     * @param string $link
+     * @param string $label
+     * @return \QuickAccessCore
+     */
+    public function createQuickAccess($link, $label) {
+        $quickAccess = new QuickAccessCore();
+        $quickAccess->link = $link;
+
+        foreach (Language::getLanguages(false) as $lang) {
+            $langId = $lang['id_lang'];
+            $quickAccess->name[$langId] = $this->l($label);
+        }
+
+        $quickAccess->new_window = 0;
+        return $quickAccess;
+    }
+
+    private function createQuickAccessSettingsUrl() {
+        return $this->getAdminLink('AdminModules', [
+            'configure' => $this->name,
+            'module_name' => $this->name,
+        ], false);
+    }
+
+    private function createQuickAccessOrdersUrl() {
+        return $this->getAdminLink('AdminOrderPacketery', [], false);
+    }
+
+    /**
+     * @param string $link
+     * @return int|null
+     */
+    public function getQuickAccessId($link) {
+        $id = Db::getInstance()->getValue('SELECT id_quick_access FROM '._DB_PREFIX_.'quick_access WHERE link = "'.pSQL($link).'"');
+	    return (is_numeric($id) ? (int)$id : null);
     }
 
     /**
@@ -271,6 +339,12 @@ class Packetery extends Module
         ) {
             return false;
         }
+
+        $settingsQA = new QuickAccessCore($this->getQuickAccessId($this->createQuickAccessSettingsUrl()));
+        $settingsQA->delete();
+
+        $ordersQA = new QuickAccessCore($this->getQuickAccessId($this->createQuickAccessOrdersUrl()));
+        $ordersQA->delete();
 
         return true;
     }
