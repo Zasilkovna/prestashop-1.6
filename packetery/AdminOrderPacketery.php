@@ -255,18 +255,13 @@ class AdminOrderPacketery extends AdminTab
         echo "<br><br><p>" . $this->l('The exported file can be uploaded in Packeta client area, under Parcels import, section Import parcels file.') . "</p>";
         echo "</fieldset>";
         echo "</form>";
-        echo "<script type='text/javascript' src='//www.zasilkovna.cz/api/" .
-            Configuration::get('PACKETERY_API_KEY') . "/branch.js?sync_load=1&amp;prestashop=1'></script>";
         /* Check checkbox by clicking on table row */
         echo '
             <script type="text/javascript">
-                window.packetery.jQuery(function() {
-                    var $ = window.packetery.jQuery;
-                    $("#packetery-order-export").find("tr").css({cursor: "pointer"}).end().on("click", "tr", function(e) {
-                        if($(e.target).is("input, select, option")) return;
-                        var i = $(this).find("input");
-                        i.attr("checked", !i.is(":checked"));
-                    });
+                $("#packetery-order-export").find("tr").css({cursor: "pointer"}).end().on("click", "tr", function(e) {
+                    if($(e.target).is("input, select, option")) return;
+                    var i = $(this).find("input");
+                    i.attr("checked", !i.is(":checked"));
                 });
             </script>';
     }

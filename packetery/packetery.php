@@ -34,7 +34,7 @@ class Packetery extends Module
     {
         $this->name = 'packetery';
         $this->tab = 'shipping_logistics';
-        $this->version = '2.0.7';
+        $this->version = '2.0.8';
         $this->limited_countries = [];
         parent::__construct();
 
