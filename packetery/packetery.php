@@ -176,16 +176,6 @@ class Packetery extends Module
             return false;
         }
 
-        // for PrestaShop >= 1.4.0.2 there is one-page-checkout, more hooks are required
-        $v = explode('.', _PS_VERSION_);
-        if (_PS_VERSION_ > '1.4.0' || (array_slice($v, 0, 3) == array(1, 4, 0) && $v[3] >= 2)) {
-            if (!$this->registerHook('processCarrier')
-                || !$this->registerHook('paymentTop')
-            ) {
-                return false;
-            }
-        }
-
         // optional hooks (allow fail for older versions of PrestaShop)
         $this->registerHook('displayOrderConfirmation');
         $this->registerHook('displayOrderDetail');
@@ -329,12 +319,10 @@ class Packetery extends Module
             || !$this->unregisterHook('newOrder')
             || !$this->unregisterHook('header')
             || !$this->unregisterHook('displayFooter')
-            || !$this->unregisterHook('processCarrier')
             || !$this->unregisterHook('displayOrderConfirmation')
             || !$this->unregisterHook('displayOrderDetail')
             || !$this->unregisterHook('actionGetExtraMailTemplateVars')
             || !$this->unregisterHook('displayAdminOrderLeft')
-            || !$this->unregisterHook('paymentTop')
             || !$this->unregisterHook('backOfficeTop')
         ) {
             return false;
@@ -963,15 +951,6 @@ END;
     }
 
     /**
-     * @param int $carrierId
-     * @return bool
-     */
-    private static function isPacketeryCarrier($carrierId)
-    {
-        return (Db::getInstance()->getValue('SELECT 1 FROM `' . _DB_PREFIX_ . 'packetery_address_delivery` WHERE `id_carrier` = ' . $carrierId) == 1);
-    }
-
-    /**
      * @return array
      */
     public static function addressDeliveries()
@@ -1003,32 +982,6 @@ END;
             uasort($res, $fn);
         }
         return $res;
-    }
-
-    /**
-     * invalidates carrier if it's packetery and doesn't have a selected branch
-     * @param $params
-     */
-    public function hookPaymentTop($params)
-    {
-        $db = Db::getInstance();
-        $isPacketeryCarrier = self::isPacketeryCarrier((int)$params['cart']->id_carrier);
-        $hasSelectedBranch = ($db->getValue(
-                'SELECT `id_branch` FROM `' . _DB_PREFIX_ . 'packetery_order` WHERE `id_cart` = ' . ((int)$params['cart']->id)
-            ) > 0);
-
-        if ($isPacketeryCarrier && !$hasSelectedBranch) {
-            $params['cart']->id_carrier = 0;
-        }
-    }
-
-    /**
-     * Hook call in a hook call
-     * @param $params
-     */
-    public function hookProcessCarrier($params)
-    {
-        $this->hookPaymentTop($params);
     }
 
     /**
