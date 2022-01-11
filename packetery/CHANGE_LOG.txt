@@ -22,3 +22,4 @@
       - Quick access links added during installation and removed during uninstallation
 2.0.8 - Removed: branch.js loading in Packeta order administration
       - Removed: hooks processCarrier and paymentTop causing conflicts with other modules
+2.0.9 - Added: ON DUPLICATE KEY UPDATE support for older PrestaShop versions
