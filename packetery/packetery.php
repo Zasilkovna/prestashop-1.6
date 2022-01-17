@@ -34,7 +34,7 @@ class Packetery extends Module
     {
         $this->name = 'packetery';
         $this->tab = 'shipping_logistics';
-        $this->version = '2.0.8';
+        $this->version = '2.0.9';
         $this->limited_countries = [];
         parent::__construct();
 
@@ -511,14 +511,15 @@ class Packetery extends Module
                 $branchId = (int)$carrier['id_branch'];
             }
 
-            Db::getInstance()->insert('packetery_address_delivery', [
+            $carrierData = [
                 'id_carrier' => (int)$carrierId,
                 'is_cod' => (int)$carrier['is_cod'],
                 'id_branch' => $branchId,
                 'name_branch' => $carrierName,
                 'currency_branch' => $carrierCurrency,
                 'is_pickup_point' => ($branchId === null ? 1 : 0),
-            ], true, true, Db::ON_DUPLICATE_KEY);
+            ];
+            $this->insertOnDuplicateKeyUpdate('packetery_address_delivery', $carrierData, true);
         }
     }
 
@@ -730,7 +731,7 @@ END;
             $orderData['is_cod'] = 1;
         }
 
-        $db->insert('packetery_order', $orderData, false, true, Db::ON_DUPLICATE_KEY);
+        $this->insertOnDuplicateKeyUpdate('packetery_order', $orderData);
     }
 
     public function hookDisplayAdminOrderLeft($params)
@@ -1064,4 +1065,48 @@ END;
         echo json_encode(['result' => 'ok']);
     }
 
+    /**
+     * @param array $data associative array of data, it supports integer, float, boolean, null and string values
+     * @param bool $nullValues convert empty string to null?
+     * @return string array stringified to SQL
+     */
+    private function generateSQLFromData($data, $nullValues)
+    {
+        $sqlParts = [];
+        $db = Db::getInstance();
+        foreach ($data as $key => $value) {
+            switch (true) {
+                case (is_int($value) || is_float($value)):
+                    $valueEscaped = $value;
+                    break;
+                case is_bool($value):
+                    $valueEscaped = var_export($value, true);
+                    break;
+                case is_null($value):
+                    $valueEscaped = 'NULL';
+                    break;
+                default:
+                    // same behavior as newer PrestaShop
+                    if ($nullValues && $value === '') {
+                        $valueEscaped = 'NULL';
+                        break;
+                    }
+                    $valueEscaped = '\'' . $db->escape((string)$value) . '\'';
+            }
+            $sqlParts[] = sprintf(' `%s` = %s', $db->escape($key), $valueEscaped);
+        }
+        return implode(',', $sqlParts);
+    }
+
+    /**
+     * older PS does not support ON_DUPLICATE_KEY so this is simplified version of Db::insert
+     * @param string $table
+     * @param array $data
+     * @param bool $nullValues
+     */
+    private function insertOnDuplicateKeyUpdate($table, $data, $nullValues = false)
+    {
+        $dataSql = $this->generateSQLFromData($data, $nullValues);
+        Db::getInstance()->execute('INSERT INTO `' . _DB_PREFIX_ . $table . '` SET ' . $dataSql . ' ON DUPLICATE KEY UPDATE ' . $dataSql);
+    }
 }
