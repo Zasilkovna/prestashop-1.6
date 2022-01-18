@@ -1,13 +1,8 @@
-2.0.5 - Updated: Transport administration - removal of adding carriers on the module side, solved similarly to
-        address delivery by pairing existing carriers with the module.
-      - Removed: Carrier class override from older versions.
-      - Removed: Country and language forcing.
-      - Added: Widget v6 support.
-      - Updated: In case of uninstallation, all database tables created by the module will be deleted.
-      - Added: possibility of using either ID or Reference as order ID in export
-      - Added: information about branch or address delivery carrier into order administration
-        and possibility to change branch using widget
-      - Updated: CSV export version upgraded to version 6
+2.0.9 - Fixed: ON DUPLICATE KEY UPDATE support for older PrestaShop versions
+2.0.8 - Removed: branch.js loading in Packeta order administration
+      - Removed: hooks processCarrier and paymentTop causing conflicts with other modules
+2.0.7 - Added: possibility to edit the weight before packet
+      - Quick access links added during installation and removed during uninstallation
 2.0.6 - Added: information about chosen pickup point to order confirmation and e-mail
       - Added: minimum required PHP version checking during install and upgrade
       - Updated: faster and more reliable loading of address delivery carriers;
@@ -18,8 +13,13 @@
       - Removed: API key validation using API
       - Added: API key format validation
       - Removed: checking new version of the module using API
-2.0.7 - Added: possibility to edit the weight before packet
-      - Quick access links added during installation and removed during uninstallation
-2.0.8 - Removed: branch.js loading in Packeta order administration
-      - Removed: hooks processCarrier and paymentTop causing conflicts with other modules
-2.0.9 - Added: ON DUPLICATE KEY UPDATE support for older PrestaShop versions
+2.0.5 - Updated: Transport administration - removal of adding carriers on the module side, solved similarly to
+        address delivery by pairing existing carriers with the module.
+      - Removed: Carrier class override from older versions.
+      - Removed: Country and language forcing.
+      - Added: Widget v6 support.
+      - Updated: In case of uninstallation, all database tables created by the module will be deleted.
+      - Added: possibility of using either ID or Reference as order ID in export
+      - Added: information about branch or address delivery carrier into order administration
+        and possibility to change branch using widget
+      - Updated: CSV export version upgraded to version 6
