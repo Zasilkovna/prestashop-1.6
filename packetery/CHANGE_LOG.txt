@@ -1,3 +1,4 @@
+2.0.10 - Fixed: proper use of extra_template_vars that doesn't overwrite extra_template_vars of other modules
 2.0.9 - Fixed: ON DUPLICATE KEY UPDATE support for older PrestaShop versions
 2.0.8 - Removed: branch.js loading in Packeta order administration
       - Removed: hooks processCarrier and paymentTop causing conflicts with other modules
