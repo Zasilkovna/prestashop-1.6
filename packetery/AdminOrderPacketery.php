@@ -21,6 +21,8 @@ require_once(dirname(__FILE__) . '/packetery.php');
 
 class AdminOrderPacketery extends AdminTab
 {
+    const AFFILIATE_ID = '26d07661f147af2f';
+
     private $packetery = null;
 
     public function __construct()
@@ -102,7 +104,7 @@ class AdminOrderPacketery extends AdminTab
             WHERE `o`.`id_order` IN (' . pSQL(implode(',', $ids)) . ')'
         );
 
-        echo "version 6;\r\n";
+        echo "version 8;\r\n";
         echo ";;;;;;;;;;;;;;;;;;;;;;;\r\n";
         foreach ($data as $order) {
             $phone = "";
@@ -134,7 +136,8 @@ class AdminOrderPacketery extends AdminTab
                 . $this->csvEscape(
                     $streetName
                 ) . '";;"' . $this->csvEscape($order['city']) .
-                '";"' . $this->csvEscape($order['postcode']) . '";' . $this->csvEscape($order['carrier_pickup_point']) . ';;;;' . "\r\n";
+                '";"' . $this->csvEscape($order['postcode']) . '";' . $this->csvEscape($order['carrier_pickup_point']) . ';;;;;;;;'
+                . $this->csvEscape(self::AFFILIATE_ID) . ';' . "\r\n";
         }
         $db->execute(
             'update `' . _DB_PREFIX_ . 'packetery_order` set exported=1 where id_order in(' . implode(',', $ids) . ')'
