@@ -1,19 +1,21 @@
 [Návod v češtině](#modul-pro-prestashop-16)
 
 # Module for PrestaShop 1.6
+As PrestaShop 1.6.1.x has officially reached its “end of life” status, further updates, development, 
+and support for the module targeting this version have been discontinued.
 
 ### Download link
 [Download the latest version](https://github.com/Zasilkovna/prestashop-1.6/releases/latest)
 
 ## System requirements
-For installation of Prestashop 1.6.x there is required to install following components:
+For installation of Prestashop 1.6.1.24 there is required to install following components:
 - System: Unix, Linux (recommended); or Windows
 - Web server: Apache or NGINX
   - mod_rewrite allowed
   - mod_security allowed
   - mod_auth_basic denied
   - RECOMMENDED: at least 64Mb of memory reserved for PHP, the more the better
-- PHP: version 5.6 and newer
+- PHP: version 5.6 - 7.1
 - MySQL: version 5.0 and newer
 - PHP extension:
   - PDO_MySQL
@@ -125,8 +127,8 @@ Each of the configuration blocks is saved with its own "Add" or "Save" button.
 - english
 
 #### Supported versions:
-- PrestaShop vesion 1.6.x
-- If there is any problem with the module feel free to contact us on support@packeta.com
+- PrestaShop vesion 1.6.1.24
+- If there is any problem with the module feel free to contact us on [e-commerce.support@packeta.com](mailto:e-commerce.support@packeta.com)
 
 #### Provided functions:
 - Integration of [widget v6](https://widget.packeta.com/v6) for selection of pickup points in the e-shop cart.
@@ -146,6 +148,8 @@ Each of the configuration blocks is saved with its own "Add" or "Save" button.
 
 
 # Modul pro PrestaShop 1.6
+Vzhledem k tomu, že PrestaShop 1.6.1.x oficiálně dosáhl konce své životnosti (“end of life”), 
+byl ukončen další vývoj, aktualizace i poskytování podpory pro modul určený pro tuto verzi.
 
 ### Stažení modulu
 [Aktuální verze (Stáhnout »)](https://github.com/Zasilkovna/prestashop-1.6/releases/latest)
@@ -158,7 +162,7 @@ Pro instalaci Prestashop 1.6.x jsou vyžadovány následující komponenty:
   - mod_security zakázáno
   - mod_auth_basic zakázáno
   - DOPORUČENO: alespoň 64Mb paměti vyhrazené pro PHP, čím více, tím lépe
-- PHP: verze 5.6 a novější
+- PHP: verze 5.6 - PHP 7.1
 - MySQL: verze 5.0 a novější nebo MariaDB
 - Rozšíření PHP:
   - PDO_MySQL
@@ -264,8 +268,8 @@ Každý z bloků konfigurace se ukládá vlastním tlačítkem "Přidat", nebo "
 - angličtina
 
 #### Podporovaná verze
-- PrestaShop verze 1.6.x.
-- Při problému s použitím modulu nás kontaktujte na adrese technicka.podpora@zasilkovna.cz.
+- PrestaShop verze 1.6.1.24
+- Při problému s použitím modulu nás kontaktujte na adrese [e-commerce.support@packeta.com](mailto:e-commerce.support@packeta.com).
 
 #### Poskytované funkce
 - Integrace [widgetu v6](https://widget.packeta.com/v6) pro výběr výdejních míst v košíku eshopu.
