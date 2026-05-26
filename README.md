@@ -1,3 +1,5 @@
+[DEPRECATED] - modul již není udržován/no longer actively maintained
+
 [Návod v češtině](#modul-pro-prestashop-16)
 
 # Module for PrestaShop 1.6
